@@ -13,6 +13,7 @@ import ReservationSuccessPage from '../pages/ReservationSuccessPage.vue';
 import BookingDetailsPage from '../pages/BookingDetailsPage.vue';
 import ReservationManagementPage from '../pages/ReservationManagementPage.vue';
 import OperationsCheckoutPage from '../pages/OperationsCheckoutPage.vue';
+import UserGroupingPage from '../pages/UserGroupingPage.vue';
 
 const routes = [
   { path: '/dashboard', component: DashboardPage },
@@ -50,7 +51,10 @@ const routes = [
   { path: '/financial/bills', component: FinancialManagementPage },
   { path: '/financial/fund-movement', component: FinancialManagementPage },
   { path: '/financial/credit-notes', component: FinancialManagementPage },
-  ...['services', 'user-groups', 'pos', 'pos/orders', 'pos/services', 'pos/transactions', 'pos/products', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
+  { path: '/user-groups', component: UserGroupingPage },
+  { path: '/user-groups/roles/create', component: UserGroupingPage },
+  { path: '/user-groups/roles/:id/edit', component: UserGroupingPage },
+  ...['services', 'pos', 'pos/orders', 'pos/services', 'pos/transactions', 'pos/products', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];
 

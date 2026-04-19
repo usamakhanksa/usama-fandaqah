@@ -9,3 +9,5 @@ body { font-family: Inter, system-ui, sans-serif; }
 .btn-outline { @apply border border-slate-200 bg-white text-slate-700 px-3 py-2 rounded-lg text-sm hover:bg-slate-50; }
 
 .label { @apply block text-xs text-slate-600 mb-1; }
+
+.btn-secondary { @apply border border-slate-200 bg-white text-slate-700 px-3 py-2 rounded-lg text-sm hover:bg-slate-50; }

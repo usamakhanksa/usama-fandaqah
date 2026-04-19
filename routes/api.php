@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UnitHousingController;
 use App\Http\Controllers\Api\ReservationWorkflowController;
 use App\Http\Controllers\Api\FinancialManagementController;
+use App\Http\Controllers\Api\UserGroupingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -75,6 +76,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/financial/{type}/drafts', [FinancialManagementController::class, 'storeDraft']);
     Route::post('/financial/{type}/confirm', [FinancialManagementController::class, 'confirm']);
 
+
+    Route::get('/user-groups/roles', [UserGroupingController::class, 'roles']);
+    Route::post('/user-groups/roles', [UserGroupingController::class, 'storeRole']);
+    Route::put('/user-groups/roles/{role}', [UserGroupingController::class, 'updateRole']);
+    Route::delete('/user-groups/roles/{role}', [UserGroupingController::class, 'deleteRole']);
+    Route::post('/user-groups/roles/{role}/duplicate', [UserGroupingController::class, 'duplicateRole']);
+    Route::get('/user-groups/users', [UserGroupingController::class, 'users']);
+    Route::post('/user-groups/roles/{role}/assign-users', [UserGroupingController::class, 'assignUsers']);
+    Route::get('/user-groups/roles/{role}/permissions', [UserGroupingController::class, 'matrix']);
+    Route::put('/user-groups/roles/{role}/permissions/{permission}', [UserGroupingController::class, 'updatePermission']);
 
     Route::get('/search', [SearchController::class, 'autocomplete']);
 });

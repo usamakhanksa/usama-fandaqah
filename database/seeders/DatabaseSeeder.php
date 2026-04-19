@@ -21,6 +21,74 @@ class DatabaseSeeder extends Seeder
             DB::table('users')->insert(['role_id' => rand(1, 5), 'name' => fake()->name(), 'email' => "user{$u}@hotel.test", 'password' => Hash::make('password'), 'avatar' => '/assets/avatars/guest'.(($u % 8) + 1).'.svg', 'last_seen_at' => now()->subHours(rand(0, 30)), 'created_at' => now(), 'updated_at' => now()]);
         }
 
+
+        foreach ([
+            'Reservations Management',
+            'Room Inventory',
+            'Financial Reports',
+            'Bills Processing',
+            'Receipts Approval',
+            'Expense Review',
+            'POS Transactions',
+            'Services Management',
+            'User Assignment',
+            'Dashboard Analytics',
+            'Guest Profiles',
+            'Company Profiles',
+            'Unit Status Control',
+            'Check-In Operations',
+            'Check-Out Operations',
+            'Booking Files',
+            'Credit Notes',
+            'Fund Movement Reports',
+            'Audit Logs',
+            'Managerial Reports',
+        ] as $permissionName) {
+            DB::table('permissions')->insert([
+                'name' => $permissionName,
+                'slug' => str($permissionName)->slug(),
+                'group' => 'operations',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $roleNames = ['Super Admin','Manager','Receptionist','Accountant','Service Staff','Fandaqah Manager','Hotel Manager','Parking Man','Porter','Concierge','Spa Manager','Housekeeper','Cleaning Manager','Maintenance Supervisor','Event Planner','Hotel Receptionist'];
+        foreach ($roleNames as $roleName) {
+            DB::table('roles')->updateOrInsert(['slug' => str($roleName)->slug()], ['name' => $roleName, 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+        $allRoleIds = DB::table('roles')->pluck('id');
+        foreach (DB::table('users')->get() as $user) {
+            $assigned = collect([$user->role_id, $allRoleIds->random()])->unique();
+            foreach ($assigned as $roleId) {
+                DB::table('role_user')->updateOrInsert(
+                    ['role_id' => $roleId, 'user_id' => $user->id],
+                    ['created_at' => now(), 'updated_at' => now()]
+                );
+            }
+        }
+
+        $permissionIds = DB::table('permissions')->pluck('id');
+        foreach (DB::table('roles')->get() as $role) {
+            foreach ($permissionIds as $permissionId) {
+                $enabled = $role->slug === 'super-admin' ? true : (bool) rand(0, 1);
+                DB::table('permission_role')->updateOrInsert(
+                    ['role_id' => $role->id, 'permission_id' => $permissionId],
+                    [
+                        'enabled' => $enabled,
+                        'anyone' => $enabled ? (bool) rand(0, 1) : false,
+                        'can_create' => $enabled ? (bool) rand(0, 1) : false,
+                        'can_edit' => $enabled ? (bool) rand(0, 1) : false,
+                        'can_view' => $enabled ? true : (bool) rand(0, 1),
+                        'can_remove' => $enabled ? (bool) rand(0, 1) : false,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+        }
+
         $countryData = [
             ['name' => 'Saudi Arabia', 'iso2' => 'SA', 'phone_code' => '+966'],
             ['name' => 'United Arab Emirates', 'iso2' => 'AE', 'phone_code' => '+971'],
