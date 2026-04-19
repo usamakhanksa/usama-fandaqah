@@ -4,21 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Guest extends Model
+class ContactPerson extends Model
 {
     protected $guarded = [];
-
-    protected $casts = [
-        'date_of_birth' => 'date',
-    ];
 
     public function companyProfile()
     {
         return $this->belongsTo(CompanyProfile::class);
-    }
-
-    public function reservations()
-    {
-        return $this->hasMany(Reservation::class);
     }
 }
