@@ -5,7 +5,7 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 class ReservationController extends Controller {
   public function index(Request $request){
-    $q=Reservation::query()->with(['guest','room','unit']);
+    $q=Reservation::query()->with(['guest','room','unit','booking']);
     if($request->filled('type')) $q->where('stay_type',$request->string('type'));
     if($request->filled('search')) $q->where('code','like','%'.$request->string('search').'%');
     return $q->orderBy('check_in')->paginate(10);

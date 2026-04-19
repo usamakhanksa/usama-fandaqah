@@ -8,6 +8,8 @@ import ReservationSchedulePage from '../pages/ReservationSchedulePage.vue';
 import ReservationCreatePage from '../pages/ReservationCreatePage.vue';
 import ReservationSuccessPage from '../pages/ReservationSuccessPage.vue';
 import BookingDetailsPage from '../pages/BookingDetailsPage.vue';
+import ReservationManagementPage from '../pages/ReservationManagementPage.vue';
+import OperationsCheckoutPage from '../pages/OperationsCheckoutPage.vue';
 
 const routes = [
   { path: '/dashboard', component: DashboardPage },
@@ -27,8 +29,14 @@ const routes = [
   { path: '/reservations/create/payment', component: ReservationCreatePage },
   { path: '/reservations/success/:bookingId', component: ReservationSuccessPage },
   { path: '/reservations/management/:bookingId', component: BookingDetailsPage },
-  { path: '/reservations/management', component: SimplePage, props: { title: 'Reservations Management' } },
+  { path: '/reservations/management/:bookingId/financial', component: BookingDetailsPage },
+  { path: '/reservations/management/:bookingId/notes', component: BookingDetailsPage },
+  { path: '/reservations/management', component: ReservationManagementPage },
   { path: '/reservations', component: SimplePage, props: { title: 'Reservations Management' } },
+  { path: '/operations/insurance-recovery/create', component: OperationsCheckoutPage, props: { mode: 'insurance' } },
+  { path: '/operations/payment-indebtedness/create', component: OperationsCheckoutPage, props: { mode: 'payment' } },
+  { path: '/operations/check-out/create', component: OperationsCheckoutPage, props: { mode: 'checkout' } },
+  { path: '/operations/check-out/success/:id', component: ReservationSuccessPage, props: { flow: 'checkout' } },
   ...['financial', 'services', 'user-groups', 'pos', 'pos/orders', 'pos/services', 'pos/transactions', 'pos/products', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];
