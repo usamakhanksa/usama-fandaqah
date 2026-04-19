@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\UnitHousingController;
 use App\Http\Controllers\Api\ReservationWorkflowController;
 use App\Http\Controllers\Api\FinancialManagementController;
 use App\Http\Controllers\Api\UserGroupingController;
+use App\Http\Controllers\Api\PosController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -86,6 +87,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user-groups/roles/{role}/assign-users', [UserGroupingController::class, 'assignUsers']);
     Route::get('/user-groups/roles/{role}/permissions', [UserGroupingController::class, 'matrix']);
     Route::put('/user-groups/roles/{role}/permissions/{permission}', [UserGroupingController::class, 'updatePermission']);
+
+
+    Route::get('/pos/stores', [PosController::class, 'stores']);
+    Route::get('/pos/categories', [PosController::class, 'categories']);
+    Route::get('/pos/sub-categories', [PosController::class, 'subCategories']);
+    Route::get('/pos/brands', [PosController::class, 'brands']);
+    Route::get('/pos/products', [PosController::class, 'products']);
+    Route::get('/pos/services', [PosController::class, 'services']);
+    Route::post('/pos/services', [PosController::class, 'createService']);
+    Route::get('/pos/transactions', [PosController::class, 'transactions']);
+    Route::get('/pos/cart', [PosController::class, 'cart']);
+    Route::post('/pos/cart/items', [PosController::class, 'updateCart']);
+    Route::delete('/pos/cart/items', [PosController::class, 'clearCart']);
+    Route::post('/pos/checkout', [PosController::class, 'checkout']);
 
     Route::get('/search', [SearchController::class, 'autocomplete']);
 });

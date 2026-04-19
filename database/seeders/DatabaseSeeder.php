@@ -208,11 +208,94 @@ class DatabaseSeeder extends Seeder
             DB::table('invoices')->insert(['booking_id' => $i, 'number' => 'INV'.str_pad((string) $i, 5, '0', STR_PAD_LEFT), 'amount' => rand(100, 1800), 'status' => fake()->randomElement(['paid', 'pending', 'unpaid', 'failed', 'refund']), 'created_at' => now(), 'updated_at' => now()]);
         }
 
-        for ($i = 1; $i <= 15; $i++) {
-            DB::table('services')->insert(['name' => 'Service '.$i, 'price' => rand(10, 150), 'created_at' => now(), 'updated_at' => now()]);
+        foreach ([
+            ['Market', '/assets/banners/banner1.svg'],
+            ['Laundry', '/assets/banners/banner2.svg'],
+            ['Restaurant & Coffee Shops', '/assets/banners/banner3.svg'],
+        ] as $channel) {
+            DB::table('p_o_s_channels')->insert([
+                'name' => $channel[0],
+                'image' => $channel[1],
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
-        for ($i = 1; $i <= 30; $i++) {
-            DB::table('products')->insert(['name' => 'Product '.$i, 'price' => rand(5, 70), 'stock' => rand(30, 200), 'created_at' => now(), 'updated_at' => now()]);
+
+        foreach (DB::table('p_o_s_channels')->get() as $channel) {
+            DB::table('p_o_s_stores')->insert([
+                'p_o_s_channel_id' => $channel->id,
+                'name' => $channel->name.' Store',
+                'image' => $channel->image,
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        foreach ([
+            'Drinks','Ready Meals','Vegetables','Pet Care','Personal Care','Home Baking','Dairy','Household Care','Bakery','Fruits','Frozen','Sea Food','Cans & Jars','Chocolates','Grab & Go','Meat'
+        ] as $idx => $category) {
+            DB::table('product_categories')->insert([
+                'name' => $category,
+                'icon' => '/assets/avatars/guest'.(($idx % 8) + 1).'.svg',
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        foreach (['Fresh Juices', 'Soft Drinks', 'Diet Soft Drinks', 'Iced Tea'] as $subCategory) {
+            DB::table('product_sub_categories')->insert([
+                'product_category_id' => 1,
+                'name' => $subCategory,
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        foreach (['Juhaima', 'Almarai', 'Nada', 'PepsiCo', 'Nestle', 'Nadec'] as $brand) {
+            DB::table('brands')->insert([
+                'name' => $brand,
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        for ($i = 1; $i <= 18; $i++) {
+            DB::table('services')->insert([
+                'name' => 'Mini Market',
+                'name_en' => 'Mini Market '.$i,
+                'name_ar' => 'ميني ماركت '.$i,
+                'price' => rand(10, 150),
+                'show_in_reservation' => true,
+                'show_in_pos' => true,
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        for ($i = 1; $i <= 60; $i++) {
+            $price = rand(5, 80);
+            DB::table('products')->insert([
+                'name' => fake()->randomElement(['Blue diamond almonds', 'Guava Juice 1L', 'Orange Juice', 'Sparkling Water', 'Protein Bar']).' '.$i,
+                'code' => 'P'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'price' => $price,
+                'old_price' => rand(0, 1) ? $price + rand(1, 10) : null,
+                'stock' => rand(30, 200),
+                'brand_id' => rand(1, 6),
+                'product_category_id' => rand(1, 16),
+                'product_sub_category_id' => rand(0, 1) ? rand(1, 4) : null,
+                'p_o_s_channel_id' => rand(1, 3),
+                'size' => fake()->randomElement(['100 gr', '250 ml', '500 ml', '1 L']),
+                'thumbnail' => '/assets/avatars/guest'.(($i % 8) + 1).'.svg',
+                'status' => 'available',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
         for ($i = 1; $i <= 45; $i++) {
             DB::table('service_orders')->insert(['service_id' => rand(1, 15), 'guest_id' => rand(1, 130), 'qty' => rand(1, 5), 'created_at' => now(), 'updated_at' => now()]);
@@ -220,7 +303,36 @@ class DatabaseSeeder extends Seeder
         }
 
         for ($i = 1; $i <= 60; $i++) {
-            DB::table('p_o_s_orders')->insert(['guest_id' => rand(1, 130), 'amount' => rand(20, 400), 'status' => fake()->randomElement(['completed', 'pending', 'cancelled']), 'created_at' => now(), 'updated_at' => now()]);
+            $subtotal = rand(20, 300);
+            $tax = round($subtotal * 0.12, 2);
+            $discount = rand(0, 20);
+            $amount = $subtotal + $tax - $discount;
+            DB::table('p_o_s_orders')->insert([
+                'guest_id' => rand(1, 130),
+                'user_id' => rand(1, 22),
+                'p_o_s_store_id' => rand(1, 3),
+                'customer_name' => fake()->name(),
+                'amount' => $amount,
+                'subtotal' => $subtotal,
+                'tax_amount' => $tax,
+                'discount_amount' => $discount,
+                'status' => fake()->randomElement(['completed', 'pending', 'cancelled']),
+                'payment_method' => fake()->randomElement(['cash', 'pos', 'on_arrival']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            DB::table('p_o_s_transactions')->insert([
+                'p_o_s_order_id' => $i,
+                'transaction_number' => 'POSTRX'.str_pad((string) $i, 6, '0', STR_PAD_LEFT),
+                'customer_name' => fake()->name(),
+                'cashier_name' => fake()->name(),
+                'payment_method' => fake()->randomElement(['cash', 'pos']),
+                'total' => $amount,
+                'status' => fake()->randomElement(['completed', 'pending', 'failed']),
+                'paid_at' => now()->subDays(rand(0, 30)),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         for ($i = 1; $i <= 12; $i++) {
