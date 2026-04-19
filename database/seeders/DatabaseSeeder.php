@@ -168,6 +168,37 @@ class DatabaseSeeder extends Seeder
             DB::table('occupancy_metrics')->insert(['metric_date' => $d, 'unit_occupancy' => rand(40, 95), 'total_guests' => rand(120, 350), 'created_at' => now(), 'updated_at' => now()]);
         }
 
+
+
+        for ($i = 1; $i <= 8; $i++) {
+            DB::table('reservation_drafts')->insert([
+                'user_id' => 1,
+                'reference' => 'DRF'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'current_step' => rand(1, 3),
+                'details_payload' => json_encode(['booking_type' => 'single', 'check_in' => now()->addDays($i)->toDateString(), 'check_out' => now()->addDays($i + 2)->toDateString(), 'nights' => 2]),
+                'visitor_payload' => json_encode(['visitor_name' => fake()->name(), 'nationality' => 'Saudi Arabia', 'gender' => fake()->randomElement(['male', 'female'])]),
+                'payment_payload' => json_encode(['payment_method' => fake()->randomElement(['cash', 'pos', 'on_arrival']), 'discount' => rand(0, 20)]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        foreach ([
+            ['WELCOME10', 'percent', 10, 75, true],
+            ['SAR50', 'fixed', 50, null, true],
+            ['VIP20', 'percent', 20, 120, true],
+        ] as $promo) {
+            DB::table('promo_codes')->insert([
+                'code' => $promo[0],
+                'type' => $promo[1],
+                'value' => $promo[2],
+                'max_discount' => $promo[3],
+                'is_active' => $promo[4],
+                'expires_at' => now()->addMonths(6),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
         foreach ([['Welcome Back', 'This slider for any update', '/assets/banners/banner1.svg'], ['Premium Stays Await', 'Discover seasonal offers', '/assets/banners/banner2.svg'], ['Operational Insights', 'Track reservations in real-time', '/assets/banners/banner3.svg']] as $b) {
             DB::table('dashboard_banners')->insert(['title' => $b[0], 'subtitle' => $b[1], 'image_path' => $b[2], 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()]);
         }

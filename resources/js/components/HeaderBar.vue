@@ -4,6 +4,7 @@
       <button class="p-2 rounded hover:bg-slate-100">☰</button>
       <div class="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-300"></div>
       <div class="w-8 h-8 rounded-full bg-purple-100 border border-purple-300"></div>
+      <router-link to="/reservations/create" class="btn-primary text-xs">New Booking</router-link>
     </div>
     <SearchInput class="max-w-md flex-1" />
     <div class="flex items-center gap-3">

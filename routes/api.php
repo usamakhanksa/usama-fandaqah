@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UnitHousingController;
+use App\Http\Controllers\Api\ReservationWorkflowController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -59,6 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/units/check-in', [UnitHousingController::class, 'checkIn']);
     Route::post('/units/check-out', [UnitHousingController::class, 'checkOut']);
 
+    Route::get('/reservations/schedule', [ReservationWorkflowController::class, 'schedule']);
+    Route::post('/reservations/drafts', [ReservationWorkflowController::class, 'saveDraft']);
+    Route::get('/reservations/drafts/{reference}', [ReservationWorkflowController::class, 'showDraft']);
+    Route::post('/reservations/promo/apply', [ReservationWorkflowController::class, 'applyPromo']);
+    Route::post('/reservations/confirm', [ReservationWorkflowController::class, 'confirm']);
+    Route::get('/reservations/success/{booking}', [ReservationWorkflowController::class, 'successData']);
+    Route::get('/reservations/receipt/{booking}', [ReservationWorkflowController::class, 'receipt']);
+    Route::get('/reservations/management/{booking}', [ReservationWorkflowController::class, 'bookingDetails']);
+    Route::post('/reservations/management/{booking}/notes', [ReservationWorkflowController::class, 'addNote']);
 
     Route::get('/search', [SearchController::class, 'autocomplete']);
 });
