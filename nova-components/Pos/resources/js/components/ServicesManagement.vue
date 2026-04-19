@@ -1,0 +1,2082 @@
+<template>
+    <div>
+        <bread-crumb />
+        <div id="deposit_management_page">
+            <div class="title">{{ __("Operations") }}</div>
+            <div class="content_page">
+                <!-- Filter Area -->
+                <div class="filter_area">
+                    <div class="item">
+                        <input
+                            readonly
+                            v-model="createdFrom"
+                            ref="datePickerFrom"
+                            type="text"
+                            :placeholder="__('Date From')"
+                        />
+                    </div>
+
+                    <div class="item">
+                        <input
+                            readonly
+                            v-model="createdTo"
+                            ref="datePickerTo"
+                            type="text"
+                            :placeholder="__('Date To')"
+                        />
+                    </div>
+
+                    <div class="item">
+                        <input
+                            type="text"
+                            v-model.lazy="serviceNumber"
+                            :placeholder="__('Service number item')"
+                        />
+                    </div>
+
+                    <div class="item">
+                        <input
+                            type="text"
+                            v-model.lazy="contractNumber"
+                            :placeholder="__('Contract Number')"
+                        />
+                    </div>
+
+                    <div class="item" v-show="units.length">
+                        <select v-model="unitNumber">
+                            <option value="" selected>
+                                {{ __("The Unit") }}
+                            </option>
+                            <option
+                                v-for="(unit, i) in units"
+                                :value="unit.number"
+                                :key="i"
+                            >
+                                {{ unit.number + " - " + unit.name[locale] }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="item">
+                        <select v-model="loadedType">
+                            <option value="" selected="selected">
+                                {{ __("Type") }}
+                            </option>
+                            <option :value="'on_reservations'">
+                                {{ __("Loaded On Reservation") }}
+                            </option>
+                            <option :value="'on_revenue'">
+                                {{ __("Loaded On Services Revenue") }}
+                            </option>
+                        </select>
+                    </div>
+                    <!-- item -->
+
+                    <div class="item" v-show="employees.length">
+                        <select v-model="employeeId">
+                            <option value="" selected>
+                                {{ __("Employee") }}
+                            </option>
+                            <option
+                                v-for="(employee, i) in employees"
+                                :value="employee.id"
+                                :key="i"
+                            >
+                                {{ employee.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="item" v-show="service_categories.length">
+                        <select v-model="serviceCategory">
+                            <option value="" selected>
+                                {{ __("Service Type") }}
+                            </option>
+                            <option
+                                v-for="(category, i) in service_categories"
+                                :value="category.name[locale]"
+                                :key="i"
+                            >
+                                {{ category.name[locale] }}
+                            </option>
+                            <option value="various_services">
+                                {{ __("Various services") }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="item" v-if="team.integration_zatca_phase_two">
+                        <select v-model="transactionState">
+                            <option value="" selected>
+                                {{ __("Service Invoice Status") }}
+                            </option>
+                            <option
+                                v-for="(state, i) in transactionStates"
+                                :value="state"
+                                :key="i"
+                                :selected="transactionState == 'invoice'"
+                            >
+                                {{ __(state) }}
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="reset_filters" slot="reset-btn">
+                        <button
+                            @click="resetFilters()"
+                            v-tooltip="{
+                                targetClasses: ['it-has-a-tooltip'],
+                                placement: 'top',
+                                content: __('Reset Filters'),
+                                classes: ['tooltip_reset'],
+                            }"
+                        ></button>
+                    </div>
+                    <!-- reset_filters -->
+                </div>
+
+                <hr />
+
+                <div class="statistics_area relative">
+                    <loading
+                        :active="calculationsLoading"
+                        :loader="'spinner'"
+                        :color="'#7e7d7f'"
+                        :opacity="0.7"
+                        :height="20"
+                        :width="20"
+                        :is-full-page="false"
+                    ></loading>
+                    <ul>
+                        <li>
+                            <span>{{ __("Total Amount") }}</span>
+                            <p class="d-inline-flex">
+                                {{ calculations.total_amount }}
+                                <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span>
+                            </p>
+                        </li>
+                        <li>
+                            <span>{{ __("Total VAT") }}</span>
+                            <p class="d-inline-flex">
+                                {{ calculations.total_vat }} <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span>
+                            </p>
+                        </li>
+                        <li>
+                            <span>{{ __("Total TTX") }}</span>
+                            <p class="d-inline-flex">
+                                {{ calculations.total_ttx }} <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span>
+                            </p>
+                        </li>
+
+                        <li>
+                            <span>{{ __("Total Sum") }}</span>
+                            <p class="d-inline-flex">
+                                {{ calculations.total_sum }} <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span>
+                            </p>
+                        </li>
+                        <li>
+                            <span></span>
+                            <p></p>
+                        </li>
+                    </ul>
+                </div>
+                <hr />
+
+                <!-- Action Buttons -->
+                <div class="action_buttons">
+                    <div class="buttons_area" v-if="data.length">
+                        <button
+                            type="button"
+                            class="excel_button"
+                            @click="excelExport"
+                        ></button>
+                        <button
+                            type="button"
+                            class="print_button"
+                            @click="printReport"
+                        ></button>
+                    </div>
+                    <!-- buttons_area -->
+                </div>
+                <!-- action_buttons -->
+
+                <!-- Table Listing Area -->
+                <div class="table_area">
+                    <div class="table-responsive relative">
+                        <loading
+                            :active="isLoading"
+                            :loader="'spinner'"
+                            :color="'#7e7d7f'"
+                            :opacity="0.7"
+                            :height="20"
+                            :width="20"
+                            :is-full-page="false"
+                        ></loading>
+                        <table
+                            class="table w-full"
+                            cellpadding="0"
+                            cellspacing="0"
+                        >
+                            <thead>
+                                <tr>
+                                    <th>{{ __("Service number item") }}</th>
+                                    <th>{{ __("Contract Number") }}</th>
+                                    <th
+                                        v-if="
+                                            team.integration_zatca_phase_two
+                                        "
+                                    >
+                                        {{ __("Zatca Invoice Number") }}
+                                    </th>
+                                    <th
+                                        v-if="
+                                            team.integration_zatca_phase_two
+                                        "
+                                    >
+                                        {{ __("Zatca Invoice Status") }}
+                                    </th>
+                                    <th>{{ __("The Unit") }}</th>
+                                    <th>{{ __("Customer Name") }}</th>
+                                    <th>{{ __("Amount") }}</th>
+                                    <th>{{ __("VAT") }}</th>
+                                    <th>{{ __("TTX") }}</th>
+                                    <th>{{ __("Total Sum") }}</th>
+                                    <th>{{ __("Received From") }}</th>
+                                    <th>{{ __("Service Type") }}</th>
+                                    <th>{{ __("Date Receipt") }}</th>
+                                    <th>{{ __("Payment Method") }}</th>
+                                    <th>{{ __("Employee") }}</th>
+                                    <th>{{ __("Actions") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template v-if="data.length">
+                                    <tr
+                                        v-for="(obj, index) in data"
+                                        :key="index"
+                                    >
+                                        <td>{{ obj.service_number }}</td>
+                                        <td
+                                            v-if="
+                                                obj.payable_type ==
+                                                'App\\Reservation'
+                                            "
+                                        >
+                                            <router-link
+                                                v-if="
+                                                    !obj.payable.deleted_at &&
+                                                    obj.payable.customer_id
+                                                "
+                                                :to="{
+                                                    name: 'reservation',
+                                                    params: {
+                                                        id: obj.payable.id,
+                                                    },
+                                                }"
+                                                class="text-info-dark"
+                                                >{{
+                                                    obj.payable.number
+                                                }}</router-link
+                                            >
+                                            <router-link
+                                                v-else-if="
+                                                    !obj.payable.deleted_at &&
+                                                    !obj.payable.customer_id
+                                                "
+                                                :to="{
+                                                    name: 'reservation-noc',
+                                                    params: {
+                                                        id: obj.payable.id,
+                                                    },
+                                                }"
+                                                class="text-info-dark"
+                                                >{{
+                                                    obj.payable.number
+                                                }}</router-link
+                                            >
+                                            <p v-else>
+                                                {{ obj.payable.number }}
+                                            </p>
+                                        </td>
+                                        <td v-else>-</td>
+                                        <td
+                                            v-if="
+                                                team.integration_zatca_phase_two
+                                            "
+                                        >
+                                            <p class="line-break-anywhere">
+                                                {{
+                                                    obj.zatca_invoice_number
+                                                        ? obj.zatca_invoice_number
+                                                        : "-"
+                                                }}
+                                            </p>
+                                        </td>
+                                        <td
+                                            v-if="
+                                                team.integration_zatca_phase_two
+                                            "
+                                        >
+                                            <div v-if="obj.active_note != null" class="line-break-anywhere bg-blue-400 p-1 text-white font-semibold rounded-md text-xss leading-tight">
+                                                {{
+                                                    obj.active_note == 'debit note'
+                                                        ? __("invoice")
+                                                        : __(obj.active_note)
+                                                }}
+                                            </div>
+                                            <div v-else> - </div>
+                                        </td>
+                                        <td
+                                            v-if="
+                                                obj.payable_type ==
+                                                    'App\\Reservation' &&
+                                                obj.payable
+                                            "
+                                        >
+                                            {{
+                                                obj.payable.unit_number +
+                                                " - " +
+                                                obj.payable.unit_name[locale]
+                                            }}
+                                        </td>
+                                        <td v-else>-</td>
+                                        <td
+                                            v-if="
+                                                obj.meta &&
+                                                obj.meta.customer_name
+                                            "
+                                        >
+                                            {{ obj.meta.customer_name }}
+                                        </td>
+                                        <td
+                                            v-else-if="
+                                                obj.payable &&
+                                                obj.payable_type ==
+                                                    'App\\Reservation' &&
+                                                obj.payable.customer_name
+                                            "
+                                        >
+                                            {{ obj.payable.customer_name }}
+                                        </td>
+                                        <td v-else>-</td>
+                                        <td>
+                                            {{ obj.sub_total }}
+                                            <!-- <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span> -->
+                                        </td>
+                                        <td>
+                                            {{ obj.vat_total }}
+                                            <!-- <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span> -->
+                                        </td>
+                                        <td>
+                                            {{ obj.ttx_total }}
+                                            <!-- <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span> -->
+                                        </td>
+                                        <td>
+                                            {{ obj.total_with_taxes }}
+                                            <!-- <span v-if="(currency && currency == 'SAR') || !currency" class="icon-saudi_riyal"></span> <span v-else>{{ __(currency) }}</span> -->
+                                        </td>
+                                        <td>
+                                            {{
+                                                obj.payable_type ==
+                                                "App\\Reservation"
+                                                    ? obj.received_from
+                                                    : __(
+                                                          "Loaded On Services Revenue"
+                                                      )
+                                            }}
+                                        </td>
+                                        <td
+                                            v-if="obj.for == 'various_services'"
+                                        >
+                                            {{ __("Various services") }}
+                                        </td>
+                                        <td v-else>{{ obj.service_category_name[locale] }}</td>
+                                        <td>{{ obj.transaction_date }}</td>
+                                        <!-- <td>{{ obj.payment_method && obj.payment_method != 'no-payment'  ? __(capitalize(obj.payment_method)) : '-' }}</td> -->
+                                        <td
+                                            v-if="
+                                                obj.payable_type ==
+                                                    'App\\Team' &&
+                                                obj.pay_later &&
+                                                obj.type == 'withdraw'
+                                            "
+                                        >
+                                            {{ __("No Payment") }}
+                                        </td>
+                                        <td
+                                            v-if="
+                                                obj.payable_type ==
+                                                'App\\Reservation'
+                                            "
+                                        >
+                                            -
+                                        </td>
+                                        <td
+                                            v-if="
+                                                obj.payable_type ==
+                                                    'App\\Team' &&
+                                                obj.type == 'deposit'
+                                            "
+                                        >
+                                            {{
+                                                __(
+                                                    capitalize(
+                                                        obj.payment_method
+                                                    )
+                                                )
+                                            }}
+                                        </td>
+                                        <td>{{ obj.employee }}</td>
+                                        <td class="td-fit">
+
+                                            <button
+                                                :title="__('View')"
+                                                @click="openPosDetailsModal(obj)"
+                                            >
+                                                    <icon
+                                                        type="view"
+                                                        width="22"
+                                                        height="30"
+                                                        view-box="0 0 22 16"
+                                                    />
+                                            </button>
+
+                                            <button
+                                                v-permission="'print pos transactions'"
+                                                :title="__('Print Transaction')"
+                                                @click="
+                                                    setTargetTransaction(
+                                                        obj.hash_id
+                                                    )
+                                                "
+                                                target="_blank"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="22"
+                                                    height="30"
+                                                    viewBox="0 0 22 16"
+                                                >
+                                                    <path
+                                                        d="M17.471,17.471v1.934a1.934,1.934,0,0,1-1.934,1.934H7.8a1.934,1.934,0,0,1-1.934-1.934V17.471H3.934A1.934,1.934,0,0,1,2,15.537v-5.8A1.94,1.94,0,0,1,3.934,7.8H5.868V3.934A1.94,1.94,0,0,1,7.8,2h7.735a1.934,1.934,0,0,1,1.934,1.934V7.8H19.4a1.934,1.934,0,0,1,1.934,1.934v5.8A1.934,1.934,0,0,1,19.4,17.471Zm0-1.934H19.4v-5.8H3.934v5.8H5.868V13.6A1.94,1.94,0,0,1,7.8,11.669h7.735A1.934,1.934,0,0,1,17.471,13.6ZM15.537,7.8V3.934H7.8V7.8ZM7.8,13.6v5.8h7.735V13.6Z"
+                                                        transform="translate(-2 -2)"
+                                                        fill="#333b45"
+                                                    />
+                                                </svg>
+                                            </button>
+
+                                            <button
+                                                @click="
+                                                    openAddDepositTransaction(
+                                                        obj
+                                                    )
+                                                "
+                                                class="regenerate"
+                                                v-if="
+                                                    obj.pay_later &&
+                                                    obj.type == 'withdraw'
+                                                "
+                                                v-tooltip="{
+                                                    targetClasses: [
+                                                        'it-has-a-tooltip',
+                                                    ],
+                                                    placement: 'top',
+                                                    content:
+                                                        __('Fullfil Amount'),
+                                                    classes: ['tooltip_reset'],
+                                                }"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    height="30"
+                                                    viewBox="0 0 496 496"
+                                                    width="22"
+                                                    xmlns:v="https://vecta.io/nano"
+                                                >
+                                                    <path
+                                                        d="M393.053 116H102.947c-26.467 0-48 21.533-48 48v168c0 26.467 21.533 48 48 48h290.105c26.467 0 48-21.533 48-48V164c.001-26.467-21.532-48-48-48zm-55.825 232H158.772c-6.618-36.418-35.406-65.206-71.824-71.824v-56.352c36.42-6.618 65.206-35.406 71.824-71.824H337.23c6.618 36.418 35.406 65.206 71.824 71.824v56.352c-36.42 6.618-65.207 35.406-71.825 71.824zm71.825-184v22.972c-18.73-5.46-33.51-20.243-38.972-38.972h22.972c8.822 0 16 7.178 16 16zm-306.106-16h22.972c-5.46 18.73-20.243 33.51-38.972 38.972V164c0-8.822 7.178-16 16-16zm-16 184v-22.972c18.73 5.46 33.51 20.243 38.972 38.972h-22.972c-8.822 0-16-7.178-16-16zm306.106 16H370.08c5.46-18.73 20.243-33.51 38.972-38.972V332c0 8.822-7.178 16-16 16zM248 177.053c-39.12 0-70.947 31.827-70.947 70.947S208.88 318.947 248 318.947 318.947 287.12 318.947 248 287.12 177.053 248 177.053zm0 109.894c-21.476 0-38.947-17.472-38.947-38.947s17.472-38.947 38.947-38.947 38.947 17.472 38.947 38.947-17.47 38.947-38.947 38.947zM491.314 91.314l-24 24c-6.25 6.248-16.38 6.248-22.628 0l-24-24c-6.248-6.25-6.248-16.38 0-22.628C425.924 63.45 433.88 62.62 440 66.16V48c0-8.822-7.178-16-16-16H296c-8.836 0-16-7.164-16-16s7.164-16 16-16h128c26.467 0 48 21.533 48 48v18.16c6.12-3.542 14.076-2.712 19.314 2.525 6.248 6.25 6.248 16.38 0 22.628zM216 480c0 8.836-7.164 16-16 16H72c-26.467 0-48-21.533-48-48v-18.16c-6.12 3.542-14.076 2.712-19.314-2.525-6.248-6.25-6.248-16.38 0-22.628l24-24c6.25-6.248 16.38-6.248 22.628 0l24 24C85.427 414.8 78.123 432 64 432c-2.77 0-5.53-.732-8-2.16V448c0 8.822 7.178 16 16 16h128c8.836 0 16 7.164 16 16z"
+                                                    />
+                                                </svg>
+                                            </button>
+
+                                            <template
+                                                v-if="
+                                                    obj.payable_type ==
+                                                    'App\\Reservation'
+                                                "
+                                            >
+                                                <button
+                                                    :title="__('Edit')"
+                                                    @click="
+                                                        openEditTransactionModal(
+                                                            obj
+                                                        )
+                                                    "
+                                                    v-if="reservationEdit"
+                                                >
+                                                    <icon
+                                                        type="edit"
+                                                        width="22"
+                                                        height="30"
+                                                        view-box="0 0 22 16"
+                                                    />
+                                                </button>
+
+                                                <button
+                                                    :title="__('Delete')"
+                                                    @click="deleteHandler(obj)"
+                                                    v-if="
+                                                        reservationDelete &&
+                                                        !ifIntegrationEnabled(
+                                                            'ZatcaPhaseTwo'
+                                                        )
+                                                    "
+                                                >
+                                                    <icon
+                                                        type="delete"
+                                                        width="22"
+                                                        height="30"
+                                                        view-box="0 0 22 16"
+                                                    />
+                                                </button>
+                                            </template>
+                                            <template v-else>
+                                                <button
+                                                    @click="
+                                                        openRegenerateModal(obj)
+                                                    "
+                                                    class="regenerate"
+                                                    v-if="
+                                                        obj.transaction_deleted
+                                                    "
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        height="30"
+                                                        viewBox="0 0 496 496"
+                                                        width="22"
+                                                        xmlns:v="https://vecta.io/nano"
+                                                    >
+                                                        <path
+                                                            d="M393.053 116H102.947c-26.467 0-48 21.533-48 48v168c0 26.467 21.533 48 48 48h290.105c26.467 0 48-21.533 48-48V164c.001-26.467-21.532-48-48-48zm-55.825 232H158.772c-6.618-36.418-35.406-65.206-71.824-71.824v-56.352c36.42-6.618 65.206-35.406 71.824-71.824H337.23c6.618 36.418 35.406 65.206 71.824 71.824v56.352c-36.42 6.618-65.207 35.406-71.825 71.824zm71.825-184v22.972c-18.73-5.46-33.51-20.243-38.972-38.972h22.972c8.822 0 16 7.178 16 16zm-306.106-16h22.972c-5.46 18.73-20.243 33.51-38.972 38.972V164c0-8.822 7.178-16 16-16zm-16 184v-22.972c18.73 5.46 33.51 20.243 38.972 38.972h-22.972c-8.822 0-16-7.178-16-16zm306.106 16H370.08c5.46-18.73 20.243-33.51 38.972-38.972V332c0 8.822-7.178 16-16 16zM248 177.053c-39.12 0-70.947 31.827-70.947 70.947S208.88 318.947 248 318.947 318.947 287.12 318.947 248 287.12 177.053 248 177.053zm0 109.894c-21.476 0-38.947-17.472-38.947-38.947s17.472-38.947 38.947-38.947 38.947 17.472 38.947 38.947-17.47 38.947-38.947 38.947zM491.314 91.314l-24 24c-6.25 6.248-16.38 6.248-22.628 0l-24-24c-6.248-6.25-6.248-16.38 0-22.628C425.924 63.45 433.88 62.62 440 66.16V48c0-8.822-7.178-16-16-16H296c-8.836 0-16-7.164-16-16s7.164-16 16-16h128c26.467 0 48 21.533 48 48v18.16c6.12-3.542 14.076-2.712 19.314 2.525 6.248 6.25 6.248 16.38 0 22.628zM216 480c0 8.836-7.164 16-16 16H72c-26.467 0-48-21.533-48-48v-18.16c-6.12 3.542-14.076 2.712-19.314-2.525-6.248-6.25-6.248-16.38 0-22.628l24-24c6.25-6.248 16.38-6.248 22.628 0l24 24C85.427 414.8 78.123 432 64 432c-2.77 0-5.53-.732-8-2.16V448c0 8.822 7.178 16 16 16h128c8.836 0 16 7.164 16 16z"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    :title="__('Edit')"
+                                                    @click="
+                                                        openEditTransactionModal(
+                                                            obj
+                                                        )
+                                                    "
+                                                    v-if="posEdit"
+                                                >
+                                                    <icon
+                                                        type="edit"
+                                                        width="22"
+                                                        height="30"
+                                                        view-box="0 0 22 16"
+                                                    />
+                                                </button>
+
+                                                <button
+                                                    :title="__('Delete')"
+                                                    @click="deleteHandler(obj)"
+                                                    v-if="
+                                                        posDelete &&
+                                                        !ifIntegrationEnabled(
+                                                            'ZatcaPhaseTwo'
+                                                        )
+                                                    "
+                                                >
+                                                    <icon
+                                                        type="delete"
+                                                        width="22"
+                                                        height="30"
+                                                        view-box="0 0 22 16"
+                                                    />
+                                                </button>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template v-else>
+                                    <tr>
+                                        <td colspan="14" class="text-center">
+                                            {{ __("No POS operations found") }}
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div
+                        class="w-full flex flex-wrap mt-3 justify-center"
+                        v-if="data.length"
+                    >
+                        <pagination
+                            v-if="paginator.total > per_page"
+                            :page-count="paginator.lastPage"
+                            :page-range="3"
+                            :margin-pages="2"
+                            :value="paginator.currentPage"
+                            :prev-text="__('Previous')"
+                            :next-text="__('Next')"
+                            :container-class="'pagination  w-full flex justify-center'"
+                            :page-class="'page-item'"
+                            :page-link-class="'page-link'"
+                            :prev-link-class="'page-link'"
+                            :next-link-class="'page-link'"
+                            :prev-class="'page-item'"
+                            :next-class="'page-item'"
+                            :first-last-button="true"
+                            :first-button-text="__('First')"
+                            :last-button-text="__('Last')"
+                            @input="getCurrentPage($event)"
+                        />
+                    </div>
+                    <!-- Pagination -->
+                    <div class="Results_area" v-if="data.length">
+                        <p>
+                            {{ __("Results") }} : {{ __("From") }} (
+                            {{ paginator.from }} ) - {{ __("To") }} (
+                            {{ paginator.to }} )
+                        </p>
+                        <p>{{ __("Count") }} : {{ paginator.total }}</p>
+                    </div>
+                    <!-- Results_area -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Single Print  -->
+        <a
+            v-permission="'print pos transactions'"
+            class="display:none;"
+            :href="'/home/pos/print-record/' + hash_id"
+            ref="print"
+            target="_blank"
+        ></a>
+
+        <RegenerateDepositTransaction
+            :transaction_id="target_pos_id"
+            ref="regenerate"
+        />
+        <delete-confirm
+            ref="delete"
+            :id="target_id"
+            :type="target_type"
+            :transaction_deleted="transaction_deleted"
+        />
+        <edit-service-transaction ref="editServiceTransaction" />
+        <!-- <service-credit-note-confirm /> -->
+        <form
+            id="services_form"
+            target="_blank"
+            method="post"
+            style="display: none"
+            action="/home/print/servicesTransactionsReportPrint"
+        >
+            <input type="hidden" :value="team_id" name="team_id" />
+            <input type="hidden" :value="JSON.stringify(query)" name="query" />
+            <input type="hidden" value="pos" name="coming_from" />
+            <input
+                type="hidden"
+                :value="JSON.stringify(calculations)"
+                name="calculations"
+            />
+        </form>
+        <AddDepositTransaction :obj="target_service" ref="fullfil" />
+
+        <sweet-modal
+            :enable-mobile-fullscreen="false"
+            :pulse-on-block="false"
+            width="70%"
+            :title="__('POS')"
+            overlay-theme="dark"
+            ref="posDetailsModal"
+            class="pos_details_modal"
+        >
+
+            <div class="controls relative">
+
+                <social-sharing
+                    :url="detailsUrl + '/public?lang=' + locale + '&type=embed'"
+                    inline-template
+                >
+                    <network network="whatsapp">
+                        <a href="#" class="whatsapp_button"></a>
+                    </network>
+                </social-sharing>
+                <a
+                    v-permission="'print pos transactions'"
+                    class="print_button"
+                    :href="detailsUrl"
+                    target="_blank"
+                ></a>
+                <sms-component
+                v-if="current_pos_details && current_pos_details.payable_type == 'App\\Team'"
+                :entity_id="null"
+                :document_url="detailsUrl + '/public?lang=' + locale + '&type=embed'"
+                :document_type="'pos'"
+                :sms_base_title="sms_base_title"
+                :phone="current_pos_details.meta.customer_phone"
+                :team_id="current_pos_details.payable.id"
+                />
+
+            </div>
+            <!-- share_button_reservation -->
+            <div class="embed_area">
+                <iframe
+                    id="manualInvoice"
+                    :src="detailsUrl + '?type=embed'"
+                ></iframe>
+
+            </div>
+            <!-- embed_area -->
+        </sweet-modal>
+    </div>
+</template>
+
+<script>
+import SmsComponent from '../../../../Calender/resources/js/components/SmsComponent';
+import AddDepositTransaction from "./partial/AddDepositTransaction";
+import RegenerateDepositTransaction from "./RegenerateDepositTransaction";
+import DeleteConfirm from "./DeleteConfirm";
+import EditServiceTransaction from "./partial/EditServiceTransaction";
+import flatpickr from "flatpickr";
+import { Arabic } from "flatpickr/dist/l10n/ar.js";
+import "../airbnb-modified.css";
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
+import Pagination from "./Pagination";
+import XLSX from "xlsx";
+
+import BreadCrumb from "./BreadCrumb";
+import ServiceCreditNoteConfirm from "./partial/ServiceCreditNoteConfirm.vue";
+export default {
+    name: "ServicesManagement",
+    components: {
+        BreadCrumb,
+        Loading,
+        Pagination,
+        DeleteConfirm,
+        EditServiceTransaction,
+        RegenerateDepositTransaction,
+        AddDepositTransaction,
+        ServiceCreditNoteConfirm,
+        SmsComponent
+    },
+    data() {
+        return {
+            serviceNumber: "",
+            contractNumber: "",
+            unitNumber: "",
+            loadedType: "",
+            employeeId: "",
+            serviceCategory: "",
+            transactionState: "",
+            transactionStates: [],
+            createdFrom: moment().subtract(7, "days").format("YYYY-MM-DD"),
+            createdTo: null,
+            flatpickrFrom: null,
+            flatpickrTo: null,
+            locale: "en",
+            isLoading: false,
+            nowDate: moment(),
+            DayBefore7: moment().subtract(7, "days"),
+            data: [],
+            ids: [],
+            paginator: {},
+            crumbs: [],
+            query: {},
+            selectedPage: 1,
+            legacyQuery: {},
+            team_id: Nova.config.user.current_team_id,
+            units: [],
+            employees: [],
+            service_categories: [],
+            hash_id: null,
+            target_id: null,
+            target_type: null,
+            per_page: 20,
+            calculationsLoading: false,
+            calculations: {
+                total_amount: 0,
+                total_vat: 0,
+                total_ttx: 0,
+                total_sum: 0,
+            },
+            posEdit: false,
+            posDelete: false,
+            reservationEdit: false,
+            reservationDelete: false,
+            transaction_deleted: false,
+            target_pos_id: null,
+            target_service: null,
+            currency: Nova.app.currentTeam.currency,
+            integrations: [],
+            team: Nova.app.currentTeam,
+            detailsUrl : null,
+            sms_base_title : null
+        };
+    },
+    computed: {
+        dateFormat() {
+            return "Y-m-d H:i";
+        },
+    },
+    methods: {
+        checkPermissions() {
+            if (Nova.app.$hasPermission("edit service transaction from pos")) {
+                this.posEdit = true;
+            } else {
+                this.posEdit = false;
+            }
+
+            if (
+                Nova.app.$hasPermission("delete service transaction from pos")
+            ) {
+                this.posDelete = true;
+            } else {
+                this.posDelete = false;
+            }
+
+            if (
+                Nova.app.$hasPermission(
+                    "edit service transaction from reservation"
+                )
+            ) {
+                this.reservationEdit = true;
+            } else {
+                this.reservationEdit = false;
+            }
+
+            if (
+                Nova.app.$hasPermission(
+                    "delete service transaction from reservation"
+                )
+            ) {
+                this.reservationDelete = true;
+            } else {
+                this.reservationDelete = false;
+            }
+        },
+        deleteHandler(obj) {
+            if (obj.payable_type == "App\\Reservation") {
+                if (parseInt(obj.is_attached_to_invoice)) {
+                    this.$toasted.show(
+                        this.__(
+                            "Can not delete this service cause it was attached to an invoice"
+                        ),
+                        { type: "error" }
+                    );
+                    return;
+                }
+                this.checkIfServiceCanBeDeletedOrUpdated(obj, "delete");
+            } else {
+                this.target_id = obj.id;
+                this.target_type = obj.type;
+                this.transaction_deleted = obj.transaction_deleted;
+                this.$refs.delete.$refs.deleteConfirm.open();
+            }
+        },
+        setTargetTransaction(hash) {
+            this.hash_id = hash;
+            const self = this;
+            setTimeout(function () {
+                self.$refs.print.click();
+            }, 0);
+        },
+        getCurrentPage(page) {
+            this.selectedPage = page;
+        },
+        capitalize(label) {
+            if (typeof label !== "string") return "";
+            return label.charAt(0).toUpperCase() + label.slice(1);
+        },
+        excelExport() {
+            this.isLoading = true;
+            let config = {
+                headers: {
+                    "x-team": this.team_id,
+                    "x-localization": this.locale,
+                },
+                params: this.$route.query,
+            };
+            axios
+                .get(
+                    window.FANDAQAH_API_URL +
+                        "/services-logs/excel-service-logs",
+                    config
+                )
+                .then((response) => {
+                    this.isLoading = false;
+                    let customersWs = XLSX.utils.json_to_sheet(
+                        response.data.data
+                    );
+                    let wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(
+                        wb,
+                        customersWs,
+                        response.data.file_name
+                    );
+                    XLSX.writeFile(wb, response.data.file_name + ".xlsx");
+                    this.$toasted.show(response.data.msg, { type: "success" });
+                });
+        },
+        printReport() {
+            $("#services_form").submit();
+        },
+        resetFilters() {
+            let opt = {};
+            opt["page"] = 1;
+            this.$router.push(
+                {
+                    name: "pos.services-management",
+                    query: Object.assign({}, this.legacyQuery, opt),
+                },
+                () => {
+                    this.serviceNumber = "";
+                    this.contractNumber = "";
+                    this.unitNumber = "";
+                    this.loadedType = "";
+                    this.employeeId = "";
+                    this.serviceCategory = "";
+                    this.createdFrom = null;
+                    this.createdTo = null;
+                    this.getData();
+                }
+            );
+        },
+        getData() {
+            let config = {
+                headers: {
+                    "x-team": this.team_id,
+                    "x-localization": this.locale,
+                },
+                params: this.$route.query,
+            };
+
+            this.isLoading = true;
+            this.checkPermissions();
+            axios
+                .get(window.FANDAQAH_API_URL + `/services-logs/list`, config)
+                .then((response) => {
+                    this.data = response.data.data;
+                    this.paginator = {
+                        currentPage: response.data.meta.current_page || null,
+                        lastPage: response.data.meta.last_page || null,
+                        from: response.data.meta.from || null,
+                        to: response.data.meta.to || null,
+                        total: response.data.meta.total || null,
+                        pathPage: response.data.meta.path + "?page=" || null,
+                        firstPageUrl: response.data.links.first || null,
+                        lastPageUrl: response.data.links.last || null,
+                        nextPageUrl: response.data.links.next || null,
+                        prevPageUrl: response.data.links.prev || null,
+                    };
+
+                    this.ids = response.data.meta.ids;
+                    this.query = this.$route.query;
+                    this.calculations = {
+                        total_amount: response.data.calculations.total_amount,
+                        total_vat: response.data.calculations.total_vat,
+                        total_ttx: response.data.calculations.total_ttx,
+                        total_sum: response.data.calculations.total_sum,
+                    };
+
+                    this.isLoading = false;
+                    // this.getTotals();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        },
+        getTotals() {
+            let config = {
+                headers: {
+                    "x-team": this.team_id,
+                    "x-localization": this.locale,
+                },
+                params: this.$route.query,
+            };
+            this.calculationsLoading = true;
+            axios
+                .get(
+                    window.FANDAQAH_API_URL + `/services-logs/get-totals`,
+                    config
+                )
+                .then((response) => {
+                    this.calculations = {
+                        total_amount: response.data.total_amount,
+                        total_vat: response.data.total_vat,
+                        total_ttx: response.data.total_ttx,
+                        total_sum: response.data.total_sum,
+                    };
+
+                    this.calculationsLoading = false;
+                });
+        },
+        getUnits() {
+            axios
+                .get(
+                    window.FANDAQAH_API_URL +
+                        `/units/dropDown?team_id=${this.team_id}`
+                )
+                .then((response) => {
+                    this.units = response.data.data;
+                });
+        },
+        getEmployees() {
+            axios
+                .get(
+                    window.FANDAQAH_API_URL +
+                        `/users/dropDown?team_id=${this.team_id}`
+                )
+                .then((response) => {
+                    this.employees = response.data.data;
+                });
+        },
+        getServiceCategories() {
+            axios
+                .get(
+                    window.FANDAQAH_API_URL +
+                        `/services-category/dropDown?team_id=${this.team_id}`
+                )
+                .then((response) => {
+                    this.service_categories = response.data.data;
+                });
+        },
+        openEditTransactionModal(obj) {
+            if (obj.payable_type == "App\\Reservation") {
+                if (parseInt(obj.is_attached_to_invoice)) {
+                    this.$toasted.show(
+                        this.__(
+                            "Can not edit this service cause it was attached to an invoice"
+                        ),
+                        { type: "error" }
+                    );
+                    return;
+                }
+                this.checkIfServiceCanBeDeletedOrUpdated(obj, "update");
+            } else {
+                Nova.$emit("open-edit-modal", obj);
+            }
+        },
+        checkIfServiceCanBeDeletedOrUpdated(obj, type) {
+            axios
+                .post(
+                    `/nova-vendor/pos/check-delete-update-capability/${obj.id}`
+                )
+                .then((response) => {
+                    if (response.data.flag == "forbidden") {
+                        let toast_message =
+                            type == "update"
+                                ? "Sorry you can't update this service cause it's included under an invoice with number :number - reservation number :reservation_number"
+                                : "Sorry you can't delete this service cause it's included under an invoice with number :number - reservation number :reservation_number";
+
+                        this.$toasted.show(
+                            Nova.app.__(toast_message, {
+                                number: response.data.invoice_number,
+                                reservation_number:
+                                    response.data.reservation["number"],
+                            }),
+                            {
+                                duration: 4000,
+                                type: "error",
+                                position: "top-center",
+                                action: {
+                                    text: Nova.app.__("Show Reservation"),
+                                    onClick: (e, toast) => {
+                                        this.$router.push({
+                                            name: "reservation",
+                                            params: {
+                                                id: response.data.reservation[
+                                                    "id"
+                                                ],
+                                            },
+                                        });
+                                        toast.goAway(0);
+                                    },
+                                },
+                            }
+                        );
+                    } else {
+                        if (type == "delete") {
+                            this.target_id = obj.id;
+                            this.target_type = obj.type;
+                            this.transaction_deleted = obj.transaction_deleted;
+                            this.$refs.delete.$refs.deleteConfirm.open();
+                        } else {
+                            Nova.$emit("open-edit-modal", obj);
+                        }
+                    }
+                });
+        },
+        openRegenerateModal(pos) {
+            this.target_pos_id = pos.id;
+            setTimeout(() => {
+                this.$refs.regenerate.$refs.regenerateConfirm.open();
+            }, 0);
+        },
+
+        openAddDepositTransaction(obj) {
+            this.target_service = obj;
+            setTimeout(() => {
+                this.$refs.fullfil.$refs.deposit_transaction.open();
+            }, 0);
+        },
+        checkIntegration(key) {
+            this.isLoading = true;
+            Nova.request()
+                .get(`/nova-vendor/settings/integrations/${key}`)
+                .then((response) => {
+                    this.isLoading = false;
+                    this.integrations = [
+                        ...this.integrations,
+                        {
+                            key: key,
+                            ...response.data,
+                        },
+                    ];
+                })
+                .catch((error) => {
+                    this.isLoading = false;
+                    this.$toasted.error(error, {
+                        duration: 3000,
+                    });
+                });
+        },
+        ifIntegrationEnabled(key) {
+            return this.integrations.find(
+                (integration) =>
+                    integration.key === key && integration.integration !== null
+            );
+        },
+        openPosDetailsModal(transaction){
+            this.current_pos_details = transaction;
+            this.detailsUrl = window.APP_URL + '/home/pos/print-record/' + transaction.hash_id;
+            this.sms_base_title =  Nova.app.__('Simple Tax Invoice') ;
+            this.$refs.posDetailsModal.open();
+        }
+    },
+    watch: {
+        createdFrom: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_created_from]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == null) {
+                let opt = {};
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        createdTo: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_created_to]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == null) {
+                let opt = {};
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        serviceNumber: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_service_number]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == "") {
+                let opt = {};
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        contractNumber: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_reservation_number]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == "") {
+                let opt = {};
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        unitNumber: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_unit_number]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == "") {
+                let opt = {};
+                opt["filter[by_unit_number]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        loadedType: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_loaded_on_type]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == "") {
+                let opt = {};
+                opt["filter[by_loaded_on_type]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        employeeId: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_creator]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == "") {
+                let opt = {};
+                opt["filter[by_creator]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        serviceCategory: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_service_category]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+
+            if (val == "") {
+                let opt = {};
+                opt["filter[by_service_category]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        selectedPage: function (val) {
+            if (val) {
+                let opt = {};
+                opt["page"] = val;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+        transactionState: function (val) {
+            if (val != null) {
+                let opt = {};
+                opt["filter[by_service_invoice_status]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+            if (val == "") {
+                let opt = {};
+                opt["filter[by_service_invoice_status]"] = val;
+                opt["page"] = 1;
+                this.$router.push(
+                    {
+                        name: "pos.services-management",
+                        query: Object.assign({}, this.$route.query, opt),
+                    },
+                    () => {
+                        this.getData();
+                    }
+                );
+            }
+        },
+    },
+    beforeDestroy() {
+        Nova.$off("open-edit-modal");
+        Nova.$off("close-edit-modal");
+        Nova.$off("service-transaction-updated");
+        Nova.$off("service-transaction-deleted");
+        Nova.$off("open-credit-note-confirm-modal");
+    },
+    mounted() {
+        this.transactionStates = [
+            'invoice',
+            'credit note'
+        ];
+        this.locale = Nova.config.local;
+        const self = this;
+        this.$nextTick(() => {
+            this.flatpickrFrom = flatpickr(this.$refs.datePickerFrom, {
+                enableTime: true,
+                enableSeconds: false,
+                dateFormat: this.dateFormat,
+                allowInput: false,
+                mode: "single",
+                time_24hr: true,
+                onReady() {
+                    self.$refs.datePickerFrom.parentNode.classList.add(
+                        "date-filter"
+                    );
+                },
+                onChange() {
+                    self.createdFrom = self.$refs.datePickerFrom.value;
+                },
+                locale: self.locale == "ar" ? Arabic : "en",
+            });
+
+            this.flatpickrTo = flatpickr(this.$refs.datePickerTo, {
+                enableTime: true,
+                enableSeconds: false,
+                dateFormat: this.dateFormat,
+                allowInput: false,
+                mode: "single",
+                time_24hr: true,
+                onReady() {
+                    self.$refs.datePickerTo.parentNode.classList.add(
+                        "date-filter"
+                    );
+                },
+                onChange() {
+                    self.createdTo = self.$refs.datePickerTo.value;
+                },
+                locale: self.locale == "ar" ? Arabic : "en",
+            });
+        });
+        this.crumbs = [
+            {
+                text: "Home",
+                to: "/dashboards/main",
+            },
+
+            {
+                text: "Reports",
+                to: "/reports",
+            },
+
+            {
+                text: "Services Report",
+                to: "#",
+            },
+        ];
+        this.query = this.$route.query;
+        this.legacyQuery = this.$route.query;
+        this.checkIntegration("ZatcaPhaseTwo");
+        this.getUnits();
+        this.getEmployees();
+        this.getServiceCategories();
+
+        let opt = {};
+
+         if(this.team.integration_zatca_phase_two) {
+            const [status] = this.transactionStates;
+            opt["filter[by_service_invoice_status]"] =
+                status;
+        }
+
+        opt["filter[by_created_from]"] =
+            this.DayBefore7.format("YYYY-MM-DD HH:mm");
+        opt["filter[by_created_to]"] = this.nowDate.format("YYYY-MM-DD HH:mm");
+
+        this.$router.push(
+            {
+                name: "pos.services-management",
+                query: Object.assign({}, this.$route.query, opt),
+            },
+            () => {
+                this.getData();
+                if(this.team.integration_zatca_phase_two) {
+                    const [status] = this.transactionStates;
+                    this.transactionState = status;
+                }
+            }
+        );
+
+
+        Nova.$on("service-transaction-updated", () => {
+            this.getData();
+        });
+
+        Nova.$on("service-transaction-deleted", () => {
+            this.getData();
+        });
+
+        Nova.$on("transaction-recreated", () => {
+            this.getData();
+        });
+
+        Nova.$on("transaction-added-pos", () => {
+            this.getData();
+        });
+
+        Nova.$on("service-transaction-updated", () => {
+            this.getData();
+        });
+
+        Nova.$on("open-credit-note-confirm-modal", (obj) => {
+           console.log(obj)
+        });
+
+
+    },
+};
+</script>
+
+<style lang="scss">
+.d-inline-flex{
+    display: inline-flex !important;
+}
+button .regenerate {
+    color: #b3b9bf;
+    margin: 0 5px !important;
+    outline: none;
+    svg {
+        width: 25px;
+        height: 25px;
+        path {
+            fill: #b3b9bf;
+            &:hover {
+                fill: #3d92d4;
+            }
+        }
+    }
+    &:hover {
+        color: #3d92d4;
+    }
+} /* a */
+
+.customer-label {
+    display: inline-block;
+    font-size: 14px;
+    border-radius: 4px;
+    padding: 3px 10px;
+    min-width: 60px;
+}
+.Edit_Transaction_Modal {
+
+    .sweet-content {
+        overflow: auto;
+        max-height: 500px;
+        display: block;
+        scrollbar-width: thin;
+        scrollbar-color: #ccc #f5f5f5;
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #ccc;
+        }
+        &::-webkit-scrollbar-thumb:window-inactive {
+            background: #f5f5f5;
+        }
+    } /* sweet-content */
+    .formgroup {
+        display: block;
+        margin: 0 auto 10px;
+    } /* formgroup */
+    .row_group {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin: 0 -10px;
+        @media (min-width: 320px) and (max-width: 767px) {
+            margin: 0;
+        } /* Mobile */
+        .col {
+            width: 50%;
+            padding: 0 10px;
+            margin: 0 0 10px;
+            @media (min-width: 320px) and (max-width: 767px) {
+                width: 100%;
+                padding: 0;
+            } /* Mobile */
+        } /* col */
+    } /* row_group */
+    label {
+        display: block;
+        margin: 0 auto 5px;
+        font-size: 15px;
+        span {
+            display: inline-block;
+            margin: 0 5px 0 0;
+            color: #f00;
+            [dir="ltr"] & {
+                margin: 0 0 0 5px;
+            } /* ltr */
+        } /* span */
+    } /* label */
+    input {
+        height: 40px !important;
+        padding: 0 10px !important;
+        color: #000 !important;
+        font-size: 15px !important;
+        border: 1px solid #dddddd !important;
+        background: #fafafa !important;
+        width: 100% !important;
+        &[readonly="readonly"] {
+            cursor: pointer;
+        } /* readonly */
+    } /* input */
+    select {
+        background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='iso-8859-1'%3F%3E%3C!-- Generator: Adobe Illustrator 19.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 491.996 491.996' style='enable-background:new 0 0 491.996 491.996;' xml:space='preserve'%3E%3Cg%3E%3Cg%3E%3Cpath d='M484.132,124.986l-16.116-16.228c-5.072-5.068-11.82-7.86-19.032-7.86c-7.208,0-13.964,2.792-19.036,7.86l-183.84,183.848 L62.056,108.554c-5.064-5.068-11.82-7.856-19.028-7.856s-13.968,2.788-19.036,7.856l-16.12,16.128 c-10.496,10.488-10.496,27.572,0,38.06l219.136,219.924c5.064,5.064,11.812,8.632,19.084,8.632h0.084 c7.212,0,13.96-3.572,19.024-8.632l218.932-219.328c5.072-5.064,7.856-12.016,7.864-19.224 C491.996,136.902,489.204,130.046,484.132,124.986z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3Cg%3E%3C/g%3E%3C/svg%3E%0A");
+        width: 100%;
+        height: 40px !important;
+        padding: 0 10px !important;
+        background-color: #fafafa !important;
+        border: 1px solid #ddd !important;
+        color: #000;
+        font-size: 15px;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -o-appearance: none;
+        appearance: none;
+        border-radius: 5px !important;
+        background-position: 15px center;
+        background-repeat: no-repeat;
+        background-size: 14px;
+    } /* select */
+    button {
+        background: #4099de;
+        border-radius: 5px;
+        border: 1px solid #4099de;
+        min-width: 100px;
+        height: 35px;
+        line-height: 35px;
+        font-size: 15px;
+        padding: 0 15px;
+        color: #ffffff;
+        width: 100%;
+        margin: 0 auto 10px;
+        -webkit-transition: all 0.2s ease-in-out;
+        -moz-transition: all 0.2s ease-in-out;
+        -o-transition: all 0.2s ease-in-out;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+            background: #0071c9;
+            border-color: #0071c9;
+        } /* hover */
+    } /* button */
+} /* Edit_Transaction_Modal */
+.Results_area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    p {
+        display: block;
+        margin: 10px 0 0;
+        font-size: 15px;
+        color: #000;
+    } /* p */
+} /* Results_area */
+#deposit_management_page {
+    margin: 10px auto 0;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    .title {
+        background: #f7fafc;
+        border-bottom: 1px solid #ddd;
+        padding: 0.75rem;
+        color: #000;
+        font-size: 1.125rem;
+        display: block;
+    } /* title */
+    .content_page {
+        background: #fff;
+        padding: 10px;
+        .filter_area {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            margin: 0 -10px;
+            .item {
+                width: 16.66666%;
+                padding: 0 10px;
+                margin: 0 0 10px;
+                @media (min-width: 320px) and (max-width: 480px) {
+                    width: 50%;
+                } /* media */
+                @media (min-width: 481px) and (max-width: 767px) {
+                    width: 33.33333%;
+                } /* media */
+                @media (min-width: 768px) and (max-width: 991px) {
+                    width: 25%;
+                } /* media */
+                input {
+                    background: #fafafa;
+                    height: 40px;
+                    padding: 0 10px;
+                    font-size: 15px;
+                    border: 1px solid #ddd !important;
+                    color: #000;
+                    width: 100%;
+                    border-radius: 4px !important;
+                    outline: none;
+                } /* input */
+                select {
+                    background-color: #fafafa;
+                    background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' id='Layer_1' x='0px' y='0px' viewBox='0 0 512.011 512.011' style='enable-background:new 0 0 512.011 512.011;' xml:space='preserve' width='512px' height='512px' class=''%3E%3Cg%3E%3Cg%3E%3Cg%3E%3Cpath d='M505.755,123.592c-8.341-8.341-21.824-8.341-30.165,0L256.005,343.176L36.421,123.592c-8.341-8.341-21.824-8.341-30.165,0 s-8.341,21.824,0,30.165l234.667,234.667c4.16,4.16,9.621,6.251,15.083,6.251c5.462,0,10.923-2.091,15.083-6.251l234.667-234.667 C514.096,145.416,514.096,131.933,505.755,123.592z' data-original='%23000000' class='active-path' fill='%23000000'/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A");
+                    background-repeat: no-repeat;
+                    background-size: 14px;
+                    background-position: 10px center;
+                    height: 40px;
+                    padding: 0 10px;
+                    font-size: 15px;
+                    border: 1px solid #ddd !important;
+                    color: #000;
+                    width: 100%;
+                    border-radius: 4px !important;
+                    outline: none;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    -o-appearance: none;
+                    appearance: none;
+                } /* select */
+            } /* item */
+            .reset_filters {
+                width: 100%;
+                display: flex;
+                padding: 0 10px;
+                justify-content: flex-end;
+                button {
+                    height: 40px;
+                    width: 40px;
+                    background-color: #718096;
+                    border-radius: 4px;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16.866' height='18.447' viewBox='0 0 16.866 18.447'%3E%3Cg transform='translate(0 0)'%3E%3Cpath d='M24.417,3.658a7.354,7.354,0,0,1,9.56-.252l-2.189.083a.509.509,0,0,0,.019,1.017h.019l3.36-.124a.508.508,0,0,0,.49-.509v-.06h0L35.552.49a.509.509,0,1,0-1.017.038l.079,2.083A8.364,8.364,0,0,0,23.735,2.9a8.367,8.367,0,0,0-2.516,8.178.506.506,0,0,0,.493.388.441.441,0,0,0,.121-.015.509.509,0,0,0,.373-.614A7.349,7.349,0,0,1,24.417,3.658Z' transform='translate(-20.982 0)' fill='%23ffffff'/%3E%3Cpath d='M91.8,185.6a.508.508,0,1,0-.987.241,7.348,7.348,0,0,1-11.832,7.387l2.215-.2a.509.509,0,1,0-.094-1.013l-3.349.3a.508.508,0,0,0-.46.554l.3,3.349a.508.508,0,0,0,.5.463.183.183,0,0,0,.045,0,.508.508,0,0,0,.46-.554l-.181-2.038a8.308,8.308,0,0,0,4.833,1.842c.143.008.286.011.426.011A8.365,8.365,0,0,0,91.8,185.6Z' transform='translate(-75.175 -178.237)' fill='%23ffffff'/%3E%3C/g%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: center center;
+                    background-size: 20px;
+                    -webkit-transition: all 0.2s ease-in-out;
+                    -moz-transition: all 0.2s ease-in-out;
+                    -o-transition: all 0.2s ease-in-out;
+                    transition: all 0.2s ease-in-out;
+                    &:hover {
+                        background-color: #5e6d83;
+                    } /* hover */
+                } /* button */
+            } /* reset_filters */
+        } /* filter_area */
+        hr {
+            margin: 15px auto;
+            border-color: #ddd;
+        } /* hr */
+        .statistics_area {
+            ul {
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                margin: 0 -10px;
+                li {
+                    width: 20%;
+                    padding: 0 10px;
+                    @media (min-width: 320px) and (max-width: 480px) {
+                        width: 50%;
+                        margin: 5px 0;
+                    } /* media */
+                    @media (min-width: 481px) and (max-width: 767px) {
+                        width: 33.33333%;
+                        margin: 5px 0;
+                    } /* media */
+                    @media (min-width: 768px) and (max-width: 991px) {
+                        width: 25%;
+                        margin: 5px 0;
+                    } /* media */
+                    span {
+                        display: block;
+                        font-size: 15px;
+                        color: #000;
+                        margin: 0 0 5px;
+                    } /* span */
+                    p {
+                        display: block;
+                        font-size: 16px;
+                        font-weight: bold;
+                        line-height: 1.2;
+                        &.totalDebtor {
+                            color: #f56565;
+                        } /* totalDebtor */
+                        &.totalCreditor {
+                            color: #48bb78;
+                        } /* totalCreditor */
+                    } /* p */
+                } /* li */
+            } /* ul */
+            .mx-w-30px {
+                max-width: 30px;
+            }
+        } /* statistics_area */
+        .action_buttons {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin: 0 0 10px;
+            button.add_receipts {
+                display: block;
+                background: #4099de;
+                border: none;
+                border-radius: 4px;
+                color: #fff;
+                font-size: 15px;
+                padding: 5px 15px;
+                &:hover {
+                    background: #0071c9;
+                } /* hover */
+            } /* add_receipts */
+            .buttons_area {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                button {
+                    display: block;
+                    height: 30px;
+                    width: 30px;
+                    margin: 0 10px 0 0;
+                    outline: none;
+                    background-position: center center;
+                    background-size: 25px;
+                    background-repeat: no-repeat;
+                    &.excel_button {
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23.308' height='23.308' viewBox='0 0 23.308 23.308'%3E%3Cpath d='M24.213,3H16V5.675h2.717V7.5H16V9.275h2.689v1.793H16v1.793h2.689v1.793H16v1.793h2.689V18.24H16v2.689h8.213a.768.768,0,0,0,.751-.78V3.78A.768.768,0,0,0,24.213,3ZM23.172,18.24H19.586V16.447h3.586Zm0-3.586H19.586V12.861h3.586Zm0-3.586H19.586V9.275h3.586Zm0-3.586H19.586V5.689h3.586Z' transform='translate(-1.657 -0.311)' fill='%23333b45'/%3E%3Cpath d='M0,2.59V20.719l13.447,2.589V0ZM8.505,16.208,6.941,13.25a2.623,2.623,0,0,1-.184-.608H6.733a4.6,4.6,0,0,1-.21.634l-1.57,2.931H2.516l2.894-4.54L2.763,7.128H5.251l1.3,2.723a4.756,4.756,0,0,1,.273.766h.025q.077-.266.285-.792l1.443-2.7h2.279l-2.723,4.5,2.8,4.578Z' fill='%23333b45'/%3E%3C/svg%3E");
+                    } /* excel_button */
+                    &.print_button {
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='19.339' height='19.339' viewBox='0 0 19.339 19.339'%3E%3Cpath d='M17.471,17.471v1.934a1.934,1.934,0,0,1-1.934,1.934H7.8a1.934,1.934,0,0,1-1.934-1.934V17.471H3.934A1.934,1.934,0,0,1,2,15.537v-5.8A1.94,1.94,0,0,1,3.934,7.8H5.868V3.934A1.94,1.94,0,0,1,7.8,2h7.735a1.934,1.934,0,0,1,1.934,1.934V7.8H19.4a1.934,1.934,0,0,1,1.934,1.934v5.8A1.934,1.934,0,0,1,19.4,17.471Zm0-1.934H19.4v-5.8H3.934v5.8H5.868V13.6A1.94,1.94,0,0,1,7.8,11.669h7.735A1.934,1.934,0,0,1,17.471,13.6ZM15.537,7.8V3.934H7.8V7.8ZM7.8,13.6v5.8h7.735V13.6Z' transform='translate(-2 -2)' fill='%23333b45'/%3E%3C/svg%3E");
+                    } /* print_button */
+                } /* button */
+            } /* buttons_area */
+        } /* action_buttons */
+        .table_area {
+            .no_data_show {
+                text-align: center;
+                padding: 50px 15px 40px;
+                svg {
+                    display: block;
+                    margin: 0 auto 15px;
+                } /* svg */
+                span {
+                    display: block;
+                    font-size: 15px;
+                    text-align: center;
+                    color: #000;
+                } /* span */
+            } /* no_data_show */
+            .table-responsive {
+                width: 100%;
+                margin: 0 auto 20px;
+                position: relative;
+                @media (min-width: 320px) and (max-width: 991px) {
+                    overflow: auto;
+                } /* media */
+                table {
+                    width: 100%;
+                    border: 1px solid #e2e8f0;
+                    display: table;
+                    thead {
+                        tr {
+                            th {
+                                padding: 10px 5px;
+                                line-height: 20px;
+                                font-weight: normal;
+                                font-size: 15px;
+                                border: 1px solid #5e697c;
+                                vertical-align: middle;
+                                text-align: center !important;
+                                color: #ffffff;
+                                background: #4a5568;
+                            } /* th */
+                        } /* tr */
+                    } /* thead */
+                    tbody {
+                        tr {
+                            td {
+                                text-align: center !important;
+                                padding: 15px 5px;
+                                vertical-align: middle;
+                                line-height: 20px;
+                                font-size: 15px;
+                                border: 1px solid #ced4dc;
+                                color: #000000;
+                                font-weight: normal;
+                                height: auto;
+                                background: #ffffff;
+                                &.td-fit {
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    border-right: none;
+                                    border-bottom: none;
+                                    a,
+                                    button {
+                                        color: #b3b9bf;
+                                        margin: 0 5px !important;
+                                        outline: none;
+                                        svg {
+                                            path {
+                                                fill: #b3b9bf;
+                                                &:hover {
+                                                    fill: #3d92d4;
+                                                }
+                                            }
+                                        }
+                                        &:hover {
+                                            color: #3d92d4;
+                                        }
+                                    } /* a */
+                                } /* td-fit */
+                                .text-left {
+                                    text-align: center !important;
+                                } /* text-left */
+                            } /* td */
+                        } /* tr */
+                    } /* tbody */
+                } /* table */
+            } /* table-responsive */
+        } /* table_area */
+    } /* content_page */
+} /* deposit_management_page */
+.line-break-anywhere {
+    line-break: anywhere;
+}
+.text-xss {
+        font-size: 11px;
+    }
+
+.pos_details_modal {
+
+    .sweet-modal {
+        @media (min-width: 768px) and (max-width: 991px) {
+            width: 95% !important;
+        } /* @media */
+    } /* sweet-modal */
+    .embed_area {
+        max-height: 500px;
+        height: 100%;
+        overflow-y: auto;
+        display: block !important;
+        scrollbar-width: thin;
+        scrollbar-color: #ccc #f5f5f5;
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #ccc;
+        }
+        &::-webkit-scrollbar-thumb:window-inactive {
+            background: #f5f5f5;
+        }
+        @media (min-width: 320px) and (max-width: 480px) {
+            display: none !important;
+        } /* @media */
+        iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+        } /* iframe */
+    } /* embed_area */
+} /* contract_modal */
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0 auto 15px;
+    border-bottom: 1px solid #dddddd;
+    padding: 0 0 10px;
+
+    a {
+        display: block;
+        height: 35px;
+        width: 35px;
+        border-radius: 5px;
+        background-position: center center;
+        background-size: 20px;
+        background-repeat: no-repeat;
+        margin: 5px;
+        cursor: pointer;
+        &.print_button {
+            background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' version='1.1' id='Layer_1' x='0px' y='0px' viewBox='0 0 512 512' style='enable-background:new 0 0 512 512;' xml:space='preserve' width='512px' height='512px'%3E%3Cg%3E%3Cg%3E%3Cg%3E%3Cpath d='M472.178,133.907h-54.303V35.132c0-9.425-7.641-17.067-17.067-17.067H111.192c-9.425,0-17.067,7.641-17.067,17.067v98.775 H39.822C17.864,133.907,0,151.772,0,173.73v171.702c0,21.958,17.864,39.822,39.822,39.822h54.306v91.614 c0,9.425,7.641,17.067,17.067,17.067h289.61c9.425,0,17.067-7.641,17.067-17.067v-91.614h54.306 c21.958,0,39.822-17.864,39.822-39.822V173.73C512,151.773,494.136,133.907,472.178,133.907z M128.258,52.199h255.483v81.708 H128.258V52.199z M383.738,459.801H128.262c0-3.335,0-135.503,0-139.628h255.477C383.738,324.402,383.738,456.594,383.738,459.801 z M477.867,345.433c0,3.137-2.552,5.689-5.689,5.689h-54.306v-48.014c0-9.425-7.641-17.067-17.067-17.067h-289.61 c-9.425,0-17.067,7.641-17.067,17.067v48.014H39.822c-3.137,0-5.689-2.552-5.689-5.689V173.731c0-3.137,2.552-5.689,5.689-5.689 c13.094,0,419.57,0,432.356,0c3.137,0,5.689,2.552,5.689,5.689V345.433z' data-original='%23000000' class='active-path' data-old_color='%23000000' fill='%23FFFFFF'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M400.808,199.988h-43.443c-9.425,0-17.067,7.641-17.067,17.067s7.641,17.067,17.067,17.067h43.443 c9.425,0,17.067-7.641,17.067-17.067S410.234,199.988,400.808,199.988z' data-original='%23000000' class='active-path' data-old_color='%23000000' fill='%23FFFFFF'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M329.956,399.834H182.044c-9.425,0-17.067,7.641-17.067,17.067s7.641,17.067,17.067,17.067h147.911 c9.425,0,17.067-7.641,17.067-17.067S339.381,399.834,329.956,399.834z' data-original='%23000000' class='active-path' data-old_color='%23000000' fill='%23FFFFFF'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M329.956,346.006H182.044c-9.425,0-17.067,7.641-17.067,17.067s7.641,17.067,17.067,17.067h147.911 c9.425,0,17.067-7.641,17.067-17.067S339.381,346.006,329.956,346.006z' data-original='%23000000' class='active-path' data-old_color='%23000000' fill='%23FFFFFF'/%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A");
+            background-color: #4099de;
+        }
+        &.whatsapp_button{
+            background-image: url("data:image/svg+xml,%3C%3Fxml version='1.0'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' height='512px' viewBox='-23 -21 682 682.66669' width='512px'%3E%3Cg%3E%3Cpath d='m544.386719 93.007812c-59.875-59.945312-139.503907-92.9726558-224.335938-93.007812-174.804687 0-317.070312 142.261719-317.140625 317.113281-.023437 55.894531 14.578125 110.457031 42.332032 158.550781l-44.992188 164.335938 168.121094-44.101562c46.324218 25.269531 98.476562 38.585937 151.550781 38.601562h.132813c174.785156 0 317.066406-142.273438 317.132812-317.132812.035156-84.742188-32.921875-164.417969-92.800781-224.359376zm-224.335938 487.933594h-.109375c-47.296875-.019531-93.683594-12.730468-134.160156-36.742187l-9.621094-5.714844-99.765625 26.171875 26.628907-97.269531-6.269532-9.972657c-26.386718-41.96875-40.320312-90.476562-40.296875-140.28125.054688-145.332031 118.304688-263.570312 263.699219-263.570312 70.40625.023438 136.589844 27.476562 186.355469 77.300781s77.15625 116.050781 77.132812 186.484375c-.0625 145.34375-118.304687 263.59375-263.59375 263.59375zm144.585938-197.417968c-7.921875-3.96875-46.882813-23.132813-54.148438-25.78125-7.257812-2.644532-12.546875-3.960938-17.824219 3.96875-5.285156 7.929687-20.46875 25.78125-25.09375 31.066406-4.625 5.289062-9.242187 5.953125-17.167968 1.984375-7.925782-3.964844-33.457032-12.335938-63.726563-39.332031-23.554687-21.011719-39.457031-46.960938-44.082031-54.890626-4.617188-7.9375-.039062-11.8125 3.476562-16.171874 8.578126-10.652344 17.167969-21.820313 19.808594-27.105469 2.644532-5.289063 1.320313-9.917969-.664062-13.882813-1.976563-3.964844-17.824219-42.96875-24.425782-58.839844-6.4375-15.445312-12.964843-13.359374-17.832031-13.601562-4.617187-.230469-9.902343-.277344-15.1875-.277344-5.28125 0-13.867187 1.980469-21.132812 9.917969-7.261719 7.933594-27.730469 27.101563-27.730469 66.105469s28.394531 76.683594 32.355469 81.972656c3.960937 5.289062 55.878906 85.328125 135.367187 119.648438 18.90625 8.171874 33.664063 13.042968 45.175782 16.695312 18.984374 6.03125 36.253906 5.179688 49.910156 3.140625 15.226562-2.277344 46.878906-19.171875 53.488281-37.679687 6.601563-18.511719 6.601563-34.375 4.617187-37.683594-1.976562-3.304688-7.261718-5.285156-15.183593-9.253906zm0 0' fill-rule='evenodd' data-original='%23000000' class='active-path' data-old_color='%23000000' fill='%23FFFFFF'/%3E%3C/g%3E%3C/svg%3E%0A");
+            background-color: #4dc247;
+        }
+    }
+}
+</style>

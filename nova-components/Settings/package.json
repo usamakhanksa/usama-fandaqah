@@ -1,0 +1,38 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "npm run development",
+        "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "watch": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --watch --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "watch-poll": "npm run watch -- --watch-poll",
+        "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "prod": "npm run production && npm run compress",
+        "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --watch --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+        "compress": "bread-compressor -s dist"
+    },
+    "devDependencies": {
+        "browser-sync": "^2.26.7",
+        "browser-sync-webpack-plugin": "^2.2.2",
+        "cross-env": "^5.0.0",
+        "laravel-mix": "^1.0"
+    },
+    "dependencies": {
+        "@xkeshi/image-compressor": "^0.5.3",
+        "bread-compressor-cli": "^1.0.8",
+        "cropperjs": "^1.5.6",
+        "laravel-vue-pagination": "^2.3.1",
+        "node-sass": "^4.14.1",
+        "sweet-modal-vue": "^2.0.0",
+        "v-tooltip": "^2.0.3",
+        "vue": "^2.5.0",
+        "vue-color": "^2.7.0",
+        "vue-editor": "0.0.0",
+        "vue-gallery": "^2.0.1",
+        "vue-infinite-loading": "^2.4.4",
+        "vue-lazy-input": "^1.0.5",
+        "vue-signature-pad": "^2.0.0",
+        "vue-underscore": "^0.1.4",
+        "vue2-editor": "^2.10.2",
+        "vuedraggable": "^2.23.2"
+    }
+}

@@ -1,0 +1,3395 @@
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports) {
+
+/* globals __VUE_SSR_CONTEXT__ */
+
+// IMPORTANT: Do NOT use ES2015 features in this file.
+// This module is a runtime utility for cleaner component module output and will
+// be included in the final webpack user bundle.
+
+module.exports = function normalizeComponent (
+  rawScriptExports,
+  compiledTemplate,
+  functionalTemplate,
+  injectStyles,
+  scopeId,
+  moduleIdentifier /* server only */
+) {
+  var esModule
+  var scriptExports = rawScriptExports = rawScriptExports || {}
+
+  // ES6 modules interop
+  var type = typeof rawScriptExports.default
+  if (type === 'object' || type === 'function') {
+    esModule = rawScriptExports
+    scriptExports = rawScriptExports.default
+  }
+
+  // Vue.extend constructor export interop
+  var options = typeof scriptExports === 'function'
+    ? scriptExports.options
+    : scriptExports
+
+  // render functions
+  if (compiledTemplate) {
+    options.render = compiledTemplate.render
+    options.staticRenderFns = compiledTemplate.staticRenderFns
+    options._compiled = true
+  }
+
+  // functional template
+  if (functionalTemplate) {
+    options.functional = true
+  }
+
+  // scopedId
+  if (scopeId) {
+    options._scopeId = scopeId
+  }
+
+  var hook
+  if (moduleIdentifier) { // server build
+    hook = function (context) {
+      // 2.3 injection
+      context =
+        context || // cached call
+        (this.$vnode && this.$vnode.ssrContext) || // stateful
+        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
+      // 2.2 with runInNewContext: true
+      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+        context = __VUE_SSR_CONTEXT__
+      }
+      // inject component styles
+      if (injectStyles) {
+        injectStyles.call(this, context)
+      }
+      // register component module identifier for async chunk inferrence
+      if (context && context._registeredComponents) {
+        context._registeredComponents.add(moduleIdentifier)
+      }
+    }
+    // used by ssr in case component is cached and beforeCreate
+    // never gets called
+    options._ssrRegister = hook
+  } else if (injectStyles) {
+    hook = injectStyles
+  }
+
+  if (hook) {
+    var functional = options.functional
+    var existing = functional
+      ? options.render
+      : options.beforeCreate
+
+    if (!functional) {
+      // inject component registration as beforeCreate hook
+      options.beforeCreate = existing
+        ? [].concat(existing, hook)
+        : [hook]
+    } else {
+      // for template-only hot-reload because in that case the render fn doesn't
+      // go through the normalizer
+      options._injectStyles = hook
+      // register for functioal component in vue file
+      options.render = function renderWithStyleInjection (h, context) {
+        hook.call(context)
+        return existing(h, context)
+      }
+    }
+  }
+
+  return {
+    esModule: esModule,
+    exports: scriptExports,
+    options: options
+  }
+}
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+var listToStyles = __webpack_require__(11)
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+var options = null
+var ssrIdKey = 'data-vue-ssr-id'
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+module.exports = function (parentId, list, _isProduction, _options) {
+  isProduction = _isProduction
+
+  options = _options || {}
+
+  var styles = listToStyles(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = listToStyles(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+  if (options.ssrId) {
+    styleElement.setAttribute(ssrIdKey, obj.id)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(4);
+__webpack_require__(27);
+module.exports = __webpack_require__(28);
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+Nova.booting(function (Vue, router, store) {
+    Vue.component('units-card', __webpack_require__(5));
+    router.addRoutes([{
+        name: 'units',
+        path: '/units',
+        component: __webpack_require__(8)
+    }, {
+        name: 'units.status',
+        path: '/units/status',
+        component: __webpack_require__(14)
+    }, {
+        name: 'units.housekeeping',
+        path: '/units/housekeeping',
+        component: __webpack_require__(22)
+    }]);
+});
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(33)
+}
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(6)
+/* template */
+var __vue_template__ = __webpack_require__(7)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/js/components/Card.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-b9bc2c0a", Component.options)
+  } else {
+    hotAPI.reload("data-v-b9bc2c0a", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['card'],
+    data: function data() {
+        return {
+            textAlign: ''
+        };
+    },
+    mounted: function mounted() {
+        var lang = Nova.config.local;
+        lang == 'en' ? this.textAlign = 'text-left' : this.textAlign = 'text-right';
+    },
+
+    methods: {
+        goTo: function goTo(type) {
+            this.$router.push('/resources/' + type);
+        }
+    }
+});
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "flex flex-wrap -mx-2 overflow-hidden" }, [
+    _c(
+      "div",
+      {
+        staticClass:
+          "my-2 px-2 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/4"
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: " setting flex bg-white rounded-lg p-2 shadow",
+            on: {
+              click: function($event) {
+                return _vm.goTo("unit-categories")
+              }
+            }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "h-16 w-16 text-center text-4xl  text-muted pt-2"
+              },
+              [
+                _c(
+                  "svg",
+                  {
+                    attrs: {
+                      xmlns: "http://www.w3.org/2000/svg",
+                      width: "45.688",
+                      height: "47.001",
+                      viewBox: "0 0 45.688 47.001"
+                    }
+                  },
+                  [
+                    _c(
+                      "g",
+                      { attrs: { transform: "translate(-7.984 0.998)" } },
+                      [
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M165.517,85.93h14.13a1.422,1.422,0,0,0,1.42-1.42V81.716a1.422,1.422,0,0,0-1.42-1.42h-14.13a1.422,1.422,0,0,0-1.42,1.42V84.51A1.422,1.422,0,0,0,165.517,85.93Zm-.046-4.214a.046.046,0,0,1,.046-.046h14.13a.046.046,0,0,1,.046.046V84.51a.046.046,0,0,1-.046.046h-14.13a.046.046,0,0,1-.046-.046Z",
+                            transform: "translate(-141.754 -73.817)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M165.517,165.119h1.705a.687.687,0,1,0,0-1.374h-1.705a.046.046,0,0,1-.046-.046v-2.794a.046.046,0,0,1,.046-.046h14.13a.046.046,0,0,1,.046.046V163.7a.046.046,0,0,1-.046.046h-9.241a.687.687,0,1,0,0,1.374h9.241a1.421,1.421,0,0,0,1.42-1.42v-2.794a1.421,1.421,0,0,0-1.42-1.42h-14.13a1.421,1.421,0,0,0-1.42,1.42V163.7A1.421,1.421,0,0,0,165.517,165.119Z",
+                            transform: "translate(-141.754 -145.722)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M52.251,41.867h-.818V9.83a1.421,1.421,0,0,0-1.42-1.42h-5.4V3.569h1.045A1.168,1.168,0,0,0,46.824,2.4V.168A1.168,1.168,0,0,0,45.657-1h-4.5a.687.687,0,0,0-.687.687.687.687,0,0,0,.687.687h4.292V2.195H16.206V.376H37.928a.687.687,0,0,0,.687-.687A.687.687,0,0,0,37.928-1H16A1.168,1.168,0,0,0,14.832.168V2.4A1.168,1.168,0,0,0,16,3.569h1.045v4.84h-5.4a1.422,1.422,0,0,0-1.42,1.42V41.867H9.4a1.421,1.421,0,0,0-1.42,1.42v1.3A1.422,1.422,0,0,0,9.4,46H52.251a1.422,1.422,0,0,0,1.42-1.42v-1.3A1.422,1.422,0,0,0,52.251,41.867ZM44.612,9.784h5.4a.046.046,0,0,1,.046.046V41.867H44.612ZM18.417,3.569H43.238v38.3H39.313v-18.3a1.146,1.146,0,0,0-1.145-1.145H30.877l-.049,0-.049,0H23.488a1.146,1.146,0,0,0-1.145,1.145v18.3H18.417ZM37.938,23.795V41.867H31.564V23.795Zm-7.847,0V41.867H23.717V23.795ZM11.6,9.83a.046.046,0,0,1,.046-.046h5.4V41.867H11.6ZM52.3,44.583a.046.046,0,0,1-.046.046H9.4a.046.046,0,0,1-.046-.046v-1.3a.046.046,0,0,1,.046-.046H52.252a.046.046,0,0,1,.046.046Z",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,150.518H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                            transform: "translate(-372.56 -137.58)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,189.364H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                            transform: "translate(-372.56 -172.853)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,228.21H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                            transform: "translate(-372.56 -208.126)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,267.06H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-372.56 -243.402)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,305.906H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-372.56 -278.675)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,344.752H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-372.56 -313.948)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,383.6H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-372.56 -349.221)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M420.757,422.444H418.97a.687.687,0,0,0,0,1.374h1.786a.687.687,0,0,0,0-1.374Z",
+                            transform: "translate(-372.56 -384.495)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,150.518H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                            transform: "translate(-47.27 -137.58)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,189.364H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                            transform: "translate(-47.27 -172.853)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,228.21H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                            transform: "translate(-47.27 -208.126)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,267.06H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-47.27 -243.402)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,305.906H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-47.27 -278.675)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,344.752H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-47.27 -313.948)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,383.6H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                            transform: "translate(-47.27 -349.221)",
+                            fill: "#333b45"
+                          }
+                        }),
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M62.516,422.444H60.729a.687.687,0,0,0,0,1.374h1.786a.687.687,0,0,0,0-1.374Z",
+                            transform: "translate(-47.27 -384.495)",
+                            fill: "#333b45"
+                          }
+                        })
+                      ]
+                    )
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+              _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                _vm._v(_vm._s(_vm.__("Unit Categories")))
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "text-muted" }, [
+                _vm._v(_vm._s(_vm.__("Define your unit categories")))
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass:
+          "my-2 px-2 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/4"
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "setting flex bg-white rounded-lg p-2 shadow",
+            on: {
+              click: function($event) {
+                return _vm.goTo("unit-general-features")
+              }
+            }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "h-16 w-16 text-center text-4xl  text-muted pt-2"
+              },
+              [
+                _c(
+                  "svg",
+                  {
+                    attrs: {
+                      xmlns: "http://www.w3.org/2000/svg",
+                      width: "46.473",
+                      height: "44.284",
+                      viewBox: "0 0 46.473 44.284"
+                    }
+                  },
+                  [
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M22.658,27.772a.89.89,0,0,1-.89.89A10.982,10.982,0,0,0,10.8,39.632a.89.89,0,0,1-1.78,0,12.764,12.764,0,0,1,12.75-12.75A.89.89,0,0,1,22.658,27.772Zm23.721-1.185A23.675,23.675,0,0,0,33.894,15.1a.89.89,0,1,0-.657,1.654A21.9,21.9,0,0,1,44.785,27.379a.89.89,0,0,0,1.594-.792Zm-6.469.917a.89.89,0,0,0,1.491-.973,19.443,19.443,0,0,0-7.44-6.688.89.89,0,0,0-.808,1.586A17.661,17.661,0,0,1,39.911,27.5Zm5.127,23.427a3.193,3.193,0,0,1-3.189,3.189H3.189a3.189,3.189,0,0,1,0-6.379h9.786V45.836H4.124a.89.89,0,0,1-.89-.89v-4.6A19.344,19.344,0,0,1,21.629,21.084V16.215h-.26a3.189,3.189,0,0,1,0-6.379h2.3a3.189,3.189,0,0,1,0,6.379h-.26v4.869A19.344,19.344,0,0,1,41.8,40.348v4.6a.89.89,0,0,1-.89.89h-8.85v1.905h9.786A3.193,3.193,0,0,1,45.038,50.931Zm-22.519-36.5h1.15a1.409,1.409,0,0,0,0-2.819h-2.3a1.409,1.409,0,0,0,0,2.819Zm8.654,29.622h8.85V40.348a17.5,17.5,0,1,0-35.009,0v3.709Zm-16.418,1.78v1.905H30.283V45.836Zm28.5,5.094a1.411,1.411,0,0,0-1.409-1.409H3.189a1.409,1.409,0,0,0,0,2.819H41.849A1.411,1.411,0,0,0,43.258,50.931Z",
+                        transform: "translate(0 -9.836)",
+                        fill: "#333b45"
+                      }
+                    })
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+              _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                _vm._v(_vm._s(_vm.__("General Features")))
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "text-muted" }, [
+                _vm._v(_vm._s(_vm.__("Units shared features")))
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass:
+          "my-2 px-2 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/4"
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "setting flex bg-white rounded-lg p-2 shadow",
+            on: {
+              click: function($event) {
+                return _vm.goTo("unit-special-features")
+              }
+            }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "h-16 w-16 text-center text-4xl  text-muted pt-2"
+              },
+              [
+                _c(
+                  "svg",
+                  {
+                    attrs: {
+                      xmlns: "http://www.w3.org/2000/svg",
+                      width: "23.749",
+                      height: "48.938",
+                      viewBox: "0 0 23.749 48.938"
+                    }
+                  },
+                  [
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M125.985,31.373H127.1a.934.934,0,0,1,0,1.868h-1.112a.934.934,0,0,1,0-1.868ZM109.477,12.652a10.245,10.245,0,0,1,.593-3.432.923.923,0,0,1,.056-.153,10.234,10.234,0,0,1,1.536-2.738V.934A.934.934,0,0,1,112.6,0h14.266a.934.934,0,0,1,.934.934V6.347a10.246,10.246,0,0,1-3.008,15.21l-.322,1.647a.934.934,0,1,1-1.834-.358l.077-.392a10.2,10.2,0,0,1-.991.248.934.934,0,1,1-.362-1.833,8.377,8.377,0,0,0,5.431-12.717,14.013,14.013,0,0,1-7.172,3.78,12.07,12.07,0,0,1-8.088-1.015,8.375,8.375,0,0,0,6.56,9.951.934.934,0,0,1-.362,1.833q-.506-.1-.991-.248l.077.392a.934.934,0,1,1-1.834.358l-.322-1.646A10.274,10.274,0,0,1,109.477,12.652Zm4.053-6.927h12.4V1.868h-12.4Zm-1.4,3.389c3.813,2.306,9.238,1.168,12.508-1.52H113.046A8.357,8.357,0,0,0,112.13,9.114ZM131.6,28.426V40.575a.934.934,0,0,1-.532.843l-7.376,3.521.04.584a.935.935,0,0,1-.346.791l-3,2.417a.933.933,0,0,1-.586.207q-.038,0-.077,0a.932.932,0,0,1-.663-.2l-3-2.417a.934.934,0,0,1-.346-.791l.04-.584-7.376-3.521a.934.934,0,0,1-.532-.843V28.426a.934.934,0,0,1,.517-.836l4.7-2.343a.934.934,0,0,1,.417-.1H116l1.326-1.13a.934.934,0,0,1,.606-.223h3.585a.934.934,0,0,1,.606.223l1.326,1.13h2.517a.936.936,0,0,1,.417.1l4.7,2.343A.935.935,0,0,1,131.6,28.426Zm-14.783,1.051-1.077-.918a.934.934,0,0,1-.328-.711v-.831H113.7L109.715,29V39.985l6.177,2.948Zm5.018,15.687-.049-.715c0-.011,0-.022,0-.033l-.951-13.9h-2.214l-.951,13.893c0,.017,0,.034,0,.051l-.048.706,2.109,1.7Zm.337-18.65-1-.85h-2.9l-1,.85v.9l1.1.94.008.007.331.282h2.008l1.442-1.229v-.9Zm7.56,2.49-3.985-1.987h-1.706v.831a.934.934,0,0,1-.328.711l-1.077.918.921,13.456,6.177-2.948Z",
+                        transform: "translate(-107.847 0)",
+                        fill: "#333b45"
+                      }
+                    })
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+              _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                _vm._v(_vm._s(_vm.__("Special Features")))
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "text-muted" }, [
+                _vm._v(_vm._s(_vm.__("Units special features")))
+              ])
+            ])
+          ]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass:
+          "my-2 px-2 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/4"
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "setting flex bg-white rounded-lg p-2 shadow",
+            on: {
+              click: function($event) {
+                return _vm.goTo("unit-options")
+              }
+            }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "h-16 w-16 text-center text-4xl  text-muted pt-2"
+              },
+              [
+                _c(
+                  "svg",
+                  {
+                    attrs: {
+                      xmlns: "http://www.w3.org/2000/svg",
+                      width: "35.306",
+                      height: "33.581",
+                      viewBox: "0 0 35.306 33.581"
+                    }
+                  },
+                  [
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M9.787,30.642A.669.669,0,0,0,9.835,30L8.176,26.312a.669.669,0,0,0-.61-.395H4.979a.669.669,0,0,0-.61.395L2.71,30a.669.669,0,0,0,.61.943h.926a2.193,2.193,0,0,0-.177.866v.364a2.193,2.193,0,0,0,.177.866H.669A.669.669,0,0,0,0,33.712v9.513a.669.669,0,0,0,.669.669H9.161a.669.669,0,0,0,.669-.669V33.712a.669.669,0,0,0-.669-.669H8.3a2.191,2.191,0,0,0,.177-.866v-.364a2.191,2.191,0,0,0-.177-.866h.926A.669.669,0,0,0,9.787,30.642ZM5.412,27.256H7.134l1.057,2.354H4.354Zm1.727,4.558v.364a.866.866,0,0,1-1.732,0v-.364a.866.866,0,0,1,1.732,0Zm1.353,2.568v1.928H5.83a.669.669,0,0,0,0,1.338H8.492V39.29H5.83a.669.669,0,0,0,0,1.338H8.492v1.928H1.338V34.381Zm9.3-7.256a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338h.166A.669.669,0,0,1,17.789,27.125ZM29.43,24.193a.669.669,0,0,1-.669.669H28.6a.669.669,0,1,1,0-1.338h.166A.669.669,0,0,1,29.43,24.193Zm2.328,2.932a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338h.166A.669.669,0,0,1,31.759,27.125Zm1.232-6.381H29.64a.669.669,0,0,0-.626-.905H24.768a.669.669,0,0,0-.626.905H13.667A2.791,2.791,0,0,0,11.284,16.5H5.5a2.775,2.775,0,0,0-1.454.409v-4.57a2.025,2.025,0,0,0-4.049,0V30.473a.669.669,0,1,0,1.338,0V12.337a.687.687,0,0,1,1.373,0V23.865a.669.669,0,1,0,1.338,0V22.082h8.689v5.75a2.745,2.745,0,0,0,2.742,2.742H33.968v2.908H11.775a.669.669,0,0,0,0,1.338H31.257v1.454a.669.669,0,0,0,.669.669h2.711a.669.669,0,0,0,.669-.669V23.059A2.318,2.318,0,0,0,32.991,20.744Zm-21.707,0H5.5a1.454,1.454,0,1,1,0-2.908h5.781a1.454,1.454,0,0,1,0,2.908ZM33.968,35.605H32.595V34.82h1.373Zm0-6.369H15.48a1.406,1.406,0,0,1-1.4-1.4v-5.75H32.991a.978.978,0,0,1,.977.977ZM27.1,27.125a.669.669,0,0,1-.669.669h-.166a.669.669,0,1,1,0-1.338h.166A.669.669,0,0,1,27.1,27.125Zm-6.985-2.932a.669.669,0,0,1-.669.669h-.166a.669.669,0,1,1,0-1.338h.166A.669.669,0,0,1,20.117,24.193Zm4.657,0a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338H24.1A.669.669,0,0,1,24.774,24.193Zm-2.328,2.932a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338h.166A.669.669,0,0,1,22.445,27.125Z",
+                        transform: "translate(0 -10.313)",
+                        fill: "#333b45"
+                      }
+                    })
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+              _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                _vm._v(_vm._s(_vm.__("Unit Options")))
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "text-muted" }, [
+                _vm._v(_vm._s(_vm.__("Add extra fields to your units")))
+              ])
+            ])
+          ]
+        )
+      ]
+    )
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-b9bc2c0a", module.exports)
+  }
+}
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(9)
+}
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(12)
+/* template */
+var __vue_template__ = __webpack_require__(13)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/js/components/Tool.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-68ff5483", Component.options)
+  } else {
+    hotAPI.reload("data-v-68ff5483", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(10);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("290c3e45", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-68ff5483\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Tool.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-68ff5483\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Tool.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(1)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* Scoped Styles */\n.setting {\n    border: 1px solid #ddd;\n    cursor: pointer;\n    text-decoration: none !important;\n}\n.setting:hover {\n    border: 1px solid #007bff;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+/**
+ * Translates the list format produced by css-loader into something
+ * easier to manipulate.
+ */
+module.exports = function listToStyles (parentId, list) {
+  var styles = []
+  var newStyles = {}
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i]
+    var id = item[0]
+    var css = item[1]
+    var media = item[2]
+    var sourceMap = item[3]
+    var part = {
+      id: parentId + ':' + i,
+      css: css,
+      media: media,
+      sourceMap: sourceMap
+    }
+    if (!newStyles[id]) {
+      styles.push(newStyles[id] = { id: id, parts: [part] })
+    } else {
+      newStyles[id].parts.push(part)
+    }
+  }
+  return styles
+}
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: {
+
+        textAlign: {
+            type: String,
+            default: "text-left"
+        }
+    },
+    methods: {
+        goTo: function goTo(type) {
+            this.$router.push('resources/' + type);
+        }
+    },
+    mounted: function mounted() {
+
+        var lang = Nova.config.local;
+        lang == 'en' ? this.textAlign = 'text-left' : this.textAlign = 'text-right';
+    }
+});
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    [
+      _c("heading", { staticClass: "mb-6" }, [_vm._v(_vm._s(_vm.__("Units")))]),
+      _vm._v(" "),
+      _c("div", { staticClass: "flex flex-wrap -mx-1 overflow-hidden" }, [
+        _c(
+          "div",
+          {
+            staticClass:
+              "my-1 px-1 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/3"
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "setting flex bg-white rounded-lg p-4 shadow m-2",
+                on: {
+                  click: function($event) {
+                    return _vm.goTo("units")
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "h-16 pt-2 w-16  text-center text-4xl  text-muted "
+                  },
+                  [
+                    _c(
+                      "svg",
+                      {
+                        attrs: {
+                          xmlns: "http://www.w3.org/2000/svg",
+                          width: "31.717",
+                          height: "48.001",
+                          viewBox: "0 0 31.717 48.001"
+                        }
+                      },
+                      [
+                        _c(
+                          "g",
+                          { attrs: { transform: "translate(-86.848 0)" } },
+                          [
+                            _c(
+                              "g",
+                              { attrs: { transform: "translate(86.848)" } },
+                              [
+                                _c("path", {
+                                  attrs: {
+                                    d:
+                                      "M116.23,8.372l-1.666-.055a.71.71,0,0,0-.047,1.42l1.666.055a.99.99,0,0,1,.961.994v.3a.99.99,0,0,1-.961.994l-13.647.451a.71.71,0,0,0-.616.4,4.592,4.592,0,1,1,0-3.99.71.71,0,0,0,.616.4l8.666.284a.71.71,0,1,0,.047-1.419l-2.9-.095A10.945,10.945,0,0,0,97.784,0h-.039a11.011,11.011,0,0,0-10.9,11.046v1.215a.71.71,0,0,0,.71.71h4.569a6.008,6.008,0,0,0,10.248,1.84v.9a4.948,4.948,0,0,1-3.115,4.611l-8.407,3.383a6.362,6.362,0,0,0-4,5.929V45.4a2.607,2.607,0,0,0,2.6,2.6h16.663a2.607,2.607,0,0,0,2.6-2.6V33.374a.71.71,0,1,0-1.42,0V45.4a1.185,1.185,0,0,1-1.183,1.183H89.452A1.185,1.185,0,0,1,88.268,45.4V29.637a4.948,4.948,0,0,1,3.115-4.611l8.407-3.383a6.362,6.362,0,0,0,4-5.929v-1.8l3.5-.116v15.32a.71.71,0,1,0,1.42,0V13.746l7.512-.248a2.4,2.4,0,0,0,2.335-2.413v-.3A2.4,2.4,0,0,0,116.23,8.372ZM91.771,11.551h-3.5v-.5A9.588,9.588,0,0,1,97.749,1.42h.034a9.526,9.526,0,0,1,9.074,6.642l-3.864-.127A6.027,6.027,0,0,0,95.973,5.2a6.011,6.011,0,0,0-4.193,5.407c0,.006,0,.012,0,.018q-.008.153-.008.308v.615Z",
+                                    transform: "translate(-86.848)",
+                                    fill: "#333b45"
+                                  }
+                                })
+                              ]
+                            )
+                          ]
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+                  _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                    _vm._v(_vm._s(_vm.__("Units")))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "text-muted" }, [
+                    _vm._v(_vm._s(_vm.__("manage your units")))
+                  ])
+                ])
+              ]
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass:
+              "my-1 px-1 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/3"
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: " setting flex bg-white rounded-lg p-4 shadow m-2",
+                on: {
+                  click: function($event) {
+                    return _vm.goTo("unit-categories")
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "h-16 pt-2 w-16  text-center text-4xl  text-muted "
+                  },
+                  [
+                    _c(
+                      "svg",
+                      {
+                        attrs: {
+                          xmlns: "http://www.w3.org/2000/svg",
+                          width: "45.688",
+                          height: "47.001",
+                          viewBox: "0 0 45.688 47.001"
+                        }
+                      },
+                      [
+                        _c(
+                          "g",
+                          { attrs: { transform: "translate(-7.984 0.998)" } },
+                          [
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M165.517,85.93h14.13a1.422,1.422,0,0,0,1.42-1.42V81.716a1.422,1.422,0,0,0-1.42-1.42h-14.13a1.422,1.422,0,0,0-1.42,1.42V84.51A1.422,1.422,0,0,0,165.517,85.93Zm-.046-4.214a.046.046,0,0,1,.046-.046h14.13a.046.046,0,0,1,.046.046V84.51a.046.046,0,0,1-.046.046h-14.13a.046.046,0,0,1-.046-.046Z",
+                                transform: "translate(-141.754 -73.817)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M165.517,165.119h1.705a.687.687,0,1,0,0-1.374h-1.705a.046.046,0,0,1-.046-.046v-2.794a.046.046,0,0,1,.046-.046h14.13a.046.046,0,0,1,.046.046V163.7a.046.046,0,0,1-.046.046h-9.241a.687.687,0,1,0,0,1.374h9.241a1.421,1.421,0,0,0,1.42-1.42v-2.794a1.421,1.421,0,0,0-1.42-1.42h-14.13a1.421,1.421,0,0,0-1.42,1.42V163.7A1.421,1.421,0,0,0,165.517,165.119Z",
+                                transform: "translate(-141.754 -145.722)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M52.251,41.867h-.818V9.83a1.421,1.421,0,0,0-1.42-1.42h-5.4V3.569h1.045A1.168,1.168,0,0,0,46.824,2.4V.168A1.168,1.168,0,0,0,45.657-1h-4.5a.687.687,0,0,0-.687.687.687.687,0,0,0,.687.687h4.292V2.195H16.206V.376H37.928a.687.687,0,0,0,.687-.687A.687.687,0,0,0,37.928-1H16A1.168,1.168,0,0,0,14.832.168V2.4A1.168,1.168,0,0,0,16,3.569h1.045v4.84h-5.4a1.422,1.422,0,0,0-1.42,1.42V41.867H9.4a1.421,1.421,0,0,0-1.42,1.42v1.3A1.422,1.422,0,0,0,9.4,46H52.251a1.422,1.422,0,0,0,1.42-1.42v-1.3A1.422,1.422,0,0,0,52.251,41.867ZM44.612,9.784h5.4a.046.046,0,0,1,.046.046V41.867H44.612ZM18.417,3.569H43.238v38.3H39.313v-18.3a1.146,1.146,0,0,0-1.145-1.145H30.877l-.049,0-.049,0H23.488a1.146,1.146,0,0,0-1.145,1.145v18.3H18.417ZM37.938,23.795V41.867H31.564V23.795Zm-7.847,0V41.867H23.717V23.795ZM11.6,9.83a.046.046,0,0,1,.046-.046h5.4V41.867H11.6ZM52.3,44.583a.046.046,0,0,1-.046.046H9.4a.046.046,0,0,1-.046-.046v-1.3a.046.046,0,0,1,.046-.046H52.252a.046.046,0,0,1,.046.046Z",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,150.518H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                                transform: "translate(-372.56 -137.58)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,189.364H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                                transform: "translate(-372.56 -172.853)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,228.21H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                                transform: "translate(-372.56 -208.126)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,267.06H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-372.56 -243.402)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,305.906H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-372.56 -278.675)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,344.752H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-372.56 -313.948)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,383.6H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-372.56 -349.221)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M420.757,422.444H418.97a.687.687,0,0,0,0,1.374h1.786a.687.687,0,0,0,0-1.374Z",
+                                transform: "translate(-372.56 -384.495)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,150.518H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                                transform: "translate(-47.27 -137.58)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,189.364H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                                transform: "translate(-47.27 -172.853)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,228.21H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z",
+                                transform: "translate(-47.27 -208.126)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,267.06H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-47.27 -243.402)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,305.906H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-47.27 -278.675)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,344.752H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-47.27 -313.948)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,383.6H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z",
+                                transform: "translate(-47.27 -349.221)",
+                                fill: "#333b45"
+                              }
+                            }),
+                            _c("path", {
+                              attrs: {
+                                d:
+                                  "M62.516,422.444H60.729a.687.687,0,0,0,0,1.374h1.786a.687.687,0,0,0,0-1.374Z",
+                                transform: "translate(-47.27 -384.495)",
+                                fill: "#333b45"
+                              }
+                            })
+                          ]
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+                  _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                    _vm._v(_vm._s(_vm.__("Unit Categories")))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "text-muted" }, [
+                    _vm._v(_vm._s(_vm.__("Define your unit categories")))
+                  ])
+                ])
+              ]
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass:
+              "my-1 px-1 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/3"
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "setting flex bg-white rounded-lg p-4 shadow m-2",
+                on: {
+                  click: function($event) {
+                    return _vm.goTo("unit-general-features")
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "h-16 pt-2 w-16 text-center text-4xl  text-muted "
+                  },
+                  [
+                    _c(
+                      "svg",
+                      {
+                        attrs: {
+                          xmlns: "http://www.w3.org/2000/svg",
+                          width: "46.473",
+                          height: "44.284",
+                          viewBox: "0 0 46.473 44.284"
+                        }
+                      },
+                      [
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M22.658,27.772a.89.89,0,0,1-.89.89A10.982,10.982,0,0,0,10.8,39.632a.89.89,0,0,1-1.78,0,12.764,12.764,0,0,1,12.75-12.75A.89.89,0,0,1,22.658,27.772Zm23.721-1.185A23.675,23.675,0,0,0,33.894,15.1a.89.89,0,1,0-.657,1.654A21.9,21.9,0,0,1,44.785,27.379a.89.89,0,0,0,1.594-.792Zm-6.469.917a.89.89,0,0,0,1.491-.973,19.443,19.443,0,0,0-7.44-6.688.89.89,0,0,0-.808,1.586A17.661,17.661,0,0,1,39.911,27.5Zm5.127,23.427a3.193,3.193,0,0,1-3.189,3.189H3.189a3.189,3.189,0,0,1,0-6.379h9.786V45.836H4.124a.89.89,0,0,1-.89-.89v-4.6A19.344,19.344,0,0,1,21.629,21.084V16.215h-.26a3.189,3.189,0,0,1,0-6.379h2.3a3.189,3.189,0,0,1,0,6.379h-.26v4.869A19.344,19.344,0,0,1,41.8,40.348v4.6a.89.89,0,0,1-.89.89h-8.85v1.905h9.786A3.193,3.193,0,0,1,45.038,50.931Zm-22.519-36.5h1.15a1.409,1.409,0,0,0,0-2.819h-2.3a1.409,1.409,0,0,0,0,2.819Zm8.654,29.622h8.85V40.348a17.5,17.5,0,1,0-35.009,0v3.709Zm-16.418,1.78v1.905H30.283V45.836Zm28.5,5.094a1.411,1.411,0,0,0-1.409-1.409H3.189a1.409,1.409,0,0,0,0,2.819H41.849A1.411,1.411,0,0,0,43.258,50.931Z",
+                            transform: "translate(0 -9.836)",
+                            fill: "#333b45"
+                          }
+                        })
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+                  _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                    _vm._v(_vm._s(_vm.__("General Features")))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "text-muted" }, [
+                    _vm._v(_vm._s(_vm.__("Units shared features")))
+                  ])
+                ])
+              ]
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass:
+              "my-1 px-1 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/3"
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "setting flex bg-white rounded-lg p-4 shadow m-2",
+                on: {
+                  click: function($event) {
+                    return _vm.goTo("unit-special-features")
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "h-16 pt-2 w-16  text-center text-4xl  text-muted "
+                  },
+                  [
+                    _c(
+                      "svg",
+                      {
+                        attrs: {
+                          xmlns: "http://www.w3.org/2000/svg",
+                          width: "23.749",
+                          height: "48.938",
+                          viewBox: "0 0 23.749 48.938"
+                        }
+                      },
+                      [
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M125.985,31.373H127.1a.934.934,0,0,1,0,1.868h-1.112a.934.934,0,0,1,0-1.868ZM109.477,12.652a10.245,10.245,0,0,1,.593-3.432.923.923,0,0,1,.056-.153,10.234,10.234,0,0,1,1.536-2.738V.934A.934.934,0,0,1,112.6,0h14.266a.934.934,0,0,1,.934.934V6.347a10.246,10.246,0,0,1-3.008,15.21l-.322,1.647a.934.934,0,1,1-1.834-.358l.077-.392a10.2,10.2,0,0,1-.991.248.934.934,0,1,1-.362-1.833,8.377,8.377,0,0,0,5.431-12.717,14.013,14.013,0,0,1-7.172,3.78,12.07,12.07,0,0,1-8.088-1.015,8.375,8.375,0,0,0,6.56,9.951.934.934,0,0,1-.362,1.833q-.506-.1-.991-.248l.077.392a.934.934,0,1,1-1.834.358l-.322-1.646A10.274,10.274,0,0,1,109.477,12.652Zm4.053-6.927h12.4V1.868h-12.4Zm-1.4,3.389c3.813,2.306,9.238,1.168,12.508-1.52H113.046A8.357,8.357,0,0,0,112.13,9.114ZM131.6,28.426V40.575a.934.934,0,0,1-.532.843l-7.376,3.521.04.584a.935.935,0,0,1-.346.791l-3,2.417a.933.933,0,0,1-.586.207q-.038,0-.077,0a.932.932,0,0,1-.663-.2l-3-2.417a.934.934,0,0,1-.346-.791l.04-.584-7.376-3.521a.934.934,0,0,1-.532-.843V28.426a.934.934,0,0,1,.517-.836l4.7-2.343a.934.934,0,0,1,.417-.1H116l1.326-1.13a.934.934,0,0,1,.606-.223h3.585a.934.934,0,0,1,.606.223l1.326,1.13h2.517a.936.936,0,0,1,.417.1l4.7,2.343A.935.935,0,0,1,131.6,28.426Zm-14.783,1.051-1.077-.918a.934.934,0,0,1-.328-.711v-.831H113.7L109.715,29V39.985l6.177,2.948Zm5.018,15.687-.049-.715c0-.011,0-.022,0-.033l-.951-13.9h-2.214l-.951,13.893c0,.017,0,.034,0,.051l-.048.706,2.109,1.7Zm.337-18.65-1-.85h-2.9l-1,.85v.9l1.1.94.008.007.331.282h2.008l1.442-1.229v-.9Zm7.56,2.49-3.985-1.987h-1.706v.831a.934.934,0,0,1-.328.711l-1.077.918.921,13.456,6.177-2.948Z",
+                            transform: "translate(-107.847 0)",
+                            fill: "#333b45"
+                          }
+                        })
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+                  _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                    _vm._v(_vm._s(_vm.__("Special Features")))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "text-muted" }, [
+                    _vm._v(_vm._s(_vm.__("Units special features")))
+                  ])
+                ])
+              ]
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            staticClass:
+              "my-1 px-1 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/3"
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "setting flex bg-white rounded-lg p-4 shadow m-2",
+                on: {
+                  click: function($event) {
+                    return _vm.goTo("unit-options")
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "h-16 pt-4 w-16 text-center text-4xl  text-muted "
+                  },
+                  [
+                    _c(
+                      "svg",
+                      {
+                        attrs: {
+                          xmlns: "http://www.w3.org/2000/svg",
+                          width: "35.306",
+                          height: "33.581",
+                          viewBox: "0 0 35.306 33.581"
+                        }
+                      },
+                      [
+                        _c("path", {
+                          attrs: {
+                            d:
+                              "M9.787,30.642A.669.669,0,0,0,9.835,30L8.176,26.312a.669.669,0,0,0-.61-.395H4.979a.669.669,0,0,0-.61.395L2.71,30a.669.669,0,0,0,.61.943h.926a2.193,2.193,0,0,0-.177.866v.364a2.193,2.193,0,0,0,.177.866H.669A.669.669,0,0,0,0,33.712v9.513a.669.669,0,0,0,.669.669H9.161a.669.669,0,0,0,.669-.669V33.712a.669.669,0,0,0-.669-.669H8.3a2.191,2.191,0,0,0,.177-.866v-.364a2.191,2.191,0,0,0-.177-.866h.926A.669.669,0,0,0,9.787,30.642ZM5.412,27.256H7.134l1.057,2.354H4.354Zm1.727,4.558v.364a.866.866,0,0,1-1.732,0v-.364a.866.866,0,0,1,1.732,0Zm1.353,2.568v1.928H5.83a.669.669,0,0,0,0,1.338H8.492V39.29H5.83a.669.669,0,0,0,0,1.338H8.492v1.928H1.338V34.381Zm9.3-7.256a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338h.166A.669.669,0,0,1,17.789,27.125ZM29.43,24.193a.669.669,0,0,1-.669.669H28.6a.669.669,0,1,1,0-1.338h.166A.669.669,0,0,1,29.43,24.193Zm2.328,2.932a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338h.166A.669.669,0,0,1,31.759,27.125Zm1.232-6.381H29.64a.669.669,0,0,0-.626-.905H24.768a.669.669,0,0,0-.626.905H13.667A2.791,2.791,0,0,0,11.284,16.5H5.5a2.775,2.775,0,0,0-1.454.409v-4.57a2.025,2.025,0,0,0-4.049,0V30.473a.669.669,0,1,0,1.338,0V12.337a.687.687,0,0,1,1.373,0V23.865a.669.669,0,1,0,1.338,0V22.082h8.689v5.75a2.745,2.745,0,0,0,2.742,2.742H33.968v2.908H11.775a.669.669,0,0,0,0,1.338H31.257v1.454a.669.669,0,0,0,.669.669h2.711a.669.669,0,0,0,.669-.669V23.059A2.318,2.318,0,0,0,32.991,20.744Zm-21.707,0H5.5a1.454,1.454,0,1,1,0-2.908h5.781a1.454,1.454,0,0,1,0,2.908ZM33.968,35.605H32.595V34.82h1.373Zm0-6.369H15.48a1.406,1.406,0,0,1-1.4-1.4v-5.75H32.991a.978.978,0,0,1,.977.977ZM27.1,27.125a.669.669,0,0,1-.669.669h-.166a.669.669,0,1,1,0-1.338h.166A.669.669,0,0,1,27.1,27.125Zm-6.985-2.932a.669.669,0,0,1-.669.669h-.166a.669.669,0,1,1,0-1.338h.166A.669.669,0,0,1,20.117,24.193Zm4.657,0a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338H24.1A.669.669,0,0,1,24.774,24.193Zm-2.328,2.932a.669.669,0,0,1-.669.669h-.166a.669.669,0,0,1,0-1.338h.166A.669.669,0,0,1,22.445,27.125Z",
+                            transform: "translate(0 -10.313)",
+                            fill: "#333b45"
+                          }
+                        })
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: " w-5/6", class: _vm.textAlgin }, [
+                  _c("h2", { staticClass: "text-lg mb-0 mt-2" }, [
+                    _vm._v(_vm._s(_vm.__("Unit Options")))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "text-muted" }, [
+                    _vm._v(_vm._s(_vm.__("Add extra fields to your units")))
+                  ])
+                ])
+              ]
+            )
+          ]
+        )
+      ])
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-68ff5483", module.exports)
+  }
+}
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(15)
+}
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(17)
+/* template */
+var __vue_template__ = __webpack_require__(21)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/js/components/Status.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-ed6f95c6", Component.options)
+  } else {
+    hotAPI.reload("data-v-ed6f95c6", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(16);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("68476272", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-ed6f95c6\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Status.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-ed6f95c6\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Status.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(1)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n#units_status_page .title_page {\r\n\tmargin-bottom: 15px;\r\n\tdisplay: -webkit-box;\r\n\tdisplay: -ms-flexbox;\r\n\tdisplay: flex;\r\n\t-webkit-box-pack: justify;\r\n\t-ms-flex-pack: justify;\r\n\t    justify-content: space-between;\r\n\t-webkit-box-align: center;\r\n\t-ms-flex-align: center;\r\n\t    align-items: center;\n}\n#units_status_page .title_page h2 {\r\n\tcolor: #000;\r\n\tfont-size: 22px;\n}\n#units_status_page .title_page .title_left .fc-button-primary.fc-today-button {\r\n   color: #fff;\r\n\tbackground-color:#2C3E50;\r\n\tborder-color:#2C3E50;\r\n   opacity: 0.65;\r\n\tdisplay: inline-block;\r\n\tfont-weight: 400;\r\n\ttext-align: center;\r\n\tvertical-align: middle;\r\n\t-webkit-user-select: none;\r\n\t-moz-user-select: none;\r\n\t-ms-user-select: none;\r\n\tuser-select: none;\r\n\tborder: 1px solid transparent;\r\n\tpadding: 0.4em 0.65em;\r\n\tfont-size: 1em;\r\n\tline-height: 1.5;\r\n\tborder-radius: 0.25em;\n}\n#units_status_page .title_page .title_left .fc-button-group {\r\n\tposition: relative;\r\n\tdisplay: -webkit-inline-box;\r\n\tdisplay: -ms-inline-flexbox;\r\n\tdisplay: inline-flex;\r\n\tvertical-align: middle;\r\n\tmargin: 0 0 0 .75em;\n}\n#units_status_page .title_page .title_left .fc-button-group .fc-button {\r\n\toverflow: visible;\r\n\ttext-transform: none;\r\n\tmargin: 0;\r\n\tfont-family: inherit;\r\n\tpadding: 0.4em 0.84em;\r\n\tfont-size: 1em;\r\n\tline-height: 1.5;\r\n\tborder-radius: 0.25em;\r\n\tborder: 1px solid transparent;\r\n\t-webkit-user-select: none;\r\n\t   -moz-user-select: none;\r\n\t    -ms-user-select: none;\r\n\t        user-select: none;\r\n\tdisplay: inline-block;\r\n\tfont-weight: 400;\r\n\ttext-align: center;\n}\n#units_status_page .title_page .title_left .fc-button-group .fc-button-primary {\r\n\tcolor: #fff;\r\n\tbackground-color: #2C3E50;\r\n\tborder-color: #2C3E50;\n}\n#units_status_page .title_page .title_left .fc-button-group .fc-button:not(:disabled) {\r\n\tcursor: pointer;\n}\n#units_status_page .title_page .title_left .fc-button-group .fc-button {\r\n    position: relative;\r\n    -webkit-box-flex: 1;\r\n    -ms-flex: 1 1 auto;\r\n    flex: 1 1 auto;\n}\n#units_status_page .title_page .title_left .fc-button-group > .fc-button:not(:last-child) {\r\n\tborder-top-left-radius: 0;\r\n\tborder-bottom-left-radius: 0;\n}\n#units_status_page .title_page .title_left .fc-button-group > .fc-button:not(:first-child) {\r\n    border-top-right-radius: 0;\r\n    border-bottom-right-radius: 0;\r\n    margin-left: -1px;\n}\n#units_status_page .title_page .title_left .fc-button-group .fc-button .fc-icon {\r\n\tvertical-align: middle;\r\n\tfont-size: 1.1em;\n}\n#units_status_page .title_page .title_left .fc-button-group .fc-button:hover {\r\n\tcolor: #fff;\r\n\tbackground-color: #1e2b37;\r\n\tborder-color: #1a252f;\n}\n#units_status_page .table_area {\r\n\tposition: relative;\r\n\twidth: 100%;\n}\n#units_status_page .table_area .another_table {\r\n\toverflow: auto;\r\n\twidth: 100%;\r\n\tpadding: 0 150px 0 0;\n}\n#units_status_page .table_area table {\r\n\ttable-layout: fixed;\r\n\twhite-space: nowrap;\r\n\twidth: 100%;\n}\n#units_status_page .table_area table.units_row {\r\n\tposition: absolute;\r\n\tright: 0;\r\n\ttop: 0;\r\n\tz-index: 9;\r\n\twidth: 150px;\n}\n#units_status_page .table_area table thead tr th {\r\n\tbackground: #fff;\r\n\twhite-space: nowrap;\r\n\toverflow: hidden;\r\n\tborder: 1px solid #707070;\r\n\tpadding: 5px;\r\n\twidth: 140px;\r\n\ttext-align: center;\r\n\tvertical-align: middle;\r\n\tfont-size: 17px;\r\n\tfont-weight: normal;\r\n\tline-height: 22px;\r\n\theight: 55px;\n}\n#units_status_page .table_area table thead tr th.time_today, #units_status_page .table_area table tbody tr td.time_today {background: #FCF8E3;\n}\n#units_status_page .table_area table tbody tr td {\r\n\tbackground: #fff;\r\n\twhite-space: nowrap;\r\n\toverflow: hidden;\r\n\tborder: 1px solid #707070;\r\n\tpadding: 0 5px;\r\n\ttext-align: center;\r\n\tfont-size: 17px;\r\n\tvertical-align: middle;\r\n\theight: 61px;\n}\n#units_status_page .table_area table.units_row tbody tr td {\r\n\ttext-align: right;\r\n\tbackground: #F4F7FA;\r\n\tline-height: 20px;\n}\n#units_status_page .table_area table tbody tr td .price {\r\n\tdirection: rtl;\r\n\tfont-size: 16px;\n}\n#units_status_page .table_area table tbody tr td .price i {\r\n\tfont-style: normal;\r\n\tfont-size: 17px;\r\n\tfont-weight: normal;\n}\n#units_status_page .table_area table tbody tr td .Is_checked_in, #units_status_page .table_area table tbody tr td .Is_waiting {\r\n\tbackground: #E0CFE2;\r\n\tborder-radius: 5px;\r\n\tpadding: 3px 5px;\r\n\theight: 40px;\r\n\tborder: 2px solid #EDE1EF;\r\n\tcolor: #000000;\r\n\tline-height: 30px;\r\n\twhite-space: nowrap;\r\n\toverflow: hidden;\r\n\tfont-size: 15px;\r\n\ttext-align: right;\n}\n#units_status_page .table_area table tbody tr td .Is_checked_in a, #units_status_page .table_area table tbody tr td .Is_waiting a {display: block;\n}\n#units_status_page .table_area table tbody tr td .Is_checked_in img, #units_status_page .table_area table tbody tr td .Is_waiting img {\r\n\tfloat: right;\r\n\theight: 30px;\r\n\twidth: 30px;\r\n\tdisplay: block;\r\n\tmargin: 0 0 0 5px;\n}\n#units_status_page .table_area table tbody tr td .Is_waiting {\r\n\tbackground: #BDDAE3;\r\n\tborder-color:#D8ECF2;\n}\n#units_status_page .table_area table tbody tr td span.tag {\r\n\tdisplay: block;\r\n\tfloat: right;\r\n\tpadding: 0 10px;\r\n\tmargin: 5px auto 5px 5px;\r\n\theight: 20px;\r\n\tborder-radius: 4px;\r\n\tline-height: 20px;\r\n\tfont-size: 14px;\r\n\tborder: 1px solid;\n}\n.status_block {text-align: left;\n}\n.status_block span {\r\n\tdisplay: inline-block;\r\n\theight: 20px;\r\n\tline-height: 20px;\r\n\tmargin: 0 20px 0 0;\r\n\tcolor: #000;\n}\n.status_block span i {\r\n\tdisplay: block;\r\n\theight: 20px;\r\n\twidth: 20px;\r\n\tborder-radius: 100%;\r\n\tborder: 2px solid;\r\n\tfloat: left;\r\n\tmargin: 0 5px 0 0;\r\n\tcolor: #000;\n}\n.status_block span.Is_checked_in i {\r\n\tbackground: #E0CFE2;\r\n\tborder-color: #EDE1EF;\n}\n.status_block span.Is_waiting i {\r\n\tbackground: #BDDAE3;\r\n\tborder-color: #D8ECF2;\n}\nhtml:lang(en) #units_status_page .title_page h2 svg {\r\n\tfloat: left !important;\r\n\tmargin: 5px 5px 0 0 !important;\n}\nhtml:lang(en) #units_status_page .title_page .title_left .fc-button-group {\r\n\tmargin: 0 .75em 0 0;\r\n\tdirection: rtl;\n}\nhtml:lang(en) #units_status_page .table_area table.units_row {\r\n\tright: auto;\r\n\tleft: 0;\n}\nhtml:lang(en) #units_status_page .table_area table.units_row tbody tr td, html:lang(en) #units_status_page .table_area table tbody tr td .Is_checked_in, html:lang(en) #units_status_page .table_area table tbody tr td .Is_waiting {text-align: left;\n}\nhtml:lang(en) #units_status_page .table_area .another_table {padding: 0 0 0 150px;\n}\nhtml:lang(en) .status_block {text-align: right;\n}\nhtml:lang(en) .status_block span {margin: 0 0 0 20px;\n}\nhtml:lang(en) .status_block span i {\r\n\tfloat: right;\r\n\tmargin: 0 0 0 5px;\n}\nhtml:lang(en) #units_status_page .table_area table tbody tr td .price {direction: ltr;\n}\r\n\r\n/* Portrait phones and smaller */\n@media (min-width: 320px) and (max-width: 480px) {\n#units_status_page .title_page {display: block;\n}\n#units_status_page .title_page .title_right {margin: 0 auto 10px;\n}\n#units_status_page .table_area {overflow: auto;\n}\n#units_status_page .table_area table.units_row {\r\n\t\tposition: relative;\r\n\t\tfloat: right;\n}\n#units_status_page .table_area .another_table {\r\n\t\tposition: absolute;\r\n\t\tfloat: right;\r\n\t\toverflow: hidden;\r\n\t\twidth: auto;\n}\n}\r\n/* Smart phones and Tablets */\n@media (min-width: 481px) and (max-width: 767px) {\n#units_status_page .title_page {display: block;\n}\n#units_status_page .title_page .title_right {margin: 0 auto 10px;\n}\n#units_status_page .table_area {overflow: auto;\n}\n#units_status_page .table_area table.units_row {\r\n\t\tposition: relative;\r\n\t\tfloat: right;\n}\n#units_status_page .table_area .another_table {\r\n\t\tposition: absolute;\r\n\t\tfloat: right;\r\n\t\toverflow: hidden;\r\n\t\twidth: auto;\n}\n}\r\n/* Small Screens */\n@media (min-width: 768px) and (max-width: 991px) {\n#units_status_page .table_area {overflow: auto;\n}\n#units_status_page .table_area table.units_row {\r\n\t\tposition: relative;\r\n\t\tfloat: right;\n}\n#units_status_page .table_area .another_table {\r\n\t\tposition: absolute;\r\n\t\tfloat: right;\r\n\t\toverflow: hidden;\r\n\t\twidth: auto;\n}\n}\r\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator__);
+
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: {
+        textAlign: {
+            type: String,
+            default: "text-left"
+        }
+    },
+    data: function data() {
+        return {
+            loading: false,
+            units: [],
+            days: [],
+            start_date: moment(new Date())
+        };
+    },
+    mounted: function mounted() {
+        this.getUnits();
+        var lang = Nova.config.local;
+        lang == 'en' ? this.textAlign = 'text-left' : this.textAlign = 'text-right';
+    },
+
+    methods: {
+        getUnits: function () {
+            var _ref = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee(status) {
+                var _this = this;
+
+                return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee$(_context) {
+                    while (1) {
+                        switch (_context.prev = _context.next) {
+                            case 0:
+                                // this.units = []
+                                // this.days = []
+
+                                if (status == 'old') {
+                                    this.start_date = this.start_date.subtract(14, "days");
+                                } else if (status == 'new') {
+                                    this.start_date = this.start_date.add(14, 'days');
+                                } else if (status == 'today') {
+                                    this.start_date = moment(new Date());
+                                }
+
+                                _context.next = 3;
+                                return axios.get('/nova-vendor/units/status', {
+                                    params: {
+                                        date_in: this.start_date.format('YYYY-MM-DD')
+                                    }
+                                }).then(function (response) {
+                                    _this.units = response.data.data;
+                                    _this.days = response.data.meta.days;
+                                }).catch(function (err) {
+                                    _this.loading = false;
+                                    _this.$toasted.show(_this.__(err), { type: 'error' });
+                                });
+
+                            case 3:
+                            case 'end':
+                                return _context.stop();
+                        }
+                    }
+                }, _callee, this);
+            }));
+
+            function getUnits(_x) {
+                return _ref.apply(this, arguments);
+            }
+
+            return getUnits;
+        }(),
+        newReservation: function newReservation(day, unit_id) {
+            this.$router.replace({
+                name: 'new-reservation',
+                params: { date: day, room_id: unit_id }
+            });
+        }
+    }
+
+});
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(19);
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+// This method of obtaining a reference to the global object needs to be
+// kept identical to the way it is obtained in runtime.js
+var g = (function() { return this })() || Function("return this")();
+
+// Use `getOwnPropertyNames` because not all browsers support calling
+// `hasOwnProperty` on the global `self` object in a worker. See #183.
+var hadRuntime = g.regeneratorRuntime &&
+  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
+
+// Save the old regeneratorRuntime in case it needs to be restored later.
+var oldRuntime = hadRuntime && g.regeneratorRuntime;
+
+// Force reevalutation of runtime.js.
+g.regeneratorRuntime = undefined;
+
+module.exports = __webpack_require__(20);
+
+if (hadRuntime) {
+  // Restore the original runtime.
+  g.regeneratorRuntime = oldRuntime;
+} else {
+  // Remove the global property added by runtime.js.
+  try {
+    delete g.regeneratorRuntime;
+  } catch(e) {
+    g.regeneratorRuntime = undefined;
+  }
+}
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+!(function(global) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  var inModule = typeof module === "object";
+  var runtime = global.regeneratorRuntime;
+  if (runtime) {
+    if (inModule) {
+      // If regeneratorRuntime is defined globally and we're in a module,
+      // make the exports object identical to regeneratorRuntime.
+      module.exports = runtime;
+    }
+    // Don't bother evaluating the rest of this file if the runtime was
+    // already defined globally.
+    return;
+  }
+
+  // Define the runtime globally (as expected by generated code) as either
+  // module.exports (if we're in a module) or a new, empty object.
+  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  runtime.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  IteratorPrototype[iteratorSymbol] = function () {
+    return this;
+  };
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunctionPrototype[toStringTagSymbol] =
+    GeneratorFunction.displayName = "GeneratorFunction";
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      prototype[method] = function(arg) {
+        return this._invoke(method, arg);
+      };
+    });
+  }
+
+  runtime.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  runtime.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      if (!(toStringTagSymbol in genFun)) {
+        genFun[toStringTagSymbol] = "GeneratorFunction";
+      }
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  runtime.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return Promise.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return Promise.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration. If the Promise is rejected, however, the
+          // result for this iteration will be rejected with the same
+          // reason. Note that rejections of yielded Promises are not
+          // thrown back into the generator function, as is the case
+          // when an awaited Promise is rejected. This difference in
+          // behavior between yield and await is important, because it
+          // allows the consumer to decide what to do with the yielded
+          // rejection (swallow it and continue, manually .throw it back
+          // into the generator, abandon iteration, whatever). With
+          // await, by contrast, there is no opportunity to examine the
+          // rejection reason outside the generator function, so the
+          // only option is to throw it from the await expression, and
+          // let the generator function handle the exception.
+          result.value = unwrapped;
+          resolve(result);
+        }, reject);
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new Promise(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+    return this;
+  };
+  runtime.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList)
+    );
+
+    return runtime.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        if (delegate.iterator.return) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  Gp[toStringTagSymbol] = "Generator";
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  Gp[iteratorSymbol] = function() {
+    return this;
+  };
+
+  Gp.toString = function() {
+    return "[object Generator]";
+  };
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  runtime.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  runtime.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+})(
+  // In sloppy mode, unbound `this` refers to the global object, fallback to
+  // Function constructor if we're in global strict mode. That is sadly a form
+  // of indirect eval which violates Content Security Policy.
+  (function() { return this })() || Function("return this")()
+);
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    [
+      _c("heading", { staticClass: "mb-1 text-90 font-normal text-2xl" }, [
+        _vm._v(_vm._s(_vm.__("Units Status")))
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "py-4", attrs: { id: "units_status_page" } }, [
+        _c("div", { staticClass: "title_page" }, [
+          _c("div", { staticClass: "title_right" }, [
+            _c("h2", [
+              _c(
+                "svg",
+                {
+                  staticStyle: {
+                    display: "inline-block",
+                    margin: "5px 0px 0px 5px",
+                    float: "right"
+                  },
+                  attrs: {
+                    xmlns: "http://www.w3.org/2000/svg",
+                    "xmlns:xlink": "http://www.w3.org/1999/xlink",
+                    width: "21.127",
+                    height: "20.61",
+                    viewBox: "0 0 21.127 20.61"
+                  }
+                },
+                [
+                  _c("defs", [
+                    _c("clipPath", { attrs: { id: "a" } }, [
+                      _c("rect", {
+                        attrs: {
+                          width: "21.127",
+                          height: "20.61",
+                          fill: "none"
+                        }
+                      })
+                    ])
+                  ]),
+                  _c("g", { attrs: { "clip-path": "url(#a)" } }, [
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M20.654,56.02a.472.472,0,0,0-.473.473V71.87H.946V59.728h16.1a.473.473,0,1,0,0-.946H.946V55.129H3.033a.473.473,0,1,0,0-.946H.473A.472.472,0,0,0,0,54.656V72.343a.472.472,0,0,0,.473.473H20.654a.472.472,0,0,0,.473-.473V56.493A.473.473,0,0,0,20.654,56.02Z",
+                        transform: "translate(0 -52.206)"
+                      }
+                    }),
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M98.594,11.292a.472.472,0,0,0,.473-.473V6.742a.473.473,0,1,0-.946,0v4.077A.473.473,0,0,0,98.594,11.292Z",
+                        transform: "translate(-94.072 -6.269)"
+                      }
+                    }),
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M245.007,11.292a.472.472,0,0,0,.473-.473V6.742a.473.473,0,1,0-.946,0v4.077A.472.472,0,0,0,245.007,11.292Z",
+                        transform: "translate(-234.443 -6.269)"
+                      }
+                    }),
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M391.421,11.292a.472.472,0,0,0,.473-.473V9.192h3.576a.473.473,0,1,0,0-.946h-3.576v-1.5a.473.473,0,1,0-.946,0v4.077A.473.473,0,0,0,391.421,11.292Z",
+                        transform: "translate(-374.816 -6.269)"
+                      }
+                    }),
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M128.883,55.129h3.542a.473.473,0,0,0,0-.946h-3.542a.473.473,0,1,0,0,.946Z",
+                        transform: "translate(-123.111 -52.206)"
+                      }
+                    }),
+                    _c("path", {
+                      attrs: {
+                        d:
+                          "M275.285,55.129h3.542a.473.473,0,0,0,0-.946h-3.542a.473.473,0,1,0,0,.946Z",
+                        transform: "translate(-263.472 -52.206)"
+                      }
+                    })
+                  ])
+                ]
+              ),
+              _vm._v(
+                "\n\t\t\t\t\t \n\t\t\t\t\t" +
+                  _vm._s(_vm.days[0].number) +
+                  "\n\t\t\t\t\t- \n\t\t\t\t\t" +
+                  _vm._s(_vm.days[13].number) +
+                  "\n\t\t\t\t"
+              )
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "title_left" }, [
+            _c("div", { staticClass: "fc-button-group" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "fc-next-button fc-button fc-button-primary",
+                  attrs: { type: "button", "aria-label": "next" },
+                  on: {
+                    click: function($event) {
+                      return _vm.getUnits("old")
+                    }
+                  }
+                },
+                [_c("span", { staticClass: "fc-icon fa fa-chevron-right" })]
+              ),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "fc-prev-button fc-button fc-button-primary",
+                  attrs: { type: "button", "aria-label": "prev" },
+                  on: {
+                    click: function($event) {
+                      return _vm.getUnits("new")
+                    }
+                  }
+                },
+                [_c("span", { staticClass: "fc-icon fa fa-chevron-left" })]
+              )
+            ]),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "fc-today-button fc-button fc-button-primary",
+                attrs: {
+                  type: "button",
+                  disabled: _vm.start_date.isSame(_vm.TODAY, "d")
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.getUnits("today")
+                  }
+                }
+              },
+              [
+                _vm._v(
+                  "\n\t\t\t\t\t\t" + _vm._s(_vm.__("Today")) + "\n\t\t\t\t\t"
+                )
+              ]
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "table_area" }, [
+          _c("table", { staticClass: "units_row" }, [
+            _c("thead", [
+              _c("tr", [_c("th", [_vm._v(_vm._s(_vm.__("Units")))])])
+            ]),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.units, function(unit, index) {
+                return _c("tr", { key: index }, [
+                  _c("td", [
+                    _c("div", { staticClass: "unit_number" }, [
+                      _vm._v(_vm._s(unit.unit_number))
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "unit_name" }, [
+                      _vm._v(" " + _vm._s(unit.name))
+                    ])
+                  ])
+                ])
+              }),
+              0
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "another_table" }, [
+            _c("table", [
+              _c("thead", [
+                _c(
+                  "tr",
+                  _vm._l(_vm.days, function(day, index) {
+                    return _c(
+                      "th",
+                      { key: index, class: { time_today: day.is_today } },
+                      [
+                        _c("p", [_vm._v(_vm._s(day.name))]),
+                        _vm._v(" "),
+                        _c("span", [_vm._v(_vm._s(day.number))])
+                      ]
+                    )
+                  }),
+                  0
+                )
+              ]),
+              _vm._v(" "),
+              _c(
+                "tbody",
+                _vm._l(_vm.units, function(unit, index) {
+                  return _c(
+                    "tr",
+                    { key: index },
+                    _vm._l(unit.days, function(day, index) {
+                      return _c(
+                        "td",
+                        { key: index, attrs: { colspan: day.colspan } },
+                        [
+                          day.reservations != null &&
+                          day.reservations.length > 0 &&
+                          day.reservations[0].checked_in != null
+                            ? _c("div", { staticClass: "Is_checked_in" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    attrs: {
+                                      href:
+                                        "/home/reservation/" +
+                                        day.reservations[0].id
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                        \t" +
+                                        _vm._s(
+                                          day.reservations[0].customer.name
+                                        ) +
+                                        "\n                                        "
+                                    )
+                                  ]
+                                )
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          day.reservations != null &&
+                          day.reservations.length > 0 &&
+                          day.reservations[0].checked_in == null
+                            ? _c("div", { staticClass: "Is_waiting" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    attrs: {
+                                      href:
+                                        "/home/reservation/" +
+                                        day.reservations[0].id
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                        \t" +
+                                        _vm._s(
+                                          day.reservations[0].customer.name
+                                        ) +
+                                        "\n                                        "
+                                    )
+                                  ]
+                                )
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          day.reservations != null &&
+                          day.reservations.length == 0
+                            ? _c("div", { staticClass: "price" }, [
+                                _c(
+                                  "a",
+                                  {
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.newReservation(
+                                          day.number,
+                                          unit.id
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                        \t" +
+                                        _vm._s(day.prices.day) +
+                                        " "
+                                    ),
+                                    _c("i", [_vm._v(_vm._s(_vm.__("SAR")))])
+                                  ]
+                                )
+                              ])
+                            : _vm._e()
+                        ]
+                      )
+                    }),
+                    0
+                  )
+                }),
+                0
+              )
+            ])
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "clrearfix", staticStyle: { clear: "both" } }),
+      _vm._v(" "),
+      _c("div", { staticClass: "status_block" }, [
+        _c("span", { staticClass: "Is_waiting" }, [
+          _c("i"),
+          _vm._v(_vm._s(_vm.__("Pending")))
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "Is_checked_in" }, [
+          _c("i"),
+          _vm._v(_vm._s(_vm.__("Login Now")))
+        ])
+      ])
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-ed6f95c6", module.exports)
+  }
+}
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(23)
+}
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(25)
+/* template */
+var __vue_template__ = __webpack_require__(26)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/js/components/Housekeeping.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-6e8a9488", Component.options)
+  } else {
+    hotAPI.reload("data-v-6e8a9488", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(24);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("a18ed408", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-6e8a9488\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Housekeeping.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-6e8a9488\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Housekeeping.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(1)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: {
+        textAlign: {
+            type: String,
+            default: "text-left"
+        }
+    },
+    data: function data() {
+        return {
+            loading: false
+        };
+    },
+    mounted: function mounted() {
+        this.getUnits();
+        var lang = Nova.config.local;
+        lang == 'en' ? this.textAlign = 'text-left' : this.textAlign = 'text-right';
+    },
+
+    methods: {}
+});
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div")
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-6e8a9488", module.exports)
+  }
+}
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 29 */,
+/* 30 */,
+/* 31 */,
+/* 32 */,
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(34);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(2)("ac06e93a", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-b9bc2c0a\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Card.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-b9bc2c0a\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./Card.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(1)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.setting {\r\n  border: 1px solid #ddd;\r\n  cursor: pointer;\r\n  text-decoration: none !important;\n}\n.setting:hover {\r\n    background: #fafafa;\r\n    border-color: #bbb;\n}\n.setting div.text-muted {\r\n    font-size: 15px;\r\n    margin: 4px auto 0;\n}\r\n", ""]);
+
+// exports
+
+
+/***/ })
+/******/ ]);

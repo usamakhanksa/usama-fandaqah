@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import LoginPage from '../pages/LoginPage.vue';
 import DashboardPage from '../pages/DashboardPage.vue';
 import RoomsPage from '../pages/RoomsPage.vue';
 import GuestsPage from '../pages/GuestsPage.vue';
@@ -22,9 +23,15 @@ import POSBrandsPage from '../pages/POSBrandsPage.vue';
 import POSCategoriesPage from '../pages/POSCategoriesPage.vue';
 import POSSubCategoriesPage from '../pages/POSSubCategoriesPage.vue';
 import POSTransactionsPage from '../pages/POSTransactionsPage.vue';
+import SettingsPage from '../pages/SettingsPage.vue';
+import ReportsPage from '../pages/ReportsPage.vue';
+import ChannelManagerPage from '../pages/ChannelManagerPage.vue';
+import ManageCategoriesPage from '../pages/ManageCategoriesPage.vue';
+import ChannelReservationsPage from '../pages/ChannelReservationsPage.vue';
 
 const routes = [
-  { path: '/dashboard', component: DashboardPage },
+  { path: '/login', component: LoginPage, name: 'login' },
+  { path: '/dashboard', component: DashboardPage, name: 'dashboard' },
   { path: '/rooms', component: RoomsPage },
   { path: '/guests', component: GuestsPage },
   { path: '/guests/companies', component: GuestsPage },
@@ -72,8 +79,22 @@ const routes = [
   { path: '/pos/products/brands', component: POSBrandsPage },
   { path: '/pos/products/categories', component: POSCategoriesPage },
   { path: '/pos/products/sub-categories', component: POSSubCategoriesPage },
-  ...['services', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
+  { path: '/settings', component: SettingsPage },
+  { path: '/reports', component: ReportsPage },
+  { path: '/channel-manager', component: ChannelManagerPage },
+  { path: '/channel-manager/availability-rates', component: ManageCategoriesPage },
+  { path: '/channel-manager/reservations', component: ChannelReservationsPage },
+  ...['services', 'profile'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];
 
-export default createRouter({ history: createWebHistory(), routes });
+const router = createRouter({ history: createWebHistory(), routes });
+
+router.beforeEach((to, from, next) => {
+  const isAuth = localStorage.getItem('auth_fandaqah');
+  if (to.name !== 'login' && !isAuth) next({ name: 'login' });
+  else if (to.name === 'login' && isAuth) next({ name: 'dashboard' });
+  else next();
+});
+
+export default router;

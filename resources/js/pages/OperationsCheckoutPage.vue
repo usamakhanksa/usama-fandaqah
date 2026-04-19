@@ -65,7 +65,7 @@
     </div>
 
     <div v-else class="card p-8 text-center space-y-4">
-      <img src="/assets/illustrations/success.svg" alt="success" class="w-64 mx-auto">
+      <img :src="'/assets/banners/banner2.svg'" alt="success" class="w-64 mx-auto">
       <h2 class="text-4xl font-bold">Check Out Has Been Successfull</h2>
       <p class="text-slate-500">You Have Successfully Checked Out From The Room Number (504)</p>
       <div class="flex justify-center gap-3">

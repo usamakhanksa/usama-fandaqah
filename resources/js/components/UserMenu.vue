@@ -1,7 +1,7 @@
 <template>
   <details class="relative">
     <summary class="list-none cursor-pointer flex items-center gap-2">
-      <img src="/assets/avatars/admin.svg" class="w-8 h-8 rounded-full">
+      <img :src="'/assets/avatars/admin.svg'" class="w-8 h-8 rounded-full">
       <div class="text-left leading-tight">
         <p class="text-xs font-semibold">Aya Ahmed Abdullah</p>
         <p class="text-[11px] text-slate-400">Super Admin</p>

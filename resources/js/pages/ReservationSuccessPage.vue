@@ -2,7 +2,7 @@
   <div class="p-4">
     <div class="card p-6 text-center space-y-4 max-w-3xl mx-auto">
       <ReservationStepper :current="steps.length" :steps="steps" />
-      <img src="/assets/illustrations/success.svg" class="h-52 mx-auto" alt="success" />
+      <img :src="'/assets/banners/banner2.svg'" class="h-52 mx-auto" alt="success" />
       <h1 class="text-4xl font-bold">{{ data.title }}</h1>
       <p class="text-slate-500">{{ data.subtitle }}</p>
       <div class="flex items-center justify-center gap-3">

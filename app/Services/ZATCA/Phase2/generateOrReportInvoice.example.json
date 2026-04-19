@@ -1,0 +1,48 @@
+{
+    "credential": {
+        "binarySecurityToken": "{{username}}",
+        "secret": "{{password}}"
+    },
+    "invoice_type": "simplified tax invoice",
+    "invoice_sub_type": "invoice",
+    "payment_means": "cash",
+    "customer_information": {
+        "vat_number": "399999999800003",
+        "reg_name": "شركة نماذج فاتورة المحدودة | Fatoora Samples LTD",
+        "location": {
+            "countryCode": "SA",
+            "street": "صلاح الدين | Salah Al-Din",
+            "building": "1111",
+            "city_subdivision": "المروج | Al-Murooj",
+            "city": "الرياض | Riyadh",
+            "postal_zone": "12222"
+        }
+    },
+    "allowance_charge": {
+        "amount": 0.0,
+        "reason": ""
+    },
+    "tax_total": {
+        "tax_amount": 0.6,
+        "amount": 4.0
+    },
+    "monetary_total": {
+        "total_amount_excl_tax": 4.0,
+        "total_amount_incl_tax": 4.6,
+        "total_allowance": 0.0,
+        "total_prepaid": 0.0,
+        "total_amount": 4.6
+    },
+    "items": [
+        {
+            "quantity": 2,
+            "total_amount_excl_tax": 4.0,
+            "total_tax_amount": 0.6,
+            "total_amount_incl_tax": 4.6,
+            "item_name": "قلم رصاص",
+            "item_cost": 2.0,
+            "item_discount": 0.0,
+            "item_vat_percentage": 0.0
+        }
+    ]
+}

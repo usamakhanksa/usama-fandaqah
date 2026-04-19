@@ -1,0 +1,24 @@
+{
+  "name": "common",
+  "version": "1.0.0",
+  "description": "Common components used globally in modules",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "CommonComponents"
+  ],
+  "author": "hisham",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^5.0.0",
+    "cssnano": "^4.1.10",
+    "laravel-mix": "^1.0",
+    "sass-loader": "^7.1.0"
+  },
+  "dependencies": {
+    "bread-compressor-cli": "^1.0.8",
+    "vue": "^2.5.0"
+  }
+}

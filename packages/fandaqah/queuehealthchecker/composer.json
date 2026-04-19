@@ -1,0 +1,24 @@
+{
+    "name": "fandaqah/queuehealthchecker",
+    "description": "This package will help to check health of running queues and can send alerts to the admin if queue stales",
+    "autoload": {
+        "psr-4": {
+            "Fandaqah\\Queuehealthchecker\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Fandaqah\\Queuehealthchecker\\QueueHealthCheckProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "hisham mehmood khan"
+        }
+    ],
+    "require": {
+        "laravel/framework": "5.8.*"
+    }
+}

@@ -1,0 +1,3029 @@
+@tailwind preflight;
+@tailwind components;
+/* @import url('https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css'); */
+/* @import url('./tailwind.min.css'); */
+:root {
+	--transparent: transparent;
+	--black: #22292f;
+	--white: white;
+	--white-50: rgba(255, 255, 255, 0.5);
+	--danger: #e74444;
+	--success: #21b978;
+	--success-dark: #1d9962;
+	--warning: #ffeb3b;
+	--info: #03a9f4;
+	--primary: #4099de;
+	--primary-dark: #297ec0;
+	--primary-70: rgba(64, 153, 222, 0.7);
+	--primary-50: rgba(64, 153, 222, 0.5);
+	--primary-30: rgba(64, 153, 222, 0.3);
+	--primary-10: rgba(64, 153, 222, 0.1);
+	--logo: #252d37;
+	--sidebar-icon: #b3c1d1;
+	--20: #f6fbff;
+	--30: #f4f7fa;
+	--40: #eef1f4;
+	--50: #e3e7eb;
+	--60: #bacad6;
+	--70: #b3b9bf;
+	--80: #7c858e;
+	--90: #252d37;
+	--90-half: rgba(40, 54, 61, 0.5);
+	--warning-light: #fefcbf;
+	--warning-dark: #b7791f;
+	--success-light: #c6f6d5;
+	--success-dark: #38a169;
+	--danger-light: #fed7d7;
+	--danger-dark: #e53e3e;
+	--info-light: #bee3f8;
+	--info-dark: #3182ce;
+}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	-o-appearance: none;
+	appearance: none;
+    margin: 0;
+}
+input[type=number] {
+	-webkit-appearance: textfield;
+	-moz-appearance: textfield;
+	-o-appearance: textfield;
+	appearance: textfield;
+}
+button, input, textarea, a {
+	-webkit-outline: none;
+	-moz-outline: none;
+	-o-outline: none;
+	outline: none;
+}
+.px-view {
+	padding-left: 1.125rem;
+	padding-right: 1.125rem;
+}
+
+.py-view {
+	padding-top: 1.125rem;
+	padding-bottom: 1.125rem;
+}
+
+.bg-grad-sidebar {
+	background-image: -webkit-gradient( linear, left bottom, left top, from(#22292f), to(#3c434c));
+	background-image: linear-gradient(#22292f, #3c434c);
+}
+
+.btn-block {
+	width: 100%;
+	height: 36px;
+}
+
+.btn-outline-success {
+	border-width: 1px;
+	border-color: var(--success);
+	border-radius: .50rem;
+	color: var(--success);
+	font-weight: 600;
+}
+
+.btn-outline-awaiting-payment {
+    border-width: 1px;
+    border-color: var(--info);
+    border-radius: .50rem;
+    color: var(--info);
+    font-weight: 600;
+}
+.btn-outline-awaiting-confirmation {
+    border-width: 1px;
+    border-color: var(--info);
+    border-radius: .50rem;
+    color: var(--info);
+    font-weight: 600;
+}
+
+.btn-outline-timeout {
+    border-width: 1px;
+    border-color: var(--warning-dark);
+    border-radius: .50rem;
+    color: var(--warning-dark);
+    font-weight: 600;
+}
+
+.btn-outline-primary {
+	border: 1px solid;
+	border-color: var(--primary) !important;
+	color: var(--primary);
+}
+
+.btn-outline-danger {
+	border-width: 1px;
+	/*border-color: var(--danger);*/
+	border-color: #0A80D8;
+	border-radius: .50rem;
+	color: #0A80D8 ;
+	font-weight: normal;
+}
+
+
+
+.breadcrumbs .breadcrumbs__item a {
+	color: var(--primary-dark) !important;
+}
+
+.breadcrumbs {
+	padding-bottom: 2px !important;
+	border: 0px !important;
+	padding: 0px 10px !important;
+}
+
+.breadcrumbs__item:last-of-type a {
+	color: var(--80) !important;
+}
+
+.dropdown-divider {
+	height: 0;
+	margin: 0.5rem 0;
+	overflow: hidden;
+	border-top: 1px solid #dde1e3;
+}
+
+.dropdown-item {
+	display: block;
+	width: 100%;
+	padding: 0.25rem 1.5rem;
+	clear: both;
+	font-weight: 400;
+	color: #49545a;
+	text-align: inherit;
+	white-space: nowrap;
+	background-color: transparent;
+	border: 0;
+	text-decoration: none;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+	color: #3e464c;
+	text-decoration: none;
+	background-color: #f4f5f6;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+	color: #fff;
+	text-decoration: none;
+	background-color: #42a2dc;
+}
+
+.dropdown-item.disabled, .dropdown-item:disabled {
+	color: #84919a;
+	pointer-events: none;
+	background-color: transparent;
+}
+
+.dropdown-menu.show {
+	display: block;
+}
+
+.dropdown-header {
+	display: block;
+	padding: 0.5rem 1.5rem;
+	margin-bottom: 0;
+	font-size: 0.875rem;
+	color: #84919a;
+	white-space: nowrap;
+}
+
+.dropdown-item-text {
+	display: block;
+	padding: 0.25rem 1.5rem;
+	color: #49545a;
+}
+
+.list-reset {
+	padding: 10px 0px;
+}
+
+.btn-sm {
+	height: 1.475rem;
+	line-height: 1.3rem;
+	min-width: 51px;
+	padding: 0 6px;
+	text-align: center;
+}
+
+.sweet-modal .sweet-box-actions .sweet-action-close svg {
+	width: 24px !important;
+	height: 24px;
+	/* vertical-align: sub; */
+	margin-top: 9px !important;
+	margin-left: 9px !important;
+}
+
+
+.td-fit, .th-fit {
+	width: auto;
+}
+
+a.mr-3 {
+	margin-right: 1.75rem !important;
+	display: table-cell;
+}
+
+button.mr-3 {
+	margin-top: 7px !important;
+}
+
+/* Style the button that is used to open and close the collapsible content */
+
+.collapsible {}
+
+/* Style the collapsible content. Note: hidden by default */
+
+.collapse-content {
+	display: none;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+	/* select, textarea, input {
+		font-size: 16px !important;
+	} */
+	.sweet-content {
+		padding: 10px !important;
+	}
+}
+
+.btn-default {
+	-webkit-box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0) !important;
+	box-shadow: 5px 2px 4px 0 rgba(29, 17, 17, 0) !important;
+	text-shadow: none !important;
+}
+
+.sweet-modal .sweet-box-actions .sweet-action-close svg {
+	width: 24px !important;
+	height: 24px;
+	/* margin-top: 9px !important; */
+	margin: 9px !important;
+}
+
+.demo-app-calendar {
+	margin: unset !important;
+	max-width: unset !important;
+	padding: 10px !important;
+}
+
+tr>td>.fc-day-grid-event {
+	margin-top: 2px !important;
+	width: max-content !important;
+	text-align: center !important;
+	display: inline-block !important;
+	;
+	padding: 2px 36px !important;
+	font-weight: bold !important;
+	;
+}
+
+.fc th, .fc td {
+	border-style: solid;
+	border-width: 1px;
+	padding: 0;
+	vertical-align: unset;
+	text-align: -webkit-center;
+	position: relative !important;
+	;
+}
+
+.fc-day-number {
+	float: none !important;
+	margin-bottom: 16px;
+	font-size: larger !important;
+	font-weight: bold !important;
+	;
+}
+
+.spark-profile-photo-xs {
+	display: inline-block;
+}
+
+svg.mb-3 {
+	margin: auto !important;
+}
+
+.bg-30.flex.px-8.py-4 {
+	align-items: baseline;
+}
+
+.dir-ltr {
+	direction: ltr !important
+}
+
+input[type="tel"] {
+	direction: ltr !important;
+}
+
+.custom-mx-3 {
+	margin-left: .75rem !important;
+	margin-right: .75rem !important;
+}
+
+.custom-flex {
+	align-items: flex-end;
+}
+
+.custom-ml-auto {
+	margin-left: unset;
+	margin-right: auto;
+}
+
+.custom-profile-img {
+	width: 120px !important;
+	height: 120px !important;
+	border-radius: 50%;
+}
+
+.card.relative.card.relative.border.border-lg.border-50.overflow-hidden.px-0.py-0 {
+	border: none;
+	box-shadow: none;
+}
+
+.custom-btn-primary {
+	background-color: var(--primary);
+	color: var(--white);
+}
+
+.custom-mx {
+	margin-right: .5rem !important;
+}
+
+.custom-green {
+	background-color: #86d93a !important;
+}
+
+.custom-red {
+	background-color: #e5403a !important;
+}
+
+.ml-3.w-full.flex.items-center {
+	align-items: flex-end;
+}
+
+/** Ahmed Rabee Edit ******/
+
+.h-header .item-l.flex {
+	margin: 0 30px 0 0;
+}
+
+html:lang(ar) .h-header .item-l.flex {
+	margin: 0 0 0 30px;
+}
+
+html:lang(ar) .h-header .item-l.flex .search-icon-center {
+	left: 0;
+	right: auto;
+}
+
+html:lang(ar) .h-header .item-l.flex .pl-search.form-control {
+	padding: 10px 8px 10px 35px !important;
+}
+html:lang(en) .h-header.nav-block .item-r .dropdown {
+	right: auto;
+	left: 20px;
+}
+.h-header .dropdown-menu-right {
+    left: auto;
+    right: 0;
+    top: 100%;
+    padding: 12px 0 0 0;
+    z-index: 99999;
+    display: block !important;
+    float: none;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    text-align: inherit;
+    margin: 0;
+}
+
+.h-header .dropdown-menu-right::after {
+	position: absolute;
+	top: 3px;
+	content: "";
+	right: 40px;
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-width: 0 14px 10px 14px;
+	border-color: transparent transparent #ffffff transparent;
+	line-height: 0;
+	_border-color: #000000 #000000 #ffffff #000000;
+	_filter: progid:DXImageTransform.Microsoft.Chroma(color='#000000');
+}
+
+html:lang(ar) .h-header .dropdown-menu-right {
+	right: auto;
+	left: 0;
+}
+
+html:lang(ar) .h-header .dropdown-menu-right::after {
+	left: 40px;
+	right: auto;
+}
+
+html:lang(en) .h-header img.rounded-full {
+	border: 1px solid #444444;
+}
+html:lang(ar) .h-header img.rounded-full {
+	margin: 0 0 0 .75rem;
+	border: 1px solid #444444;
+}
+.nav-block .item-r a.dropdown-trigger svg, .nav-block .item-r a.dropdown-trigger svg g {
+    fill: #ffffff;
+}
+.h-header .dropdown-menu-right h6.dropdown-header {
+	display: none;
+}
+
+html:lang(ar) .h-header .dropdown-menu-right a i.text-left {
+	text-align: right;
+}
+
+html:lang(en) .vc-popover-caret.direction-bottom.align-left {
+	left: 18px !important;
+}
+
+html:lang(en) .vc-arrows-container.title-left {
+	justify-content: flex-end !important;
+}
+
+html:lang(en) input[type="tel"], html:lang(en) input[type="phone"] {
+	text-align: left !important;
+}
+
+html:lang(ar) .dropdown ul {
+	right: 0;
+	left: auto;
+	direction: ltr;
+	margin: 2px auto 0;
+}
+
+html:lang(ar) .sweet-content-content .dropdown ul, html:lang(en) .sweet-content-content .dropdown ul {
+	width: 293px;
+}
+
+.flex.justify-between.items-center.nav-block.shadow.h-header.bg-black.z-20.px-6 .dropdown .dropdown-trigger svg {
+	display: block;
+	filter: invert(100%);
+	-webkit-filter: invert(100%);
+	-moz-filter: invert(100%);
+	-o-filter: invert(100%);
+}
+
+html:lang(ar) .sweet-content-content input[type="tel"], html:lang(ar) .sweet-content-content input[type="phone"] {
+	padding: 0 10px 0 0;
+}
+
+html:lang(ar) input[type="tel"], html:lang(ar) input[type="phone"] {
+	padding: 0 10px 0 0;
+}
+
+html:lang(ar) .card .mx-3.btn-sm, html:lang(en) .card .mx-3.btn-sm {
+	font-weight: normal;
+	font-size: 14px;
+}
+
+html:lang(ar) .card .btn-sm, html:lang(en) .card .btn-sm {
+	font-weight: normal;
+	font-size: 13px;
+}
+
+
+
+html:lang(en) select {
+	background-position: center right .75rem;
+}
+
+input, select {
+	box-shadow: none !important;
+	border-color: #bbb !important;
+}
+
+input, select {
+	border-radius: 4px !important;
+}
+
+.block.w-full.bg-gray-200.border.text-gray-700.py-2.px-4.pr-8.rounded.leading-tight.focus\:outline-none.focus\:bg-white.focus\:border-gray-500 {
+	background-color: #fff;
+	background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6"><path fill="%2335393C" fill-rule="nonzero" d="M8.293.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4A1 1 0 0 1 1.707.293L5 3.586 8.293.293z"/></svg>');
+	background-repeat: no-repeat;
+	background-size: 10px 6px;
+	background-position: center right .75rem;
+	appearance: none;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+}
+
+html:lang(ar) .block.w-full.bg-gray-200.border.text-gray-700.py-2.px-4.pr-8.rounded.leading-tight.focus\:outline-none.focus\:bg-white.focus\:border-gray-500 {
+	background-position: center left .75rem;
+}
+
+.sweet-modal.theme-light.has-title.has-content.is-visible {
+	overflow: auto;
+}
+
+html:lang(en) .sweet-modal .sweet-box-actions {
+	left: auto !important;
+	right: 12px !important;
+}
+
+html:lang(en) .sweet-title {
+	padding: 0 63px 0 10px !important;
+}
+
+html:lang(ar) .sweet-title {
+	padding: 0 10px 0 63px !important;
+}
+
+.sweet-modal.theme-light.has-title.has-content.is-visible .sweet-content-content .text-90.mt-8 {
+	margin-top: 15px;
+}
+
+div[dusk="transactions-index-component"] .card.flex.flex-col.items-center.justify-center.custom-panel {
+	padding: 20px;
+}
+
+table.table.w-full[data-testid="resource-table"] thead tr th, table.table.w-full[data-testid="resource-table"] tbody tr td {
+	text-align: right !important;
+}
+
+html:lang(en) table.table.w-full[data-testid="resource-table"] thead tr th, html:lang(en) table.table.w-full[data-testid="resource-table"] tbody tr td {
+	text-align: left !important;
+}
+
+.card .py-3.flex.items-center.border-b.border-50 .flex.items-center.ml-auto.px-3 {
+	margin-left: unset;
+}
+
+html:lang(en) .card .py-3.flex.items-center.border-b.border-50 .flex.items-center.ml-auto.px-3 {
+	margin-right: unset;
+	margin-left: auto;
+}
+
+table.table.w-full[data-testid="resource-table"] thead tr th span {
+	font-weight: normal;
+	font-size: 15px;
+}
+
+html:lang(ar) .dropdown ul li a.dropdown-item {
+	text-align: right;
+	direction: rtl;
+}
+
+.records_numbers input {
+	background: #fff;
+	border: 1px solid #bbb;
+	box-shadow: none !important;
+	border-radius: 4px !important;
+	height: 40px;
+	padding: 0 10px;
+	font-size: 16px !important;
+}
+
+.records_numbers input.appearance-none[disabled="disabled"] {
+	background: #ececec !important;
+	border-color: #ddd !important;
+	font-size: 25px !important;
+	cursor: not-allowed;
+}
+.updatereservation .input-group label {
+	margin: 0 auto 7px;
+	display: block;
+}
+
+.card input[type="text"], .card input[type="tel"], .card input[type="phone"], .card input[type="email"], .card input[type="password"], .card select, .sweet-content input[type="text"], .sweet-content input[type="tel"], .sweet-content input[type="phone"], .sweet-content input[type="email"], .sweet-content input[type="password"], .sweet-content select {
+	height: 40px;
+	box-shadow: none !important;
+	padding: 0 10px;
+	background-color: #fff;
+}
+
+.edit-customer-button sweet-button.btn.btn-default.btn-outline-primary, .services_dev .w-full.overflow-hidden.md\:w-w-full.lg\:w-full.xl\:w-w-full.px-2.py-1.f-box.rounded.border.border-50.m-1 {
+	cursor: pointer;
+}
+
+.services_dev .w-full.overflow-hidden.md\:w-w-full.lg\:w-full.xl\:w-w-full.px-2.py-1.f-box.rounded.border.border-50.m-1:hover {
+	background-color: #fafafa;
+}
+
+.edit-customer-button sweet-button.btn.btn-default.btn-outline-primary:hover {
+	background: rgb(64, 153, 222);
+	color: #fff;
+	border-color: rgb(64, 153, 222) !important;
+}
+
+.autocomplete__box {
+	box-shadow: none !important;
+	border: 1px solid #bbb !important;
+	height: 40px;
+}
+
+.autocomplete__box input {
+	height: 38px !important;
+}
+
+.autocomplete ul {
+    margin-top: 0 !important;
+}
+
+.addServiceModal hr {
+	margin: 10px auto;
+}
+
+.addServiceModal label.super-select-input {
+	border-color: #bbb !important;
+	border-radius: 4px !important;
+	background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6"><path fill="%2335393C" fill-rule="nonzero" d="M8.293.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4A1 1 0 0 1 1.707.293L5 3.586 8.293.293z"/></svg>');
+	background-repeat: no-repeat;
+	background-size: 10px 6px;
+	background-position: center left .75rem;
+	z-index: 9;
+	position: relative;
+	box-shadow: none !important;
+}
+
+html:lang(en) .addServiceModal label.super-select-input {
+	background-position: center right .75rem;
+}
+
+.addServiceModal label.super-select-input input {
+	background: transparent;
+}
+
+.addServiceModal .super-select-dropdown, .addServiceModal .super-select-container {
+	width: 100% !important;
+}
+
+.addServiceModal .super-select-container.super-select-dropdown-visible .super-select-dropdown {
+	border-color: #bbb;
+	border-radius: 4px;
+	box-shadow: none;
+	padding: 0;
+}
+
+.addServiceModal .super-select-container.super-select-dropdown-visible .super-select-dropdown .super-select-group {
+	font-weight: normal;
+	border: none !important;
+	background: #ffffff;
+}
+
+.addServiceModal .super-select-container.super-select-dropdown-visible .super-select-dropdown .super-select-item {
+	background: #eee;
+	border-top: 1px solid #ddd;
+	padding: 5px;
+}
+
+.addServiceModal .super-select-container.super-select-dropdown-visible .super-select-dropdown .super-select-group .super-select-group-name {
+	border-bottom: none;
+}
+
+.Fix_Cards_Reports .card-panel {
+	height: auto;
+	min-height: 166px;
+}
+
+.Fix_Cards_Reports .card-panel h3 {
+	line-height: 40px;
+	margin: 0 0 0 .75rem;
+}
+
+html:lang(en) .Fix_Cards_Reports .card-panel h3 {
+	margin: 0 .75rem 0 0;
+}
+
+.Fix_Cards_Reports .card-panel select {
+	border: 1px solid #eee;
+}
+
+html:lang(en) .Fix_Cards_Reports .card-panel select {
+	margin: 0 auto !important;
+}
+
+.Fix_Cards_Reports .card-panel p.flex.items-center.text-4xl.mb-4 {
+	line-height: 1;
+}
+
+.Fix_Cards_Reports .card-panel svg {
+	display: inline-block;
+	margin: 0 0 0 .5rem;
+}
+
+html:lang(en) .Fix_Cards_Reports .card-panel svg {
+	margin: 0 .5rem 0 0;
+}
+.search_transactions {
+	padding: 5px 0;
+	clear: both;
+	display: table;
+	width: 100%;
+}
+
+.search_transactions .filter_item {
+	float: right;
+	width: 25%;
+	padding: 5px 10px;
+}
+html:lang(en) .search_transactions .filter_item {float: left;}
+.search_transactions.deposit_management_filter .filter_item {width: 16.66666%;}
+
+
+.tooltip.check-out-customer {
+	top: -10px !important;
+	left: 5px !important;
+}
+
+.tooltip.check-out-customer .tooltip-inner {
+	border-radius: 5px;
+	font-size: 14px;
+	text-align: center;
+	padding: 5px 10px;
+}
+
+.tooltip.check-out-customer .tooltip-arrow {
+	position: absolute;
+	width: 0;
+	height: 0;
+	border-color: transparent;
+	border-top-color: transparent;
+	border-style: solid;
+	bottom: -5px;
+	left: 50% !important;
+	margin-left: -5px;
+	border-width: 5px 5px 0;
+	border-top-color: #000;
+	z-index: 99999;
+}
+.demo-app-calendar .fc-view-container .fc-dayGrid-view tbody.fc-body .fc-week.fc-widget-content {
+	cursor: pointer;
+}
+/* .c-date .vc-reset input#date-input {
+	font-size: 19px !important;
+} */
+html:lang(en) .w-sidebar .sidebar-icon {margin: 0 1rem 0 0;}
+html:lang(en) .w-sidebar .sidebar-label {font-size: 1rem;}
+html:lang(en) .main_calendar_area .py-1.pl-2.text-1xl.inline-block {padding: .25rem .5rem 0 0;}
+html:lang(en)  #technical_support_page .text-lg.transaction.text-right {text-align: left;}
+html:lang(en) #technical_support_page .h-16.w-16.text-center.text-4xl.pt-3.ml-4, html:lang(en) #technical_support_page .h-16.w-16.text-center.text-4xl.pt-1.ml-4 {margin: 0 .75rem 0 0;}
+.PieChart_area .PieChart_title, .LineChart_area .LineChart_title {
+	margin: 0 auto 20px;
+	font-size: 17px;
+}
+.PieChart_area .PieChart_title .text-right {
+	text-align: right !important;
+	width: 70% !important;
+	font-size: 16px;
+}
+.PieChart_area .PieChart_title .text-right span {
+	display: inline-block;
+	direction: ltr;
+}
+html:lang(en) .PieChart_area .PieChart_title .text-right {text-align: left !important;}
+.PieChart_area .PieChart_title .text-left {
+	text-align: left !important;
+	width: 30%;
+	font-size: 17px;
+}
+html:lang(en) .PieChart_area .PieChart_title .text-left {text-align: right !important;}
+.min-h-screen .content {
+	width: 90%;
+	max-width: none;
+}
+.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6.sidebar-hidden {
+	width: 10%;
+	padding: 110px 10px 0 10px;
+}
+.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6.sidebar-hidden .absolute.pin-t.pin-l.pin-r.bg-logo.flex.items-center.w-sidebar.h-header.px-6.text-white {
+	width: 10%;
+	padding: 0 5px;
+}
+.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6.sidebar-hidden .absolute.pin-t.pin-l.pin-r.bg-logo.flex.items-center.w-sidebar.h-header.px-6.text-white .dim.font-bold.text-90.mx-6.text-white.text-center.w-full {
+	margin: 0 auto;
+}
+.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6.sidebar-hidden h3 {
+	display: block;
+}
+.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6.sidebar-hidden a {
+	display: block;
+}
+.w-sidebar .sidebar-icon {
+	display: block;
+	margin: 0 auto;
+	text-align: center;
+	width: 100%;
+}
+.w-sidebar .sidebar-icon svg {
+	width: 30px;
+	height: auto;
+	display: block;
+	margin: 0 auto 5px;
+	fill: #9FAFBB !important;
+}
+.w-sidebar .sidebar-icon svg.sure_bills_icon {
+	width: 45px;
+}
+.w-sidebar .sidebar-label {
+	text-align: center;
+	font-size: 15px;
+	font-family: Dubai-Light;
+	font-weight: normal;
+}
+#new_reservation .reservation_details, #new_reservation .customer_details, #new_reservation .summery_details {
+	background: #f8f8f8;
+	border: 1px solid #c3c3c3;
+	padding: 10px;
+	min-height: 100%;
+}
+#new_reservation .reservation_details .input-group {margin: 0 auto 10px;}
+#new_reservation .reservation_details .input-group label, #new_reservation .reservation_details .another_details span, #new_reservation .customer_details label {
+	display: block;
+	color: #666666;
+	margin: 0 auto 3px;
+}
+#new_reservation .reservation_details .input-group span.v-date-picker input {
+	height: 40px;
+	padding: 0 10px;
+	border: 1px solid #c3c3c3;
+}
+#new_reservation .reservation_details .input-group select, #new_reservation .reservation_details .input-group input, #new_reservation .customer_details select, #new_reservation .customer_details input {
+	height: 40px;
+	padding: 0 10px !important;
+	color: #000;
+}
+#new_reservation .reservation_details hr {
+	margin: 15px auto;
+	border-color: #aaaaaa;
+}
+#new_reservation .reservation_details .another_details span {margin: 0 auto;}
+#new_reservation .customer_details hr {
+	border-color: #aaaaaa;
+	margin: 12px auto;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_one {margin: 0 auto 10px;}
+#new_reservation .summery_details .new-reservation-table table.show_table_one tr td {
+	border: none;
+	padding: 0 !important;
+	font-size: 17px !important;
+	line-height: 29px;
+	height: auto;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_one tr td {
+	border-bottom: 1px solid #aaa;
+	padding-bottom: 15px !important;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_one tr td.prices_currency {
+	font-size: 25px !important;
+	direction: ltr;
+	padding: 20px !important;
+	text-align: left;
+	vertical-align: top;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_one tr td.prices_currency p {
+	display: inline-block;
+	margin: 0 3px 0 0;
+	font-weight: bold;
+	font-size: 30px !important;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_two tr td {
+	border-top: none;
+	border-bottom-color: #d5d5d5;
+	background: transparent !important;
+	font-size: 18px;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_two tr td.pricetd {
+	direction: ltr;
+	text-align: initial;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_two tr:last-child td {
+	border-bottom: none;
+	padding-bottom: 0 !important;
+	padding-left: 10px !important;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_two tr:last-child td:first-child {
+	font-size: 25px;
+}
+#new_reservation .summery_details .new-reservation-table table.show_table_two tr:last-child td:last-child input {
+    background: #fff;
+    border: 1px solid #c3c3c3 !important;
+    padding: 0 10px;
+    min-width: 120px;
+    height: 40px;
+    text-align: center;
+    font-size: 25px;
+    line-height: 38px;
+}
+#new_reservation .button_area {
+	text-align: left;
+	margin: 15px auto 0;
+}
+#new_reservation .button_area button {
+	display: inline-block;
+	width: auto;
+	font-size: 20px;
+	padding: 2px 30px;
+	min-width: 21%;
+	height: auto;
+}
+html:lang(en) #new_reservation .summery_details .new-reservation-table table.show_table_two tr td.pricetd, html:lang(en) #new_reservation .button_area, html:lang(en) #new_reservation .summery_details .new-reservation-table table.show_table_one tr td.prices_currency {text-align: right;}
+.btn.btn-sm.btn-outline.inline-flex.items-center.w-auto {
+	font-size: 15px;
+	padding: 15px;
+	width: auto !important;
+}
+.btn.btn-sm.btn-outline.inline-flex.items-center.w-auto::before {display: none !important;}
+
+html:lang(ar)  ul.pagination li.page-item:first-child a {
+  border-radius: 0 .25rem .25rem 0 !important;
+  margin: 0 0 0 -1px !important;
+}
+html:lang(ar)  ul.pagination li.page-item:last-child a {
+  border-radius: .25rem 0 0 .25rem !important;
+  margin: 0 -1px 0 0 !important;
+}
+.tooltip.info .tooltip-inner {
+	background: #fcf8e3;
+	border-radius: 5px;
+	padding: 8px 15px;
+	font-size: 15px;
+	color: #8a6d3b;
+	border: 1px solid #faebcc;
+	box-shadow: none !important;
+}
+div[dusk="services-categories-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="customers-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="units-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="unit-categories-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="units-movement-report-lens-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="guests-report-lens-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="users-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="reservations-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="financial-management-lens-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="unit-general-features-index-component"] .card .py-3.flex.items-center.border-b.border-5,
+div[dusk="unit-special-features-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="unit-options-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="occupieds-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="unit-cleanings-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="unit-maintenances-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="reservation-transfers-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="terms-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="roles-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="activity-logs-index-component"] .card .py-3.flex.items-center.border-b.border-50,
+div[dusk="sources-index-component"] .card .py-3.flex.items-center.border-b.border-50 {
+}
+
+div[dusk="services-categories-index-component"] .card,
+div[dusk="customers-index-component"] .card,
+div[dusk="units-index-component"] .card,
+div[dusk="unit-categories-index-component"] .card,
+div[dusk="units-movement-report-lens-component"] .card,
+div[dusk="guests-report-lens-component"] .card,
+div[dusk="users-index-component"] .card,
+div[dusk="reservations-index-component"] .card,
+div[dusk="online-reservations-index-component"] .card,
+div[dusk="financial-management-lens-component"] .card,
+div[dusk="unit-general-features-index-component"] .card,
+div[dusk="unit-special-features-index-component"] .card,
+div[dusk="unit-options-index-component"] .card,
+div[dusk="occupieds-index-component"] .card,
+div[dusk="unit-cleanings-index-component"] .card,
+div[dusk="unit-maintenances-index-component"] .card,
+div[dusk="reservation-transfers-index-component"] .card,
+div[dusk="terms-index-component"] .card,
+div[dusk="roles-index-component"] .card,
+div[dusk="activity-logs-index-component"] .card,
+div[dusk="sources-index-component"] .card {
+	overflow: hidden;
+}
+
+div[dusk="services-categories-index-component"] .checkbox,
+div[dusk="customers-index-component"] .checkbox,
+div[dusk="units-index-component"] .checkbox,
+div[dusk="unit-categories-index-component"] .checkbox,
+div[dusk="units-movement-report-lens-component"] .checkbox,
+div[dusk="guests-report-lens-component"] .checkbox,
+div[dusk="users-index-component"] .checkbox,
+div[dusk="unit-general-features-index-component"] .checkbox,
+div[dusk="unit-special-features-index-component"] .checkbox,
+div[dusk="unit-options-index-component"] .checkbox,
+div[dusk="occupieds-index-component"] .checkbox,
+div[dusk="unit-cleanings-index-component"] .checkbox,
+div[dusk="unit-maintenances-index-component"] .checkbox,
+div[dusk="reservation-transfers-index-component"] .checkbox,
+div[dusk="terms-index-component"] .checkbox,
+div[dusk="roles-index-component"] .checkbox,
+div[dusk="activity-logs-index-component"] .checkbox,
+div[dusk="sources-index-component"] .checkbox {
+	display: none;
+}
+
+div[dusk="services-categories-index-component"] .card table .w-16,
+div[dusk="customers-index-component"] .card table .w-16,
+div[dusk="units-index-component"] .card table .w-16,
+div[dusk="unit-categories-index-component"] .card table .w-16,
+div[dusk="units-movement-report-lens-component"] .card table .w-16,
+div[dusk="units-movement-report-lens-component"] .card table .w-8,
+div[dusk="guests-report-lens-component"] .card table .w-16,
+div[dusk="guests-report-lens-component"] .card table .w-8,
+div[dusk="users-index-component"] .card table .w-16,
+div[dusk="unit-general-features-index-component"] .card table .w-16,
+div[dusk="unit-special-features-index-component"] .card table .w-16,
+div[dusk="unit-options-index-component"] .card table .w-16,
+div[dusk="occupieds-index-component"] .card table .w-16,
+div[dusk="occupieds-index-component"] .card table .w-8,
+div[dusk="unit-cleanings-index-component"] .card table .w-8,
+div[dusk="unit-maintenances-index-component"] .card table .w-8,
+div[dusk="unit-maintenances-index-component"] .card table .w-16,
+div[dusk="reservation-transfers-index-component"] .card table .w-8,
+div[dusk="reservation-transfers-index-component"] .card table .w-16,
+div[dusk="terms-index-component"] .card table .w-8,
+div[dusk="terms-index-component"] .card table .w-16,
+div[dusk="roles-index-component"] .card table .w-8,
+div[dusk="roles-index-component"] .card table .w-16,
+div[dusk="activity-logs-index-component"] .card table .w-8,
+div[dusk="activity-logs-index-component"] .card table .w-16,
+div[dusk="sources-index-component"] .card table .w-8,
+div[dusk="sources-index-component"] .card table .w-16 {
+	display: none;
+}
+
+div[dusk="services-categories-index-component"] .card table .text-center.text-center,
+div[dusk="customers-index-component"] .card table .text-center.text-center,
+div[dusk="units-index-component"] .card table .text-center.text-center,
+div[dusk="unit-categories-index-component"] .card table .text-center.text-center,
+div[dusk="units-movement-report-lens-component"] .card table .text-center.text-center,
+div[dusk="guests-report-lens-component"] .card table .text-center.text-center,
+div[dusk="users-index-component"] .card table .text-center.text-center,
+div[dusk="unit-general-features-index-component"] .card table .text-center.text-center,
+div[dusk="unit-special-features-index-component"] .card table .text-center.text-center,
+div[dusk="unit-options-index-component"] .card table .text-center.text-center,
+div[dusk="occupieds-index-component"] .card table .text-center.text-center,
+div[dusk="unit-cleanings-index-component"] .card table .text-center.text-center,
+div[dusk="unit-maintenances-index-component"] .card table .text-center.text-center,
+div[dusk="reservation-transfers-index-component"] .card table .text-center.text-center,
+div[dusk="terms-index-component"] .card table .text-center.text-center,
+div[dusk="roles-index-component"] .card table .text-center.text-center,
+div[dusk="activity-logs-index-component"] .card table .text-center.text-center,
+div[dusk="sources-index-component"] .card table .text-center.text-center {
+	text-align: right;
+}
+div[data-testid="content"] div[component="edit-view"] ul.list-reset .mr-4 {margin-left: 7px;}
+html:lang(en) div[data-testid="content"] div[component="edit-view"] ul.list-reset .mr-4 {margin-right: 7px;}
+.main_calendar_area .vc-popover-content-wrapper.is-interactive {
+    left: auto !important;
+    right: 0;
+}
+html:lang(en) .main_calendar_area .vc-popover-content-wrapper.is-interactive {
+    right: auto !important;
+    left: 0;
+}
+
+#units_status_page .table_area table tbody tr td a .customer_label {
+	float: right;
+	margin: 5px auto 5px 5px;
+}
+html:lang(en) #units_status_page .table_area table tbody tr td a .customer_label {
+	float: left;
+	margin: 5px 5px 5px auto;
+}
+#units_status_page .table_area table tbody tr td a .customer_label label.customer-label {
+	display: block !important;
+	padding: 0 10px !important;
+	height: 21px;
+	line-height: 21px;
+	margin: 5px 0 0 0;
+}
+.Customer_Information label.customer-label {
+	margin: 0 5px 0 0;
+	padding: 0 10px !important;
+	height: 20px;
+	line-height: 18px;
+	font-family: 'Dubai-Regular';
+	display: block !important;
+}
+html:lang(en) .Customer_Information label.customer-label {
+	margin: 0 0 0 5px;
+	padding: 0 10px !important;
+	height: 20px;
+	line-height: 20px;
+	font-family: 'Dubai-Regular';
+	display: block !important;
+}
+.customers_table label.customer-label {
+	padding: 0px 10px !important;
+	height: 20px;
+	line-height: 18px;
+}
+div[dusk="customers-detail-component"] label.customer-label {
+	padding: 0 10px !important;
+	height: 20px;
+	line-height: 18px;
+}
+.edit_customer_Model .customer_label {display: inline-block;}
+.edit_customer_Model .customer_label label {
+	display: block !important;
+	padding: 0px 10px !important;
+	font-family: 'Dubai-Regular';
+	height: 20px;
+	line-height: 18px;
+}
+.logo_sidebar {
+	padding: 5px 0px;
+	overflow: hidden;
+	width: 100%;
+}
+.logo_sidebar .imgthumb img {
+	width: 100%;
+	height: 100%;
+}
+.logo_sidebar .imgthumb {
+	background: #363E48;
+	border-radius: 100%;
+	overflow: hidden;
+	width: 80px;
+	height: 80px;
+	margin: 0 auto;
+	text-align: center;
+	padding: 5px;
+	  -webkit-border-radius: 100%;
+	  -moz-border-radius: 100%;
+	  -o-border-radius: 100%;
+}
+.logo_sidebar .imgthumb img {
+	width: 100%;
+	height: 100%;
+	border-radius: 100%;
+	display: block;
+	margin: 0 auto;
+}
+.h-header.nav-block .item-r {width: auto !important;}
+.h-header .icons_plus {padding: 5px 0 0 0;}
+.h-header .icons_plus a {
+	display: inline-block;
+	margin: 0 7px;
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+.h-header .icons_plus a svg {
+	height: 26px !important;
+	width: auto !important;
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+.h-header .icons_plus a svg path {
+  -webkit-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+.h-header .icons_plus a:hover svg, .h-header .icons_plus a:hover svg path {fill: #0A80D8 !important;}
+.h-header .icons_plus .receipt_report {
+  float: right;
+  background: #4099de;
+  padding: 0 12px;
+  border-radius: 100px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: #fff;
+  margin: 0 5px;
+  cursor: pointer;
+}
+.h-header .icons_plus .receipt_report:hover {background: #318acf;}
+.h-header .icons_plus a.create_reservations {
+	background: #28a745;
+	color: #fff;
+	border-radius: 100px;
+	padding: 0 12px;
+	height: 26px;
+	line-height: 26px;
+	margin: 0 5px;
+	float: right;
+	font-size: 15px;
+	font-weight: normal !important;
+}
+
+a.create_reservations_mobile {
+	background: #28a745;
+	color: #fff;
+	border-radius: 100px;
+	padding: 0 12px !important;
+	height: 26px;
+	line-height: 26px;
+	margin: 0 5px;
+	float: right;
+	font-size: 15px;
+	font-weight: normal !important;
+	margin: 0px;
+	display: block;
+}
+
+html:lang(en) .h-header .icons_plus a.create_reservations {
+	float: left;
+	font-size: 14px;
+}
+.h-header .icons_plus a.create_reservations:hover {background: #3cbb59;}
+.h-header .icons_plus .SHMS_false {
+  float: right;
+  width: 26px;
+  height: 26px;
+  background-size: 26px;
+  margin: 0 5px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-image: url("../../images/SHMS_false.png");
+  position: relative;
+}
+.h-header .icons_plus .SHMS_false span {
+  position: absolute;
+  background: #3c434c;
+  white-space: nowrap;
+  color: #fff;
+  border-radius: 100px;
+  padding: 0 10px;
+  font-size: 13px;
+  height: 25px;
+  line-height: 25px;
+  top: 100%;
+  right: 0;
+  min-width: 133px;
+  text-align: center;
+  margin: 4px auto 0;
+  -webkit-transform: translateX(50%);
+  -moz-transform: translateX(50%);
+  -o-transform: translateX(50%);
+  transform: translateX(50%);
+  display: none;
+}
+.h-header .icons_plus .SHMS_false:hover span {
+  display: block;
+}
+.h-header .icons_plus .SHMS_true {
+  float: right;
+  width: 26px;
+  height: 26px;
+  background-size: 26px;
+  margin: 0 5px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-image: url("../../images/SHMS_true.png");
+  position: relative;
+}
+.h-header .icons_plus .SHMS_true span {
+  position: absolute;
+  background: #3c434c;
+  white-space: nowrap;
+  color: #fff;
+  border-radius: 100px;
+  padding: 0 10px;
+  font-size: 13px;
+  height: 25px;
+  line-height: 25px;
+  top: 100%;
+  right: 0;
+  min-width: 133px;
+  text-align: center;
+  margin: 4px auto 0;
+  -webkit-transform: translateX(50%);
+  -moz-transform: translateX(50%);
+  -o-transform: translateX(50%);
+  transform: translateX(50%);
+  display: none;
+}
+.h-header .icons_plus .SHMS_true:hover span {
+  display: block;
+}
+
+
+.h-header .icons_plus .SCTH_false {
+  float: right;
+  width: 26px;
+  height: 26px;
+  background-size: 26px;
+  margin: 0 5px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-image: url("../../images/SCTH_false.png");
+  position: relative;
+}
+.h-header .icons_plus .SCTH_false span {
+  position: absolute;
+  background: #3c434c;
+  white-space: nowrap;
+  color: #fff;
+  border-radius: 100px;
+  padding: 0 10px;
+  font-size: 13px;
+  height: 25px;
+  line-height: 25px;
+  top: 100%;
+  right: 0;
+  min-width: 133px;
+  text-align: center;
+  margin: 4px auto 0;
+  -webkit-transform: translateX(50%);
+  -moz-transform: translateX(50%);
+  -o-transform: translateX(50%);
+  transform: translateX(50%);
+  display: none;
+}
+.h-header .icons_plus .SCTH_false:hover span {
+  display: block;
+}
+.h-header .icons_plus .SCTH_true {
+  float: right;
+  width: 26px;
+  height: 26px;
+  background-size: 26px;
+  margin: 0 5px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-image: url("../../images/SCTH_true.png");
+  position: relative;
+}
+.h-header .icons_plus .SCTH_true span {
+  position: absolute;
+  background: #3c434c;
+  white-space: nowrap;
+  color: #fff;
+  border-radius: 100px;
+  padding: 0 10px;
+  font-size: 13px;
+  height: 25px;
+  line-height: 25px;
+  top: 100%;
+  right: 0;
+  min-width: 133px;
+  text-align: center;
+  margin: 4px auto 0;
+  -webkit-transform: translateX(50%);
+  -moz-transform: translateX(50%);
+  -o-transform: translateX(50%);
+  transform: translateX(50%);
+  display: none;
+}
+.h-header .icons_plus .SCTH_true:hover span {
+  display: block;
+}
+
+
+.h-header .icons_plus .ZATCA_false {
+	float: right;
+	width: 26px;
+	height: 26px;
+	background-size: 26px;
+	margin: 0 5px;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-image: url("../../images/ZATCA_false.png");
+	position: relative;
+  }
+  .h-header .icons_plus .ZATCA_false span {
+	position: absolute;
+	background: #3c434c;
+	white-space: nowrap;
+	color: #fff;
+	border-radius: 100px;
+	padding: 0 10px;
+	font-size: 13px;
+	height: 25px;
+	line-height: 25px;
+	top: 100%;
+	right: 0;
+	min-width: 133px;
+	text-align: center;
+	margin: 4px auto 0;
+	-webkit-transform: translateX(50%);
+	-moz-transform: translateX(50%);
+	-o-transform: translateX(50%);
+	transform: translateX(50%);
+	display: none;
+  }
+  .h-header .icons_plus .ZATCA_false:hover span {
+	display: block;
+  }
+  .h-header .icons_plus .ZATCA_true {
+	float: right;
+	width: 26px;
+	height: 26px;
+	background-size: 26px;
+	margin: 0 5px;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-image: url("../../images/ZATCA_true.png");
+	position: relative;
+  }
+  .h-header .icons_plus .ZATCA_true span {
+	position: absolute;
+	background: #3c434c;
+	white-space: nowrap;
+	color: #fff;
+	border-radius: 100px;
+	padding: 0 10px;
+	font-size: 13px;
+	height: 25px;
+	line-height: 25px;
+	top: 100%;
+	right: 0;
+	min-width: 133px;
+	text-align: center;
+	margin: 4px auto 0;
+	-webkit-transform: translateX(50%);
+	-moz-transform: translateX(50%);
+	-o-transform: translateX(50%);
+	transform: translateX(50%);
+	display: none;
+  }
+  .h-header .icons_plus .ZATCA_true:hover span {
+	display: block;
+  }
+
+
+html:lang(ar) .percentage-shift {
+    right: auto;
+    left: 1px;
+    background: #eee;
+    height: 34px;
+    top: 1px;
+    border-radius: 4px 0 0 4px;
+    width: 30px;
+    text-align: center;
+    line-height: 34px;
+    border-right: 1px solid #bbb;
+}
+html:lang(en) .percentage-shift {
+    right: 1px;
+    left: auto;
+    background: #eee;
+    height: 34px;
+    top: 1px;
+    border-radius: 0 4px 4px 0;
+    width: 30px;
+    text-align: center;
+    line-height: 34px;
+    border-left: 1px solid #bbb;
+}
+.color-input.rounded-l-lg.border-r-0.h-100.border.border-60.color-input-value {
+	border-radius: 5px;
+	border: 1px solid #bbb;
+	margin: 0 0 0 5px;
+	width: 45px !important;
+}
+html:lang(en) .color-input.rounded-l-lg.border-r-0.h-100.border.border-60.color-input-value {margin: 0 5px 0 0;}
+div[dusk="highlights-detail-component"] .inline-flex .rounded.mr-2 {margin: 0 0 0 10px;}
+html:lang(en) div[dusk="highlights-detail-component"] .inline-flex .rounded.mr-2 {margin: 0 10px 0 0;}
+.icons_plus_phone {
+	background: #181F25;
+	display: none;
+	margin: -15px -10px 20px -10px;
+	padding: 10px;
+	justify-content: center;
+}
+.icons_plus_phone a {padding: 0 15px;}
+.icons_plus_phone a:hover {opacity: .5;}
+.content.allsitediv {position: relative;}
+.content.allsitediv::after {
+	content: "";
+	width: 100%;
+	height: 100%;
+	right: 0;
+	top: 0;
+	background: rgba(0, 0, 0, 0.7);
+	position: absolute;
+	z-index: 999999999;
+	display: none;
+}
+.content.allsitediv.sidebaropen::after {display: block;}
+#Notes_page .infinite-loading-container .infinite-status-prompt {
+	font-size: 20px !important;
+	color: #000 !important;
+	line-height: 150px;
+}
+ul.userarea_dropdown {
+	overflow: auto;
+	max-height: 90vh;
+}
+
+ul.userarea_dropdown li a.dropdown-item {
+	padding: 0 10px 0 30px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	white-space: nowrap;
+}
+html:lang(en) ul.userarea_dropdown li a.dropdown-item {
+	padding: 5px 30px 5px 10px;
+}
+ul.userarea_dropdown div.dropdown-divider {margin: 2px auto;}
+ul.userarea_dropdown li a.dropdown-item i {
+	margin: 7px 0 7px 7px;
+}
+html:lang(en) ul.userarea_dropdown li a.dropdown-item i {
+	margin: 7px 7px 7px 0;
+}
+ul.userarea_dropdown li a.dropdown-item img.spark-profile-photo-xs {
+	margin: 7px 0 7px 7px;
+	display: block;
+	height: 20px;
+	width: 20px;
+}
+html:lang(en) ul.userarea_dropdown li a.dropdown-item img.spark-profile-photo-xs {
+	margin: 7px 7px 7px 0;
+	display: block;
+	height: 20px;
+	width: 20px;
+}
+.reservations_cost h4 b {
+	font-weight: normal;
+	font-family: Dubai-Bold;
+}
+.main_calendar_area .c-date input#date-input {
+	background: transparent;
+	border: none;
+	padding: 0;
+	font-size: 19px;
+	line-height: 32px;
+}
+.main_calendar_area .vc-popover-content-wrapper.is-interactive {
+	left: auto !important;
+	right: 0;
+	transform: translate3d(0px, 0px, 0px) !important;
+	top: 30px !important;
+	will-change: auto !important;
+}
+.main_calendar_area .c-date .vc-title {font-weight: normal;}
+.reservation_details .vc-popover-content-wrapper {
+	left: auto !important;
+	right: 0;
+	transform: translate3d(0, 52px, 0px) !important;
+}
+.vc-popover-caret.direction-bottom.align-center {
+	transform: translateX(0) translateY(-50%) rotate(45deg) !important;
+	left: auto;
+	right: 50px;
+}
+html:lang(en) .reservation_details .vc-popover-content-wrapper {
+	left: 0 !important;
+	right: 0 !important;
+}
+html:lang(en) .vc-popover-caret.direction-bottom.align-center {
+	transform: translateX(0) translateY(-50%) rotate(45deg) !important;
+	left: 50px;
+	right: auto;
+}
+.CashReceipt .sweet-modal, .PaymentVoucher .sweet-modal {overflow: inherit !important;}
+.CashReceipt .sweet-modal, .PaymentVoucher .sweet-modal, .checkout_customer_modal .sweet-modal, #add_guests .sweet-modal, .sweet-modal-overlay .sweet-modal {
+	-webkit-transform: translate(-50%, 0) !important;
+	transform: translate(-50%, 0) !important;
+	top: 15px !important;
+}
+.vpd-controls button svg {
+	display: block;
+	margin: 0 auto;
+}
+div.vpd-month-label {width: auto;}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #4a5568 !important;
+  opacity: 1 !important; /* Firefox */
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #4a5568 !important;
+}
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #4a5568 !important;
+}
+select option {
+	font-family: "Dubai-Regular";
+	font-weight: normal;
+}
+.safe_movement_report input {
+	height: 2.25rem;
+	padding: 0 10px;
+	background: #fff !important;
+}
+.financial_table table.table[data-testid="resource-table"] thead tr th,
+.DepositTransactions_table table.table[data-testid="resource-table"] thead tr th,
+.guests_report_table table.table[data-testid="resource-table"] thead tr th,
+.UnitsMovementReport_table table.table[data-testid="resource-table"] thead tr th,
+div[dusk="occupieds-index-component"] table.table thead tr th,
+div[dusk="unit-cleanings-index-component"] table.table thead tr th,
+div[dusk="unit-maintenances-index-component"] table.table thead tr th,
+.customers_table table.table[data-testid="resource-table"] thead tr th,
+div[dusk="units-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="unit-categories-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="unit-general-features-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="unit-special-features-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="services-categories-index-component"] table.table[data-testid="resource-table"] thead tr th,
+.employee_contracts_table table.table[data-testid="resource-table"] thead tr th,
+div[dusk="teams-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="users-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="terms-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="activity-logs-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="sources-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="highlights-index-component"] table.table[data-testid="resource-table"] thead tr th,
+.online_reservations_table table.table[data-testid="resource-table"] thead tr th,
+.reservation_resources_table table.table[data-testid="resource-table"] thead tr th,
+div[dusk="reservation-transfers-index-component"] table.table[data-testid="resource-table"] thead tr th,
+div[dusk="roles-index-component"] table.table[data-testid="resource-table"] thead tr th {
+	padding: 10px 5px;
+	line-height: normal;
+	font-weight: normal;
+	font-size: 15px;
+	border: 1px solid #5E697C;
+	vertical-align: middle;
+	text-align: center !important;
+	color: #ffffff;
+	background: #4a5568;
+	letter-spacing: 0;
+}
+.financial_table table.table[data-testid="resource-table"] tbody tr,
+.DepositTransactions_table table.table[data-testid="resource-table"] tbody tr,
+.guests_report_table table.table[data-testid="resource-table"] tbody tr,
+.UnitsMovementReport_table table.table[data-testid="resource-table"] tbody tr,
+div[dusk="occupieds-index-component"] table.table tbody tr,
+div[dusk="unit-cleanings-index-component"] table.table tbody tr,
+div[dusk="unit-maintenances-index-component"] table.table tbody tr,
+.customers_table table.table[data-testid="resource-table"] tbody tr,
+div[dusk="units-index-component"] table.table tbody tr,
+div[dusk="unit-categories-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="unit-general-features-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="unit-special-features-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="services-categories-index-component"] table.table[data-testid="resource-table"] tbody tr,
+.employee_contracts_table table.table[data-testid="resource-table"] tbody tr,
+div[dusk="teams-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="users-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="terms-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="activity-logs-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="sources-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="highlights-index-component"] table.table[data-testid="resource-table"] tbody tr,
+.online_reservations_table table.table[data-testid="resource-table"] tbody tr,
+.reservation_resources_table table.table[data-testid="resource-table"] tbody tr,
+div[dusk="reservation-transfers-index-component"] table.table[data-testid="resource-table"] tbody tr,
+div[dusk="roles-index-component"] table.table[data-testid="resource-table"] tbody tr {
+	background: #fff;
+}
+.financial_table table.table[data-testid="resource-table"] tbody tr td,
+.DepositTransactions_table table.table[data-testid="resource-table"] tbody tr td,
+.guests_report_table table.table[data-testid="resource-table"] tbody tr td,
+.UnitsMovementReport_table table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="occupieds-index-component"] table.table tbody tr td,
+div[dusk="unit-cleanings-index-component"] table.table tbody tr td,
+div[dusk="unit-maintenances-index-component"] table.table tbody tr td,
+.customers_table table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="units-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="unit-categories-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="unit-general-features-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="unit-special-features-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="services-categories-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+.employee_contracts_table table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="teams-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="users-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="terms-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="activity-logs-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="sources-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="highlights-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+.online_reservations_table table.table[data-testid="resource-table"] tbody tr td,
+.reservation_resources_table table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="reservation-transfers-index-component"] table.table[data-testid="resource-table"] tbody tr td,
+div[dusk="roles-index-component"] table.table[data-testid="resource-table"] tbody tr td {
+	text-align: center !important;
+	padding: 6px 5px;
+	vertical-align: middle;
+	line-height: normal;
+	font-size: 15px;
+	border: 1px solid #ced4dc;
+	color: #000000;
+	font-weight: normal;
+	height: auto;
+	background: #ffffff;
+	min-width: auto;
+}
+.financial_table table.table[data-testid="resource-table"] tbody tr td span,
+.DepositTransactions_table table.table[data-testid="resource-table"] tbody tr td span,
+div[dusk="occupieds-index-component"] table.table[data-testid="resource-table"] tbody tr td span,
+div[dusk="occupieds-index-component"] table.table[data-testid="resource-table"] thead tr th span {
+	display: block;
+	padding: 0;
+	text-align: center !important;
+}
+.financial_table table.table[data-testid="resource-table"] tbody tr td div,
+.DepositTransactions_table table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="units-index-component"] table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="unit-categories-index-component"] table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="unit-general-features-index-component"] table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="unit-special-features-index-component"] table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="services-categories-index-component"] table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="occupieds-index-component"] table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="terms-index-component"] table.table[data-testid="resource-table"] tbody tr td div,
+div[dusk="sources-index-component"] table.table[data-testid="resource-table"] tbody tr td div {
+	display: block;
+	text-align: center !important;
+}
+.guests_report_table table.table[data-testid="resource-table"] tbody tr td label#customer-label,
+.customers_table table.table[data-testid="resource-table"] tbody tr td label#customer-label {
+	padding: 0 10px !important;
+	margin: 0 auto;
+	font-size: 14px !important;
+}
+.guests_report_table table.table[data-testid="resource-table"] tbody tr td .text-left,
+.UnitsMovementReport_table table.table[data-testid="resource-table"] tbody tr td .text-left,
+.customers_table table.table[data-testid="resource-table"] tbody tr td .text-left,
+div[dusk="units-index-component"] table.table tbody tr td .text-left,
+div[dusk="unit-categories-index-component"] table.table[data-testid="resource-table"] tbody tr td .text-left,
+div[dusk="unit-general-features-index-component"] table.table[data-testid="resource-table"] tbody tr td .text-left,
+div[dusk="unit-special-features-index-component"] table.table[data-testid="resource-table"] tbody tr td .text-left,
+div[dusk="occupieds-index-component"] table.table[data-testid="resource-table"] tbody tr td .text-left,
+.employee_contracts_table table.table[data-testid="resource-table"] tbody tr td .text-left,
+div[dusk="terms-index-component"] table.table[data-testid="resource-table"] tbody tr td .text-left,
+.online_reservations_table table.table[data-testid="resource-table"] tbody tr td .text-left,
+.reservation_resources_table table.table[data-testid="resource-table"] tbody tr td .text-left,
+div[dusk="reservation-transfers-index-component"] table.table[data-testid="resource-table"] tbody tr td .text-left {
+	text-align: center !important;
+}
+.guests_report_table table.table[data-testid="resource-table"] tbody tr td div span,
+div[dusk="unit-cleanings-index-component"] table.table thead tr th span,
+div[dusk="unit-cleanings-index-component"] table.table tbody tr td span,
+div[dusk="unit-maintenances-index-component"] table.table thead tr th span,
+div[dusk="unit-maintenances-index-component"] table.table tbody tr td span {
+	display: block !important;
+	text-align: center !important;
+}
+div[dusk="unit-cleanings-index-component"] table.table tbody tr td .font-bold,
+div[dusk="unit-maintenances-index-component"] table.table tbody tr td .font-bold,
+.customers_table table.table[data-testid="resource-table"] tbody tr td .font-bold,
+div[dusk="units-index-component"] table.table tbody tr td .font-bold,
+.employee_contracts_table table.table[data-testid="resource-table"] tbody tr td .font-bold,
+div[dusk="activity-logs-index-component"] table.table[data-testid="resource-table"] tbody tr td .font-bold,
+.online_reservations_table table.table[data-testid="resource-table"] tbody tr td .font-bold,
+.reservation_resources_table table.table[data-testid="resource-table"] tbody tr td .font-bold,
+.reservation_resources_table table.table[data-testid="resource-table"] tbody tr td .font-bold b,
+div[dusk="reservation-transfers-index-component"] table.table[data-testid="resource-table"] tbody tr td .font-bold b {
+	font-weight: normal;
+}
+div[dusk="units-index-component"] table.table[data-testid="resource-table"] tbody tr td img,
+div[dusk="teams-index-component"] table.table[data-testid="resource-table"] tbody tr img {
+	display: block;
+	margin: 0 auto;
+}
+div[dusk="unit-general-features-index-component"] .py-3.flex.items-center.border-b.border-50, div[dusk="highlights-index-component"] .py-3.flex.items-center.border-b.border-50 {display: none;}
+div[dusk="highlights-index-component"] table.table[data-testid="resource-table"] tbody tr td .inline-flex.items-center.text-left .rounded.mr-2 {
+	margin: 0 5px;
+}
+div[dusk="highlights-index-component"] table.table tbody tr td:first-child,
+div[dusk="highlights-index-component"] table.table thead tr th:first-child,
+div[dusk="online-reservations-index-component"] table.table thead tr th.w-8,
+div[dusk="online-reservations-index-component"] table.table tbody tr td.w-8,
+div[dusk="online-reservations-index-component"] table.table thead tr th:last-of-type,
+div[dusk="online-reservations-index-component"] table.table tbody tr td:last-of-type,
+div[dusk="transactions-index-component"] table.table thead tr th.w-8,
+div[dusk="transactions-index-component"] table.table tbody tr td.w-8,
+div[dusk="occupieds-index-component"] table.table thead tr th:last-of-type,
+div[dusk="occupieds-index-component"] table.table tbody tr td:last-of-type,
+div[dusk="reservation-resources-lens-component"] table.table tbody tr td:first-child,
+div[dusk="reservation-resources-lens-component"] table.table thead tr th:first-child,
+div[dusk="employee-contracts-lens-component"] table.table thead tr th:last-of-type,
+div[dusk="employee-contracts-lens-component"] table.table tbody tr td:last-of-type,
+div[dusk="employee-contracts-lens-component"] table.table tbody tr td:first-child,
+div[dusk="employee-contracts-lens-component"] table.table thead tr th:first-child,
+div[dusk="teams-index-component"] table.table tbody tr td:first-child,
+div[dusk="teams-index-component"] table.table thead tr th:first-child {
+	display: none;
+}
+.flatpickr-months {height: 40px;}
+.flatpickr-months span.flatpickr-prev-month, .flatpickr-months span.flatpickr-next-month {
+	height: 40px;
+	line-height: 40px;
+	padding: 12px 10px;
+	display: block;
+}
+.flatpickr-months .flatpickr-month {
+	height: 40px !important;
+}
+.flatpickr-months .flatpickr-month .flatpickr-current-month {
+	padding: 5px 0;
+	height: 40px;
+	display: flex;
+	justify-content: space-between;
+}
+.flatpickr-months .flatpickr-month .flatpickr-current-month select.flatpickr-monthDropdown-months {
+	height: 30px;
+	border: 1px solid #cecece;
+	background-color: #fafafa !important;
+	background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6"><path fill="%2335393C" fill-rule="nonzero" d="M8.293.293a1 1 0 0 1 1.414 1.414l-4 4a1 1 0 0 1-1.414 0l-4-4A1 1 0 0 1 1.707.293L5 3.586 8.293.293z"/></svg>');
+	background-position: center right .75rem;
+	background-size: 10px 6px;
+	background-repeat: no-repeat;
+	appearance: none;
+	-moz-appearance: none;
+	padding: 0 20px 0 5px;
+	font-size: 16px;
+	min-width: 120px;
+}
+.flatpickr-months .flatpickr-month .flatpickr-current-month .numInputWrapper {
+	height: 30px;
+	background: #fafafa;
+	border-radius: 4px;
+	min-width: 100px;
+	line-height: 30px;
+	border: 1px solid #cecece;
+	position: relative;
+	max-width: 120px;
+}
+.flatpickr-months .flatpickr-month .flatpickr-current-month .numInputWrapper input.numInput.cur-year {
+	float: left;
+	padding: 0 20px 0 10px;
+}
+.flatpickr-months .flatpickr-month .flatpickr-current-month .numInputWrapper span.arrowUp,
+.flatpickr-months .flatpickr-month .flatpickr-current-month .numInputWrapper span.arrowDown {
+	opacity: 1;
+}
+.flatpickr-innerContainer span.flatpickr-weekday {
+	font-weight: normal;
+	font-size: 16px;
+}
+.tooltip.tooltip_reset {
+	left: 25px !important;
+	top: -7px !important;
+}
+html:lang(en) .tooltip.tooltip_reset {left: -24px !important;}
+.tooltip.tooltip_reset .tooltip-inner {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+.tooltip.tooltip_reset .tooltip-arrow {
+	display: inline-block;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-width: 7px 7px 0 7px;
+	border-color: #000000 transparent transparent transparent;
+	line-height: 0;
+	_border-color: #000000 #ffffff #ffffff #ffffff;
+	_filter: progid:DXImageTransform.Microsoft.Chroma(color='#ffffff');
+	position: absolute;
+	left: 12px !important;
+	bottom: -5px;
+}
+html:lang(en) .tooltip.tooltip_reset .tooltip-arrow {
+	right: 12px !important;
+	left: auto !important;
+}
+.ReservationInvoices_Modal .input_group .vcc-datepicker span.v-date-picker input[type="input"] {
+  height: 40px;
+  padding: 0 10px;
+  font-size: 1rem;
+}
+canvas#bar-chart {
+	max-height: 393px;
+}
+.dropmenusize .bg-white.border {
+	min-width: 220px;
+	width: auto !important;
+	max-width: 600px;
+}
+html:lang(ar) .ql-editor {
+  direction: rtl !important;
+  text-align: right !important;
+}
+html:lang(en) .ql-editor {
+  direction: ltr !important;
+  text-align: left !important;
+}
+html:lang(ar) .ql-editor ol, html:lang(ar) .ql-editor ul {
+  padding-left: 0 !important;
+  padding-right: 1.5em !important;
+}
+html:lang(ar) .ql-editor ol li:not(.ql-direction-rtl), html:lang(ar) .ql-editor ul li:not(.ql-direction-rtl) {
+  padding-left: 0 !important;
+  padding-right: 1.5em;
+}
+html:lang(ar) .ql-editor li:not(.ql-direction-rtl)::before {
+  margin-left: .3em !important;
+  margin-right: -1.5em !important;
+}
+.delete_confirm_modal_content {
+  position: relative;
+  padding: 30px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.delete_confirm_modal_content h1 {
+  display: block;
+  font-family: 'Dubai-Medium';
+  font-size: 20px;
+  margin: 0 auto 2px;
+  color: #000;
+}
+.delete_confirm_modal_content h2 {
+  font-family: 'Dubai-Medium';
+  font-size: 18px;
+  color: #777777;
+  margin: 0 auto 15px;
+}
+.delete_confirm_modal_content .alert_info {
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  display: block;
+  padding: 10px 15px;
+  border-radius: .3rem;
+  color: #856404;
+  margin: 0 auto 25px;
+  min-width: 500px;
+  font-family: 'Dubai-Medium';
+  font-size: 15px;
+}
+.delete_confirm_modal_content .buttons_delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.delete_confirm_modal_content .buttons_delete button {
+  padding: 0 10px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dc3545;
+  min-width: 120px;
+  margin: 10px 10px 0;
+  border-radius: .3rem;
+  font-family: 'Dubai-Medium';
+  color: #fff;
+  font-size: 15px;
+}
+
+
+.delete_confirm_modal_content .buttons_treat button {
+	padding: 0 10px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: green;
+	min-width: 120px;
+	margin: 10px 10px 0;
+	border-radius: .3rem;
+	font-family: 'Dubai-Medium';
+	color: #fff;
+	font-size: 15px;
+  }
+
+.delete_confirm_modal_content .buttons_delete button.yes_create_button{
+    background: #4099de !important;
+    color: #fff;
+}
+.delete_confirm_modal_content .buttons_delete button.yes_create_button:hover{
+    background: #0071C9 !important;
+    color: #fff;
+}
+
+.delete_confirm_modal_content .buttons_delete button:hover {
+  background: #cd2636;
+}
+.delete_confirm_modal_content .buttons_delete button.back_delete_button {
+  background: #6c757d;
+}
+.delete_confirm_modal_content .buttons_delete button.back_delete_button:hover {
+  background: #5D666E;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Portrait phones and smaller */
+@media (min-width: 320px) and (max-width: 600px) {
+	.h-header .dropdown-trigger svg {display: inline-block;}
+	.dropmenusize .bg-white.border {
+		max-width: 300px;
+	}
+	.sweet-modal .sweet-content {
+		max-height: 500px !important;
+		overflow-y: auto;
+		display: block !important;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f5f5f5;
+	}
+	.sweet-modal .sweet-content::-webkit-scrollbar {width: 6px;}
+	.sweet-modal .sweet-content::-webkit-scrollbar-track {background: #f5f5f5;}
+	.sweet-modal .sweet-content::-webkit-scrollbar-thumb {background: #ccc;}
+	.sweet-modal .sweet-content::-webkit-scrollbar-thumb:window-inactive {background: #f5f5f5;}
+	div[dusk="services-categories-index-component"] nav.flex.items-center,
+	div[dusk="customers-index-component"] nav.flex.items-center,
+	div[dusk="units-index-component"] nav.flex.items-center,
+	div[dusk="unit-categories-index-component"] nav.flex.items-center,
+	div[dusk="units-movement-report-lens-component"] nav.flex.items-center,
+	div[dusk="guests-report-lens-component"] nav.flex.items-center,
+	div[dusk="users-index-component"] nav.flex.items-center,
+	div[dusk="unit-general-features-index-component"] nav.flex.items-center,
+	div[dusk="unit-special-features-index-component"] nav.flex.items-center,
+	div[dusk="unit-options-index-component"] nav.flex.items-center,
+	div[dusk="occupieds-index-component"] nav.flex.items-center,
+	div[dusk="unit-cleanings-index-component"] nav.flex.items-center,
+	div[dusk="unit-maintenances-index-component"] nav.flex.items-center,
+	div[dusk="reservation-transfers-index-component"] nav.flex.items-center,
+	div[dusk="terms-index-component"] nav.flex.items-center,
+	div[dusk="roles-index-component"] nav.flex.items-center,
+	div[dusk="activity-logs-index-component"] nav.flex.items-center,
+	div[dusk="sources-index-component"] nav.flex.items-center,
+	div[dusk="services-categories-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="customers-index-component"] nav.flex.items-cente .flex.text-smr,
+	div[dusk="units-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-categories-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="units-movement-report-lens-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="guests-report-lens-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="users-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-general-features-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-special-features-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-options-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="occupieds-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-cleanings-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-maintenances-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="reservation-transfers-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="terms-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="roles-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="activity-logs-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="sources-index-component"] nav.flex.items-center .flex.text-sm {
+		display: block;
+	}
+	.overflowautoforsweet {
+		max-height: 420px;
+		overflow: auto;
+	}
+	.custom_add_client .modal .bg-white.rounded-lg.shadow-lg.overflow-hidden {width: 100% !important;}
+	input[type="color"],
+	input[type="date"],
+	input[type="datetime"],
+	input[type="datetime-local"],
+	input[type="email"],
+	input[type="month"],
+	input[type="number"],
+	input[type="password"],
+	input[type="search"],
+	input[type="tel"],
+	input[type="text"],
+	input[type="time"],
+	input[type="url"],
+	input[type="week"],
+	select,
+	select:focus,
+	textarea {
+	  font-size: 16px;
+	  box-shadow: none;
+	}
+	.main_calendar_area {width: 100%;}
+	body {overflow-x: hidden;}
+	.main_calendar_area .vc-popover-content-wrapper.is-interactive {
+		transform: translate3d(0px, 0px, 0px) !important;
+		top: 40px !important;
+		will-change: auto !important;
+		width: 100% !important;
+	}
+	.main_calendar_area .vc-popover-content-wrapper.is-interactive .vc-popover-content.direction-bottom {
+		width: 100% !important;
+		margin: 0 auto !important;
+	}
+	.main_calendar_area .vc-popover-content-wrapper.is-interactive .vc-popover-content.direction-bottom .vc-container.vc-relative.vc-reset {width: auto !important;}
+	.checkout_customer_modal .sweet-modal {top: 44%;}
+	.checkout_customer_modal .sweet-content-content .checkout_customer {
+		max-height: 420px;
+		overflow: scroll;
+	}
+	.icons_plus_phone {display: flex;}
+	.logo_sidebar .imgthumb {
+		height: 70px;
+		width: 70px;
+	}
+	.h-header .dropdown a.h-dropdown-trigger {width: auto !important;}
+	.h-header .icons_plus {display: none;}
+	.card .units-options .flex {display: block;}
+	.card .units-options .flex .w-1\/5 {
+		width: 100%;
+		padding: 1rem 1rem 0;
+	}
+	.card .units-options .flex .w-1\/2 {
+		width: 100%;
+		padding: 1rem;
+	}
+	.w-sidebar .sidebar-icon {
+		margin: 0 0 0 10px;
+		width: 25px;
+	}
+	html:lang(en) .w-sidebar .sidebar-icon {margin: 0 10px 0 0;}
+	.w-sidebar .sidebar-icon svg, .w-sidebar .sidebar-icon svg.sure_bills_icon {
+		margin: 0 auto;
+		width: 25px;
+	}
+	.w-sidebar .sidebar-label {font-size: 17px;}
+	.min-h-screen .content {width: 100%;}
+	#new_login, #new_reset {width: 100%;}
+	#new_reservation .reservation_details .another_details .flex .w-1\/4 {width: 50%;}
+	#new_reservation .summery_details .new-reservation-table table.show_table_one tr td.prices_currency {padding: 0 !important;}
+	.sweet-modal .sweet-content .sweet-content-content .w-1\/2.px-2.mb-1 {
+		width: 100%;
+		margin: 10px auto;
+		padding: 0;
+	}
+	html:lang(ar) .sweet-content-content input[type="tel"], html:lang(ar) .sweet-content-content input[type="phone"] {
+		width: auto;
+	}
+	html:lang(ar) .vue-tel-input, html:lang(en) .vue-tel-input {
+		position: relative;
+	}
+	html:lang(ar) .vue-tel-input .dropdown, html:lang(en) .vue-tel-input .dropdown {
+		position: initial;
+	}
+	html:lang(ar) .vue-tel-input .dropdown ul, html:lang(en) .vue-tel-input .dropdown ul {
+		max-width: 100%;
+	}
+	html:lang(ar) .h-header .dropdown-trigger {
+		width: 60px !important;
+	}
+	.custom_add_client .flex.border-b.border-40.w-full {
+		display: block;
+	}
+	.custom_add_client .w-1\/5.py-6.px-8, .custom_add_client .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	html:lang(ar) .h-header .item-l.flex, html:lang(en) .h-header .item-l.flex {
+		margin: 0 auto;
+	}
+	html:lang(ar) .h-header .item-l.flex .pl-search.form-control, html:lang(en) .h-header .item-l.flex .pl-search.form-control {
+		width: 100%;
+	}
+	html:lang(ar) .h-header .dropdown.relative.ml-auto.h-9.flex.items-center.dropdown-right, html:lang(en) .h-header .dropdown.relative.ml-auto.h-9.flex.items-center.dropdown-right {
+		margin: 0 auto !important;
+	}
+	html:lang(ar) .h-header .dropdown-trigger, html:lang(en) .h-header .dropdown-trigger {
+		margin: 0 auto;
+	}
+	html:lang(ar) .h-header .item-r.flex.justify-between.items-center, html:lang(en) .h-header .item-r.flex.justify-between.items-center {
+		width: 20%;
+	}
+	html:lang(ar) .h-header .dropdown-menu-right::after {
+		left: 5px;
+	}
+	html:lang(en) .h-header .dropdown-menu-right::after {
+		right: 5px;
+		left: auto;
+	}
+	.flex.flex-wrap.justify-end button {
+		margin: 5px;
+		padding: 0 1rem;
+	}
+	nav {
+		margin: 0 0 10px;
+	}
+	.demo-app-calendar .fc-toolbar {
+		display: block;
+		margin-top: -30px;
+	}
+	.demo-app-calendar .fc-toolbar .fc-left, .demo-app-calendar .fc-toolbar .fc-right {
+		width: 100%;
+		display: block;
+		text-align: center;
+	}
+	.demo-app-calendar .fc-view-container .fc-view {
+		width: 100%;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		display: block;
+	}
+	.demo-app-calendar .fc-view-container .fc-view table {
+		width: 100%;
+		table-layout: inherit;
+	}
+	.notipage {
+		display: block;
+	}
+	.notipage .w-1\/5.py-6.px-8, .notipage .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6 {
+		box-shadow: 0 0 30px 5px #1C232C;
+		z-index: 999999999999999999999999;
+		padding-top: 95px !important;
+		padding-bottom: 60px;
+		padding: 0 10px;
+	}
+	.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6 .w-sidebar {
+		padding: 0px 10px !important;
+		margin: 0 auto;
+	}
+	.flex.items-center.w-error {
+		display: block;
+		width: auto;
+		text-align: center;
+	}
+	.flex.items-center.w-error .flex-no-shrink.illustration {
+		margin: 0 auto;
+		display: block;
+		flex-shrink: unset;
+	}
+	.flex.items-center.w-error .flex-no-shrink.illustration svg {
+		width: 100%;
+		margin: 50px auto 0;
+		height: auto;
+	}
+	.flex.items-center.w-error div h1.text-error-title.font-normal.mb-1 {
+		line-height: 1;
+		margin: 0 auto;
+	}
+	html:lang(ar) .sweet-content-content span.vc-reset, html:lang(en) .sweet-content-content span.vc-reset {
+		position: relative;
+	}
+	html:lang(ar) .sweet-content-content span.vc-reset .vc-popover-content-wrapper.is-interactive {
+		right: 0 !important;
+		left: auto !important;
+		transform: unset !important;
+		top: 100% !important;
+	}
+	.search_transactions .flex, .search_transactions_monthly {
+		display: block;
+		text-align: left;
+	}
+	.search_transactions .flex div h3, .search_transactions_monthly div h3 {
+		padding: 10px .75rem 0;
+	}
+	.search_transactions_monthly .sm\:w-full.md\:w-1\/3.lg\:w-1\/3.xl\:w-1\/3.mb-4.bg-white {
+		margin: 0 auto;
+	}
+	.services_dev .text-70.absolute.left-1, .services_dev .flex.flex-wrap.overflow-hidden.card.py-2.px-2 {
+		display: block;
+		width: 100%;
+		position: relative;
+		left: 0 !important;
+	}
+	.services_dev .w-full .text-80 {margin: 0;}
+	.services_dev .flex .w-1\/3 {
+		width: 50%;
+		float: right;
+	}
+	.card.general_settings form .flex {
+		display: block;
+	}
+	.card.general_settings form .flex .w-1\/5.py-6.px-8, .card.general_settings form .flex .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	.card.general_settings form .flex .w-1\/5.py-6.px-8 {
+		padding: 10px 10px 0;
+	}
+	.card.general_settings form .flex .w-1\/5.py-6.px-8 label {
+		line-height: 1;
+		margin: 0 auto;
+		display: block;
+	}
+	.card.general_settings form input {
+		border: 1px solid #ddd;
+		background: #fff;
+	}
+	.p-2.bg-teal-400.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2, .p-2.bg-yellow-600.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2 {
+		font-size: 14px;
+		line-height: 23px;
+		border-radius: 4px;
+		padding: 4px;
+	}
+	.p-2.bg-teal-400.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2 span.font-semibold.mr-2.text-center.flex-auto, .p-2.bg-yellow-600.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2 span.font-semibold.mr-2.text-center.flex-auto {
+		font-family: "Dubai-Regular";
+		font-weight: normal;
+	}
+	div[dusk="filter-selector"] a.dropdown-trigger {
+		width: 4em !important;
+		padding: 0 5px 0 10px;
+	}
+	div[dusk="select-all-dropdown"] a.dropdown-trigger {
+		width: 4em !important;
+		padding: 0 5px 0 10px;
+	}
+	.new-reservation-table .flex {
+		display: block;
+	}
+	.new-reservation-table .flex .lg\:w-1\/8.md\:w-1\/4.sm\:w-full {
+		width: 100% !important;
+	}
+	.demo-app-calendar.fc.fc-ltr.fc-unthemed .fc-view.fc-dayGridMonth-view.fc-dayGrid-view table table {
+		height: auto;
+	}
+	.demo-app-calendar.fc.fc-ltr.fc-unthemed .fc-view.fc-dayGridMonth-view.fc-dayGrid-view table .fc-scroller.fc-day-grid-container {
+		height: 475px !important;
+	}
+	.addServiceModal .super-select-container.super-select-dropdown-visible {
+		background: #3c434c;
+	}
+	.addServiceModal .super-select-container.super-select-dropdown-visible .super-select-mobile-header {
+		padding: 20px 0;
+		height: auto;
+		margin: 0 10px;
+	}
+	.addServiceModal .super-select-container.super-select-dropdown-visible .super-select-mobile-header .super-select-left-arrow {
+		margin: 0 5px;
+	}
+	.addServiceModal .super-select-container.super-select-dropdown-visible label.super-select-input {
+		border: none !important;
+		padding: 10px;
+		height: auto;
+		max-height: 60px;
+	}
+	.addServiceModal .super-select-container.super-select-dropdown-visible label.super-select-input::after {
+		display: none;
+	}
+	.addServiceModal .super-select-container.super-select-dropdown-visible .super-select-dropdown {
+		top: 116px;
+	}
+	.addServiceModal .super-select-container.super-select-dropdown-visible {
+		height: 100%;
+	}
+	.search_transactions .filter_item, .search_transactions.deposit_management_filter .filter_item {
+		width: 50%;
+		padding: 5px;
+	}
+	.main_calendar_area .c-date input#date-input {
+		font-size: 16px;
+		line-height: 30px;
+		height: 30px;
+	}
+	.main_calendar_area .c-date div.vc-weekday {font-size: 16px;font-weight: normal;}
+	.main_calendar_area .c-date span.vc-day-content {
+		font-size: 16px;
+		font-weight: normal;
+	}
+	.main_calendar_area .calendar_right {
+		float: none;
+		width: auto;
+	}
+	.main_calendar_area .calendar_left {
+		float: none;
+		width: 100%;
+		margin: 5px auto 0;
+		justify-content: space-between;
+	}
+	.main_calendar_area .calendar_left span {
+		text-align: center;
+		font-size: 15px;
+		margin: 0 auto;
+	}
+	.search_transactions .filter_item label {
+		float: right;
+		width: 35%;
+		margin: 0 auto;
+		font-size: 15px;
+		line-height: 36px;
+		padding: 0;
+	}
+	html:lang(en) .search_transactions .filter_item label {
+		float: left;
+		font-size: 14px;
+		width: 43%;
+	}
+	.reservations_cost {
+		padding: 10px 20px;
+		width: 50%;
+	}
+	.cardunit .control .submenu {min-width: auto;}
+	.cardunit .control .submenu ul li a {
+		font-size: 13px;
+		padding: 10px 0;
+		line-height: 20px;
+	}
+	.cardunit .control .submenu svg {
+		height: 20px;
+		width: 20px;
+	}
+	html:lang(en) .main_calendar_area .calendar_right {
+		float: none;
+		width: 100%;
+		font-size: 22px;
+	}
+	html:lang(en) .main_calendar_area .calendar_left {
+		width: 100%;
+		float: none;
+	}
+	html:lang(en) .main_calendar_area .calendar_left span {
+		text-align: center;
+		font-size: 14px;
+		margin: 0 auto;
+	}
+	.upgrade_subscription {font-size: 14px;}
+}
+
+/* Smart phones and Tablets */
+@media (min-width: 481px) and (max-width: 767px) {
+	.h-header .dropdown-trigger svg {display: inline-block;}
+	.dropmenusize .bg-white.border {
+		max-width: 340px;
+	}
+	div[dusk="services-categories-index-component"] nav.flex.items-center,
+	div[dusk="customers-index-component"] nav.flex.items-center,
+	div[dusk="units-index-component"] nav.flex.items-center,
+	div[dusk="unit-categories-index-component"] nav.flex.items-center,
+	div[dusk="units-movement-report-lens-component"] nav.flex.items-center,
+	div[dusk="guests-report-lens-component"] nav.flex.items-center,
+	div[dusk="users-index-component"] nav.flex.items-center,
+	div[dusk="unit-general-features-index-component"] nav.flex.items-center,
+	div[dusk="unit-special-features-index-component"] nav.flex.items-center,
+	div[dusk="unit-options-index-component"] nav.flex.items-center,
+	div[dusk="occupieds-index-component"] nav.flex.items-center,
+	div[dusk="unit-cleanings-index-component"] nav.flex.items-center,
+	div[dusk="unit-maintenances-index-component"] nav.flex.items-center,
+	div[dusk="reservation-transfers-index-component"] nav.flex.items-center,
+	div[dusk="terms-index-component"] nav.flex.items-center,
+	div[dusk="roles-index-component"] nav.flex.items-center,
+	div[dusk="activity-logs-index-component"] nav.flex.items-center,
+	div[dusk="sources-index-component"] nav.flex.items-center,
+	div[dusk="services-categories-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="customers-index-component"] nav.flex.items-cente .flex.text-smr,
+	div[dusk="units-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-categories-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="units-movement-report-lens-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="guests-report-lens-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="users-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-general-features-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-special-features-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-options-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="occupieds-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-cleanings-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="unit-maintenances-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="reservation-transfers-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="terms-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="roles-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="activity-logs-index-component"] nav.flex.items-center .flex.text-sm,
+	div[dusk="sources-index-component"] nav.flex.items-center .flex.text-sm {
+		display: block;
+	}
+	.overflowautoforsweet {
+		max-height: 420px;
+		overflow: auto;
+	}
+	.custom_add_client .modal .bg-white.rounded-lg.shadow-lg.overflow-hidden {width: 100% !important;}
+	input[type="color"],
+	input[type="date"],
+	input[type="datetime"],
+	input[type="datetime-local"],
+	input[type="email"],
+	input[type="month"],
+	input[type="number"],
+	input[type="password"],
+	input[type="search"],
+	input[type="tel"],
+	input[type="text"],
+	input[type="time"],
+	input[type="url"],
+	input[type="week"],
+	select,
+	select:focus,
+	textarea {
+	  font-size: 16px;
+	  box-shadow: none;
+	}
+	.upgrade_subscription {font-size: 14px;}
+	.checkout_customer_modal .sweet-modal {top: 44%;}
+	.checkout_customer_modal .sweet-content-content .checkout_customer {
+		max-height: 420px;
+		overflow: scroll;
+	}
+	.icons_plus_phone {display: flex;}
+	.h-header .dropdown a.h-dropdown-trigger {width: auto !important;}
+	.h-header .icons_plus {display: none;}
+	.card .units-options .flex {display: block;}
+	.card .units-options .flex .w-1\/5 {
+		width: 100%;
+		padding: 1rem 1rem 0;
+	}
+	.card .units-options .flex .w-1\/2 {
+		width: 100%;
+		padding: 1rem;
+	}
+	.w-sidebar .sidebar-icon {
+		margin: 0 0 0 10px;
+		width: 25px;
+	}
+	html:lang(en) .w-sidebar .sidebar-icon {margin: 0 10px 0 0;}
+	.w-sidebar .sidebar-icon svg, .w-sidebar .sidebar-icon svg.sure_bills_icon {
+		margin: 0 auto;
+		width: 25px;
+	}
+	.w-sidebar .sidebar-label {font-size: 17px;}
+	.min-h-screen .content {width: 100%;}
+	#new_login, #new_reset {width: 100%;}
+	.sweet-modal .sweet-content .sweet-content-content .w-1\/2.px-2.mb-1 {
+		width: 100%;
+		margin: 10px auto;
+		padding: 0;
+	}
+	html:lang(ar) .sweet-content-content input[type="tel"], html:lang(ar) .sweet-content-content input[type="phone"] {
+		width: auto;
+	}
+	html:lang(ar) .vue-tel-input, html:lang(en) .vue-tel-input {
+		position: relative;
+	}
+	html:lang(ar) .vue-tel-input .dropdown, html:lang(en) .vue-tel-input .dropdown {
+		position: initial;
+	}
+	html:lang(ar) .vue-tel-input .dropdown ul, html:lang(en) .vue-tel-input .dropdown ul {
+		max-width: 100%;
+	}
+	html:lang(ar) .h-header .dropdown-trigger {
+		width: 60px !important;
+	}
+	.custom_add_client .flex.border-b.border-40.w-full {
+		display: block;
+	}
+	.custom_add_client .w-1\/5.py-6.px-8, .custom_add_client .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	html:lang(ar) .h-header .item-l.flex, html:lang(en) .h-header .item-l.flex {
+		margin: 0 auto;
+	}
+	html:lang(ar) .h-header .item-l.flex .pl-search.form-control, html:lang(en) .h-header .item-l.flex .pl-search.form-control {
+		width: 100%;
+	}
+	html:lang(ar) .h-header .dropdown.relative.ml-auto.h-9.flex.items-center.dropdown-right, html:lang(en) .h-header .dropdown.relative.ml-auto.h-9.flex.items-center.dropdown-right {
+		margin: 0 auto !important;
+	}
+	html:lang(ar) .h-header .dropdown-trigger, html:lang(en) .h-header .dropdown-trigger {
+		margin: 0 auto;
+	}
+	html:lang(ar) .h-header .item-r.flex.justify-between.items-center, html:lang(en) .h-header .item-r.flex.justify-between.items-center {
+		width: 20%;
+	}
+	html:lang(ar) .h-header .dropdown-menu-right::after {
+		left: 5px;
+	}
+	html:lang(en) .h-header .dropdown-menu-right::after {
+		right: 5px;
+		left: auto;
+	}
+	.flex.flex-wrap.justify-end button {
+		margin: 5px;
+		padding: 0 1rem;
+	}
+	nav {
+		margin: 0 0 10px;
+	}
+	.notipage {
+		display: block;
+	}
+	.notipage .w-1\/5.py-6.px-8, .notipage .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6 {
+		box-shadow: 0 0 30px 5px #1C232C;
+		z-index: 999999999999999999999999;
+		padding-top: 95px !important;
+		padding-bottom: 60px;
+		padding: 0 10px;
+	}
+	.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6 .w-sidebar {
+		padding: 0px 10px !important;
+		margin: 0 auto;
+	}
+	.flex.items-center.w-error {
+		display: block;
+		width: auto;
+		text-align: center;
+	}
+	.flex.items-center.w-error .flex-no-shrink.illustration {
+		margin: 0 auto;
+		display: block;
+		flex-shrink: unset;
+	}
+	.flex.items-center.w-error .flex-no-shrink.illustration svg {
+		width: 100%;
+		margin: 50px auto 0;
+		height: auto;
+	}
+	.flex.items-center.w-error div h1.text-error-title.font-normal.mb-1 {
+		line-height: 1;
+		margin: 0 auto;
+	}
+	html:lang(ar) .sweet-content-content span.vc-reset, html:lang(en) .sweet-content-content span.vc-reset {
+		position: relative;
+	}
+	html:lang(ar) .sweet-content-content span.vc-reset .vc-popover-content-wrapper.is-interactive {
+		right: 0 !important;
+		left: auto !important;
+		transform: unset !important;
+		top: 100% !important;
+	}
+	.search_transactions .flex, .search_transactions_monthly {
+		display: block;
+		text-align: left;
+	}
+	.search_transactions .flex div h3, .search_transactions_monthly div h3 {
+		padding: 10px .75rem 0;
+	}
+	.search_transactions_monthly .sm\:w-full.md\:w-1\/3.lg\:w-1\/3.xl\:w-1\/3.mb-4.bg-white {
+		margin: 0 auto;
+	}
+	.services_dev .text-70.absolute.left-1, .services_dev .flex.flex-wrap.overflow-hidden.card.py-2.px-2 {
+		display: block;
+		width: 100%;
+		position: relative;
+		left: 0 !important;
+	}
+	.services_dev .w-full .text-80 {
+		margin: 0 auto;
+	}
+	.services_dev .flex .w-1\/3 {
+		width: 50%;
+		float: right;
+	}
+	.card.general_settings form .flex {
+		display: block;
+	}
+	.card.general_settings form .flex .w-1\/5.py-6.px-8, .card.general_settings form .flex .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	.card.general_settings form .flex .w-1\/5.py-6.px-8 {
+		padding: 10px 10px 0;
+	}
+	.card.general_settings form .flex .w-1\/5.py-6.px-8 label {
+		line-height: 1;
+		margin: 0 auto;
+		display: block;
+	}
+	.card.general_settings form input {
+		border: 1px solid #ddd;
+		background: #fff;
+	}
+	.p-2.bg-teal-400.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2, .p-2.bg-yellow-600.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2 {
+		font-size: 14px;
+		line-height: 23px;
+		border-radius: 4px;
+		padding: 4px;
+	}
+	.p-2.bg-teal-400.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2 span.font-semibold.mr-2.text-center.flex-auto, .p-2.bg-yellow-600.items-center.w-full.text-indigo-100.leading-none.lg\:rounded-full.flex.lg\:inline-flex.mb-2.mt-2 span.font-semibold.mr-2.text-center.flex-auto {
+		font-family: "Dubai-Regular";
+		font-weight: normal;
+	}
+	div[dusk="filter-selector"] a.dropdown-trigger {
+		width: 4em !important;
+		padding: 0 5px 0 10px;
+	}
+	div[dusk="select-all-dropdown"] a.dropdown-trigger {
+		width: 4em !important;
+		padding: 0 5px 0 10px;
+	}
+	.new-reservation-table .flex {
+		display: block;
+	}
+	.new-reservation-table .flex .lg\:w-1\/8.md\:w-1\/4.sm\:w-full {
+		width: 100% !important;
+	}
+	.search_transactions .filter_item, .search_transactions.deposit_management_filter .filter_item {
+		width: 50%;
+	}
+	.c-date .vc-reset input#date-input {font-size: 21px !important;}
+	.main_calendar_area .calendar_right {
+		float: none;
+		width: auto;
+	}
+	.main_calendar_area .calendar_left {
+		float: none;
+		width: 100%;
+		margin: 5px auto 0;
+	}
+	.main_calendar_area .calendar_left span {
+		text-align: center;
+		font-size: 17px;
+		margin: 0 auto;
+	}
+	.search_transactions .filter_item label {
+		float: right;
+		width: 35%;
+		margin: 0 auto;
+		font-size: 15px;
+		line-height: 36px;
+	}
+	.reservations_cost {
+		padding: 10px 20px;
+		width: 50%;
+	}
+	.cardunit .control .submenu {min-width: auto;}
+	.cardunit .control .submenu ul li a {
+		font-size: 15px;
+		padding: 10px 0;
+		line-height: 20px;
+	}
+	.cardunit .control .submenu svg {
+		height: 20px;
+		width: 20px;
+	}
+	html:lang(en) .main_calendar_area .calendar_right {
+		float: none;
+		width: 100%;
+		font-size: 25px;
+	}
+	html:lang(en) .main_calendar_area .calendar_left {
+		width: 100%;
+		float: none;
+	}
+	html:lang(en) .main_calendar_area .calendar_left span {
+		text-align: center;
+		font-size: 15px;
+		margin: 0 auto;
+	}
+}
+
+/* Small Screens */
+@media (min-width: 768px) and (max-width: 991px) {
+	.dropmenusize .bg-white.border {
+		max-width: 500px;
+	}
+	.h-header .icons_plus {display: none;}
+	.icons_plus_phone {
+		display: flex;
+		margin: 0 -10px 20px -10px;
+	}
+	.overflowautoforsweet {
+		max-height: 420px;
+		overflow: auto;
+	}
+	.upgrade_subscription {font-size: 15px;}
+	.cardunit .control .submenu ul li a {
+		font-size: 14px;
+		padding: 10px 5px;
+	}
+	.h-header .dropdown a.h-dropdown-trigger {width: auto !important;}
+	.card .units-options .flex {display: block;}
+	.card .units-options .flex .w-1\/5 {
+		width: 100%;
+		padding: 1rem 1rem 0;
+	}
+	.card .units-options .flex .w-1\/2 {
+		width: 100%;
+		padding: 1rem;
+	}
+	.w-sidebar .sidebar-icon {
+		margin: 0 0 0 10px;
+		width: 25px;
+	}
+	html:lang(en) .w-sidebar .sidebar-icon {margin: 0 10px 0 0;}
+	.w-sidebar .sidebar-icon svg, .w-sidebar .sidebar-icon svg.sure_bills_icon {
+		margin: 0 auto;
+		width: 25px;
+	}
+	.w-sidebar .sidebar-label {font-size: 17px;}
+	.min-h-screen .content {width: 100%;}
+	.main_calendar_area .calendar_right {width: 50%;}
+	.main_calendar_area .calendar_left {width: 50%;}
+	.main_calendar_area .calendar_left span {font-size: 16px;}
+	.main_calendar_area #date-input {font-size: 16px;}
+	#new_login, #new_reset {width: 100%;}
+	.sweet-modal .sweet-content .sweet-content-content .w-1\/2.px-2.mb-1 {
+		width: 100%;
+		margin: 10px auto;
+		padding: 0;
+	}
+	html:lang(ar) .sweet-content-content input[type="tel"], html:lang(ar) .sweet-content-content input[type="phone"] {
+		width: auto;
+	}
+	html:lang(ar) .vue-tel-input, html:lang(en) .vue-tel-input {
+		position: relative;
+	}
+	html:lang(ar) .vue-tel-input .dropdown, html:lang(en) .vue-tel-input .dropdown {
+		position: initial;
+	}
+	html:lang(ar) .vue-tel-input .dropdown ul, html:lang(en) .vue-tel-input .dropdown ul {
+		max-width: 100%;
+	}
+	.custom_add_client .flex.border-b.border-40.w-full {
+		display: block;
+	}
+	.custom_add_client .w-1\/5.py-6.px-8, .custom_add_client .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	html:lang(ar) .h-header .item-l.flex, html:lang(en) .h-header .item-l.flex {
+		margin: 0 auto;
+	}
+	html:lang(ar) .h-header .item-l.flex .pl-search.form-control, html:lang(en) .h-header .item-l.flex .pl-search.form-control {
+		width: 100%;
+	}
+	html:lang(ar) .h-header .dropdown.relative.ml-auto.h-9.flex.items-center.dropdown-right, html:lang(en) .h-header .dropdown.relative.ml-auto.h-9.flex.items-center.dropdown-right {
+		margin: 0 auto !important;
+	}
+	html:lang(ar) .h-header .dropdown-trigger, html:lang(en) .h-header .dropdown-trigger {
+		margin: 0 auto;
+	}
+	html:lang(ar) .h-header .item-r.flex.justify-between.items-center, html:lang(en) .h-header .item-r.flex.justify-between.items-center {
+		width: 20%;
+	}
+	html:lang(ar) .h-header .dropdown-menu-right::after {
+		left: 5px;
+	}
+	html:lang(en) .h-header .dropdown-menu-right::after {
+		right: 5px;
+		left: auto;
+	}
+	.flex.flex-wrap.justify-end button {
+		margin: 5px;
+		padding: 0 1rem;
+	}
+	nav {
+		margin: 0 0 10px;
+	}
+	.notipage {
+		display: block;
+	}
+	.notipage .w-1\/5.py-6.px-8, .notipage .py-6.px-8.w-1\/2 {
+		width: 100%;
+		padding: 10px;
+	}
+	.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6 {
+		box-shadow: 0 0 30px 5px #1C232C;
+		z-index: 999999999999999999999999;
+		padding-top: 95px !important;
+		padding-bottom: 60px;
+		padding: 0 10px;
+	}
+	.min-h-screen.flex-none.pt-header.w-sidebar.bg-grad-sidebar.px-6 .w-sidebar {
+		padding: 0px 10px !important;
+		margin: 0 auto;
+	}
+	.flex.items-center.w-error {
+		display: block;
+		width: auto;
+		text-align: center;
+	}
+	.flex.items-center.w-error .flex-no-shrink.illustration {
+		margin: 0 auto;
+		display: block;
+		flex-shrink: unset;
+	}
+	.flex.items-center.w-error .flex-no-shrink.illustration svg {
+		width: 100%;
+		margin: 50px auto 0;
+		height: auto;
+	}
+	.flex.items-center.w-error div h1.text-error-title.font-normal.mb-1 {
+		line-height: 1;
+		margin: 0 auto;
+	}
+	html:lang(ar) .sweet-content-content span.vc-reset, html:lang(en) .sweet-content-content span.vc-reset {
+		position: relative;
+	}
+	html:lang(ar) .sweet-content-content span.vc-reset .vc-popover-content-wrapper.is-interactive {
+		right: 0 !important;
+		left: auto !important;
+		transform: unset !important;
+		top: 100% !important;
+	}
+	.search_transactions .flex, .search_transactions_monthly {
+		display: block;
+		text-align: left;
+	}
+	.search_transactions .flex div h3, .search_transactions_monthly div h3 {
+		padding: 10px .75rem 0;
+	}
+	.search_transactions_monthly .sm\:w-full.md\:w-1\/3.lg\:w-1\/3.xl\:w-1\/3.mb-4.bg-white {
+		margin: 0 auto;
+	}
+	.search_transactions .filter_item, .search_transactions.deposit_management_filter .filter_item {
+		width: 33.3333%;
+		padding: 5px;
+	}
+	html:lang(en) .main_calendar_area .calendar_left, html:lang(en) .main_calendar_area .calendar_right {width: 50%;}
+	html:lang(en) .main_calendar_area .calendar_left span {
+		text-align: left;
+		margin: 0 0 0 20px;
+		font-size: 14px;
+	}
+}
+
+@media (min-width: 1000px) and (max-width: 1400px) {
+	.main_calendar_area .calendar_right, .main_calendar_area .calendar_left {width: 50%;}
+	.PieChart_area .PieChart_title, .LineChart_area .LineChart_title {font-size: 17px;}
+	.cardunit .control .submenu {min-width: 100%;}
+	.cardunit .control .submenu ul li a {font-size: 15px;}
+	.Chart_area .chart_labels ul li {
+    font-size: 14px;
+    margin: 0 7px;
+	}
+	section.units-dash-home .cardunit button.btn {font-size: 15px;}
+}
+
+
+.custom-mr-2{
+	margin-right: .5rem !important;
+}
+
+.pdf_button {
+    display: none !important;
+}
+
+
+.d-none{
+	display: none !important;
+}
+.rolesItems {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	margin: 0;
+}
+
+.rolesItems .mb-4 {
+	margin: 0;
+	border: 1px solid #ddd;
+	border-radius: .25rem;
+	overflow: hidden;
+	padding-bottom: .25rem;
+}
+
+.rolesItems .mb-4 h3 {
+	background-color: #fafafa;
+	padding: .5rem;
+	margin-bottom: .25rem;
+	font-weight: 600;
+	border-bottom: 1px solid #ddd;
+	line-height: normal;
+	color: #000;
+	margin-top: 0;
+}
+
+.rolesItems .mb-4 div {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: .5rem;
+	padding: .25rem .5rem;
+}
+
+
+.rolesItems .mb-4 div span:first-child {
+	width: 10px;
+	height: 10px;
+	margin: 0;
+}
+
+.multi-select-services .select .checkboxLayer .checkBoxContainer ul li {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-direction: row-reverse;
+}
+
+html[dir="ltr"] .multi-select-services .select .checkboxLayer .checkBoxContainer ul li {
+	flex-direction: row;
+}
+
+
+.multi-select-services .select .checkboxLayer .checkBoxContainer ul li span.margin-left-20 {
+	float: none !important;
+	flex-grow: 1;
+	text-align: right;
+}
+
+html[dir="ltr"] .multi-select-services .select .checkboxLayer .checkBoxContainer ul li span.margin-left-20 {
+	text-align: left;
+}
+
+
+.multi-select-services .select .checkboxLayer .checkBoxContainer ul li span.right {
+	float: none !important;
+	flex-shrink: 0;
+  }
+
+
+  span.ql-size-small
+  {
+	  font-size: 0.75em !important;
+  }
+
+  span.ql-size-large {
+	  font-size: 1.25em !important;
+  }
+
+  span.ql-size-huge {
+	  font-size: 1.5em !important;
+  }

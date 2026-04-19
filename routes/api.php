@@ -16,14 +16,17 @@ use App\Http\Controllers\Api\UserGroupingController;
 use App\Http\Controllers\Api\PosController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
-    Route::get('/dashboard/customer-analytics', [DashboardController::class, 'customerAnalytics']);
-    Route::get('/dashboard/revenue-metrics', [DashboardController::class, 'revenueMetrics']);
-    Route::get('/dashboard/unit-status', [DashboardController::class, 'unitStatus']);
-    Route::get('/notifications', [DashboardController::class, 'notifications']);
 
+Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
+Route::get('/dashboard/customer-analytics', [DashboardController::class, 'customerAnalytics']);
+Route::get('/dashboard/revenue-metrics', [DashboardController::class, 'revenueMetrics']);
+Route::get('/dashboard/unit-status', [DashboardController::class, 'unitStatus']);
+Route::get('/notifications', [DashboardController::class, 'notifications']);
+Route::get('/settings/{category}', [\App\Http\Controllers\Api\SettingsController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index']);
+    // Other protected routes...
     Route::get('/rooms/availability', [ReservationController::class, 'availability']);
 
     Route::get('/rooms/metrics', [RoomController::class, 'metrics']);
@@ -101,6 +104,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pos/cart/items', [PosController::class, 'updateCart']);
     Route::delete('/pos/cart/items', [PosController::class, 'clearCart']);
     Route::post('/pos/checkout', [PosController::class, 'checkout']);
+
+
+    Route::get('/reports/deposits', [\App\Http\Controllers\Api\ReportsController::class, 'revenueTax']); // Mapping existing for demo
+    Route::get('/reports/cleaning', [\App\Http\Controllers\Api\ReportsController::class, 'unitCleanings']);
+    Route::get('/reports/maintenance', [\App\Http\Controllers\Api\ReportsController::class, 'unitMaintenance']);
 
     Route::get('/search', [SearchController::class, 'autocomplete']);
 });

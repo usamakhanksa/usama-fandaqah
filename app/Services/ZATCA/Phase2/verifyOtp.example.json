@@ -1,0 +1,22 @@
+{
+    "org": {
+        "model": "EGS",
+        "uuid": "ed22f1d8-e6a2-1118-9b58-d9a8f11e445f",
+        "solution_name": "EGS",
+        "vat_number": "311423123300003",
+        "location": {
+            "city": "AlKhobar",
+            "city_subdivision": "South District",
+            "street": "اPrince Turki",
+            "plot_identification": "",
+            "building": "2322",
+            "postal_zone": "23333"
+        },
+        "branch_industry": "Hospitality",
+        "branch_name": "Khobar Branch",
+        "org_name": "Fandaqah Tech Co.",
+        "taxpayer_name": "TST-886431145-399999999900003",
+        "CRN_number": "2051241548"
+    },
+    "otp": "214469"
+}

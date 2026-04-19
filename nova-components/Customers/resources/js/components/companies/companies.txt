@@ -1,0 +1,70 @@
+# block inside customers  
+<div class="my-1 px-1 w-full overflow-hidden sm:w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/3 cursor-pointer" @click="gotoCompanies">
+         
+    <div class=" setting flex bg-white rounded-lg p-4 shadow m-2">
+        <div class="h-16 pt-2 w-16  text-center text-4xl  text-muted ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="45.688" height="47.001" viewBox="0 0 45.688 47.001"><g transform="translate(-7.984 0.998)"><path d="M165.517,85.93h14.13a1.422,1.422,0,0,0,1.42-1.42V81.716a1.422,1.422,0,0,0-1.42-1.42h-14.13a1.422,1.422,0,0,0-1.42,1.42V84.51A1.422,1.422,0,0,0,165.517,85.93Zm-.046-4.214a.046.046,0,0,1,.046-.046h14.13a.046.046,0,0,1,.046.046V84.51a.046.046,0,0,1-.046.046h-14.13a.046.046,0,0,1-.046-.046Z" transform="translate(-141.754 -73.817)" fill="#333b45"/><path d="M165.517,165.119h1.705a.687.687,0,1,0,0-1.374h-1.705a.046.046,0,0,1-.046-.046v-2.794a.046.046,0,0,1,.046-.046h14.13a.046.046,0,0,1,.046.046V163.7a.046.046,0,0,1-.046.046h-9.241a.687.687,0,1,0,0,1.374h9.241a1.421,1.421,0,0,0,1.42-1.42v-2.794a1.421,1.421,0,0,0-1.42-1.42h-14.13a1.421,1.421,0,0,0-1.42,1.42V163.7A1.421,1.421,0,0,0,165.517,165.119Z" transform="translate(-141.754 -145.722)" fill="#333b45"/><path d="M52.251,41.867h-.818V9.83a1.421,1.421,0,0,0-1.42-1.42h-5.4V3.569h1.045A1.168,1.168,0,0,0,46.824,2.4V.168A1.168,1.168,0,0,0,45.657-1h-4.5a.687.687,0,0,0-.687.687.687.687,0,0,0,.687.687h4.292V2.195H16.206V.376H37.928a.687.687,0,0,0,.687-.687A.687.687,0,0,0,37.928-1H16A1.168,1.168,0,0,0,14.832.168V2.4A1.168,1.168,0,0,0,16,3.569h1.045v4.84h-5.4a1.422,1.422,0,0,0-1.42,1.42V41.867H9.4a1.421,1.421,0,0,0-1.42,1.42v1.3A1.422,1.422,0,0,0,9.4,46H52.251a1.422,1.422,0,0,0,1.42-1.42v-1.3A1.422,1.422,0,0,0,52.251,41.867ZM44.612,9.784h5.4a.046.046,0,0,1,.046.046V41.867H44.612ZM18.417,3.569H43.238v38.3H39.313v-18.3a1.146,1.146,0,0,0-1.145-1.145H30.877l-.049,0-.049,0H23.488a1.146,1.146,0,0,0-1.145,1.145v18.3H18.417ZM37.938,23.795V41.867H31.564V23.795Zm-7.847,0V41.867H23.717V23.795ZM11.6,9.83a.046.046,0,0,1,.046-.046h5.4V41.867H11.6ZM52.3,44.583a.046.046,0,0,1-.046.046H9.4a.046.046,0,0,1-.046-.046v-1.3a.046.046,0,0,1,.046-.046H52.252a.046.046,0,0,1,.046.046Z" fill="#333b45"/><path d="M420.757,150.518H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z" transform="translate(-372.56 -137.58)" fill="#333b45"/><path d="M420.757,189.364H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z" transform="translate(-372.56 -172.853)" fill="#333b45"/><path d="M420.757,228.21H418.97a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z" transform="translate(-372.56 -208.126)" fill="#333b45"/><path d="M420.757,267.06H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-372.56 -243.402)" fill="#333b45"/><path d="M420.757,305.906H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-372.56 -278.675)" fill="#333b45"/><path d="M420.757,344.752H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-372.56 -313.948)" fill="#333b45"/><path d="M420.757,383.6H418.97a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-372.56 -349.221)" fill="#333b45"/><path d="M420.757,422.444H418.97a.687.687,0,0,0,0,1.374h1.786a.687.687,0,0,0,0-1.374Z" transform="translate(-372.56 -384.495)" fill="#333b45"/><path d="M62.516,150.518H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z" transform="translate(-47.27 -137.58)" fill="#333b45"/><path d="M62.516,189.364H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z" transform="translate(-47.27 -172.853)" fill="#333b45"/><path d="M62.516,228.21H60.729a.687.687,0,0,0,0,1.375h1.786a.687.687,0,0,0,0-1.375Z" transform="translate(-47.27 -208.126)" fill="#333b45"/><path d="M62.516,267.06H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-47.27 -243.402)" fill="#333b45"/><path d="M62.516,305.906H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-47.27 -278.675)" fill="#333b45"/><path d="M62.516,344.752H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-47.27 -313.948)" fill="#333b45"/><path d="M62.516,383.6H60.729a.687.687,0,1,0,0,1.374h1.786a.687.687,0,1,0,0-1.374Z" transform="translate(-47.27 -349.221)" fill="#333b45"/><path d="M62.516,422.444H60.729a.687.687,0,0,0,0,1.374h1.786a.687.687,0,0,0,0-1.374Z" transform="translate(-47.27 -384.495)" fill="#333b45"/></g></svg>
+        </div>
+        <div  class=" w-5/6">
+                <h2 class="text-lg mb-0 mt-2">{{__('Companies Management')}}</h2>
+            <div class="text-muted">{{__('Manage all registered companies')}}</div>
+        </div>
+    </div>
+
+</div>
+
+
+# part of router  
+
+router.addRoutes([
+    {
+        name: 'companies',
+        path: '/companies',
+        component: require('./components/Index'),
+    },
+
+    {
+        name: 'company',
+        path: '/companies/:id/profile',
+        component: require('./components/CompanyProfile'),
+    },
+
+    {
+        name: 'bulk-reservation',
+        path: '/bulk-reservation/:date',
+        component: require('./components/bulk/NewReservation'),
+    },
+])
+
+# ar json 
+
+"Companies" : "الشركات",
+"Company Name" : "اسم الشركة", 
+"Company Phone" : "هاتف الشركة",
+"Company Address" : "عنوان الشركة",
+"Person In Charge" : "الشخص المسؤل",
+"Person In Charge Phone" : "هاتف الشخص المسؤل",
+"Companies Management" : "إدارة الشركات",
+"Add new company" : "إضافة خدمة جديدة",
+"No companies found" : "لا يوجد شركات",
+"Add Company" : "إضافة شركة",
+"Edit Company" : "تحديث الشركة",
+"Company Email" : "البريد الإليكترونى",
+"Company name is required" : "إسم الشركة مطلوب",
+"Company phone is required" : "هاتف الشركة مطلوب",
+"City is required" : "يجب ادخال المدينة",
+"Company address is required" : "عنوان الشركة مطلوب",
+"Person in charge name is required" : "إسم الشخص المسؤل مطلوب",
+"Email must be valid" : "يجب إدخال بريد اليكترونى صحيح",
+"Email is alreay taken" : "البريد الاليكترونى موجود بالفعل",
+"Company name must be unique" : "إسم الشركة موجود بالفعل",
+"Company phone must be unique" : "هاتف الشركة موجود بالفعل",
+"Company phone must be numeric" : "هاتف الشركة يجب ان يكون صحيحا",
+"Company name can not be greater than 255 chars" : "اسم الشركة يجب ان لا يتعدى 255 حرف",
+"Company added successfully" : "تم إضافة الشركة بنجاح",
+"Company updated successfully" : "تم تحديث بيانات الشركة بنجاح",
+"Companies Print" : "طباعة الشركات",
+"Companies Count" : "اجمالى الشركات",
+"Manage all registered companies" : "التحكم وادارة الشركات",
+"Search for company by name , phone or email" : "ابحث عن شركة بالاسم , رقم الهاتف او البريد الإليكترونى"
+

@@ -472,5 +472,76 @@ class DatabaseSeeder extends Seeder
         foreach ([['Welcome Back', 'This slider for any update', '/assets/banners/banner1.svg'], ['Premium Stays Await', 'Discover seasonal offers', '/assets/banners/banner2.svg'], ['Operational Insights', 'Track reservations in real-time', '/assets/banners/banner3.svg']] as $b) {
             DB::table('dashboard_banners')->insert(['title' => $b[0], 'subtitle' => $b[1], 'image_path' => $b[2], 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()]);
         }
+
+        // --- NEW MODULES SEEDING ---
+
+        // Channels
+        foreach ([['Booking.com', 'booking'], ['Agoda', 'agoda'], ['Airbnb', 'airbnb'], ['Expedia', 'expedia']] as $ch) {
+            DB::table('channels')->insert(['name' => $ch[0], 'slug' => $ch[1], 'is_active' => true, 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+        foreach (DB::table('channels')->get() as $channel) {
+            DB::table('channel_rate_plans')->insert(['channel_id' => $channel->id, 'name' => 'Standard Rate', 'room_type_id' => rand(1, 6), 'created_at' => now(), 'updated_at' => now()]);
+            for ($i = 1; $i <= 15; $i++) {
+                DB::table('channel_reservations')->insert([
+                    'channel_id' => $channel->id,
+                    'booking_id' => strtoupper($channel->slug) . rand(10000, 99999),
+                    'guest_name' => fake()->name(),
+                    'check_in' => now()->addDays(rand(1, 30))->toDateString(),
+                    'check_out' => now()->addDays(rand(31, 35))->toDateString(),
+                    'amount' => rand(500, 5000),
+                    'status' => fake()->randomElement(['Confirmed', 'Modified', 'Cancelled']),
+                    'is_posted' => rand(0, 1),
+                    'unit_number' => rand(201, 320),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // Ledger Numbers
+        foreach ([['1001', 'Cash in Hand', 'Assets'], ['1002', 'Bank Account', 'Assets'], ['2001', 'Accounts Payable', 'Liabilities'], ['4001', 'Room Revenue', 'Income']] as $ledger) {
+            DB::table('ledger_numbers')->insert(['code' => $ledger[0], 'name' => $ledger[1], 'group' => $ledger[2], 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+        // Maintenance
+        foreach (['Plumbing', 'Electrical', 'HVAC', 'Furniture', 'IT'] as $cat) {
+            DB::table('maintenance_categories')->insert(['name' => $cat, 'created_at' => now(), 'updated_at' => now()]);
+        }
+        for ($i = 1; $i <= 20; $i++) {
+            DB::table('maintenance_tickets')->insert([
+                'unit_id' => rand(1, 120),
+                'maintenance_category_id' => rand(1, 5),
+                'subject' => 'Repair Issue ' . $i,
+                'description' => 'Detailed description of maintenance required.',
+                'status' => fake()->randomElement(['pending', 'in_progress', 'completed']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Housekeeping
+        for ($i = 1; $i <= 30; $i++) {
+            DB::table('housekeeping_tasks')->insert([
+                'unit_id' => rand(1, 120),
+                'task_type' => fake()->randomElement(['cleaning', 'inspection', 'laundry']),
+                'status' => fake()->randomElement(['pending', 'in_progress', 'completed']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Amenities
+        foreach ([['WiFi', 'wifi'], ['TV', 'tv'], ['AC', 'air-conditioner'], ['Mini Bar', 'mini-bar']] as $amenity) {
+            DB::table('hotel_amenities')->insert(['name' => $amenity[0], 'icon' => $amenity[1], 'show_on_website' => true, 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+        // Customer Groups & Resources
+        foreach (['VIP', 'Corporate', 'Regular', 'Long Stay'] as $grp) {
+            DB::table('customer_groups')->insert(['name' => $grp, 'discount_percentage' => rand(5, 20), 'created_at' => now(), 'updated_at' => now()]);
+        }
+        foreach (['Direct', 'Booking.com', 'Expedia', 'Walk-in', 'Referral'] as $res) {
+            DB::table('reservation_resources')->insert(['name' => $res, 'created_at' => now(), 'updated_at' => now()]);
+        }
     }
 }
