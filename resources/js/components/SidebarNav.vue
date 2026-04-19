@@ -1,2 +1,33 @@
-<template><aside class="w-64 bg-white h-screen sticky top-0 p-4 hidden md:block"><div class="font-bold text-xl mb-4">Fandaqah</div><nav class="space-y-2"><RouterLink v-for="item in items" :to="item.path" class="block px-3 py-2 rounded-lg" :class="$route.path===item.path?'bg-rose-500 text-white':'text-slate-600'">{{item.name}}</RouterLink><button @click="open=!open" class="w-full text-left px-3 py-2">POS</button><div v-if="open" class="pl-4 space-y-1"><RouterLink v-for="item in pos" :to="item.path" class="block text-sm text-slate-500">{{item.name}}</RouterLink></div></nav></aside></template>
-<script setup>import { ref } from 'vue'; const open=ref(true); const items=[{name:'Dashboard',path:'/dashboard'},{name:'Rooms',path:'/rooms'},{name:'Guest',path:'/guests'},{name:'Unit Housing',path:'/units'},{name:'Reservations Schedule',path:'/reservations/schedule'},{name:'Reservations Management',path:'/reservations'},{name:'Financial Management',path:'/financial'},{name:'Services Management',path:'/services'},{name:'User Grouping',path:'/user-groups'}]; const pos=[{name:'Make Order',path:'/pos/orders'},{name:'Services',path:'/pos/services'},{name:'Transactions',path:'/pos/transactions'},{name:'Products',path:'/pos/products'}];</script>
+<template>
+  <aside class="w-64 bg-white h-screen sticky top-0 p-4 hidden md:flex flex-col border-r">
+    <div class="font-bold text-xl mb-4 flex items-center gap-2"><img src="/assets/avatars/admin.svg" class="w-7 h-7">fandaqah</div>
+    <nav class="space-y-1 flex-1 overflow-y-auto pr-1">
+      <SidebarMenuItem v-for="item in items" :key="item.path" :to="item.path" :icon="item.icon" :label="item.name" />
+      <button @click="open=!open" class="w-full text-left px-3 py-2 rounded-xl text-slate-500 hover:bg-slate-100 flex items-center gap-2"><span>🧾</span>POS</button>
+      <div v-if="open" class="pl-5 space-y-1"><SidebarMenuItem v-for="item in pos" :key="item.path" :to="item.path" icon="•" :label="item.name"/></div>
+    </nav>
+    <img src="/assets/banners/banner3.svg" class="w-full opacity-70" alt="building"/>
+  </aside>
+</template>
+<script setup>
+import { ref } from 'vue';
+import SidebarMenuItem from './SidebarMenuItem.vue';
+const open = ref(true);
+const items = [
+  { name: 'Dashboard', path: '/dashboard', icon: '🏠' },
+  { name: 'Rooms', path: '/rooms', icon: '🏨' },
+  { name: 'Guest', path: '/guests', icon: '👥' },
+  { name: 'Unit Housing', path: '/units', icon: '🏢' },
+  { name: 'Reservations Schedule', path: '/reservations/schedule', icon: '📅' },
+  { name: 'Reservations Management', path: '/reservations', icon: '🛎️' },
+  { name: 'Financial Management', path: '/financial', icon: '💳' },
+  { name: 'Services Management', path: '/services', icon: '🧰' },
+  { name: 'User Grouping', path: '/user-groups', icon: '🧩' },
+];
+const pos = [
+  { name: 'Make Order', path: '/pos/orders' },
+  { name: 'Services', path: '/pos/services' },
+  { name: 'Transactions', path: '/pos/transactions' },
+  { name: 'Products', path: '/pos/products' },
+];
+</script>
