@@ -36,7 +36,7 @@ const financial = [
   { name: 'Credit Notes Management', path: '/financial/credit-notes' },
 ];
 const pos = [
-  { name: 'Make Order', path: '/pos/orders' },
+  { name: 'Make Order', path: '/pos/store' },
   { name: 'Services', path: '/pos/services' },
   { name: 'Transactions', path: '/pos/transactions' },
   { name: 'Products', path: '/pos/products' },

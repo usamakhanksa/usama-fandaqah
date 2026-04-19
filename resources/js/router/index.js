@@ -14,6 +14,14 @@ import BookingDetailsPage from '../pages/BookingDetailsPage.vue';
 import ReservationManagementPage from '../pages/ReservationManagementPage.vue';
 import OperationsCheckoutPage from '../pages/OperationsCheckoutPage.vue';
 import UserGroupingPage from '../pages/UserGroupingPage.vue';
+import POSStorePage from '../pages/POSStorePage.vue';
+import POSServicesPage from '../pages/POSServicesPage.vue';
+import POSServiceCreatePage from '../pages/POSServiceCreatePage.vue';
+import POSProductsPage from '../pages/POSProductsPage.vue';
+import POSBrandsPage from '../pages/POSBrandsPage.vue';
+import POSCategoriesPage from '../pages/POSCategoriesPage.vue';
+import POSSubCategoriesPage from '../pages/POSSubCategoriesPage.vue';
+import POSTransactionsPage from '../pages/POSTransactionsPage.vue';
 
 const routes = [
   { path: '/dashboard', component: DashboardPage },
@@ -54,7 +62,17 @@ const routes = [
   { path: '/user-groups', component: UserGroupingPage },
   { path: '/user-groups/roles/create', component: UserGroupingPage },
   { path: '/user-groups/roles/:id/edit', component: UserGroupingPage },
-  ...['services', 'pos', 'pos/orders', 'pos/services', 'pos/transactions', 'pos/products', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
+  { path: '/pos', redirect: '/pos/store' },
+  { path: '/pos/store', component: POSStorePage },
+  { path: '/pos/orders', component: POSStorePage },
+  { path: '/pos/services', component: POSServicesPage },
+  { path: '/pos/services/create', component: POSServiceCreatePage },
+  { path: '/pos/transactions', component: POSTransactionsPage },
+  { path: '/pos/products', component: POSProductsPage },
+  { path: '/pos/products/brands', component: POSBrandsPage },
+  { path: '/pos/products/categories', component: POSCategoriesPage },
+  { path: '/pos/products/sub-categories', component: POSSubCategoriesPage },
+  ...['services', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];
 

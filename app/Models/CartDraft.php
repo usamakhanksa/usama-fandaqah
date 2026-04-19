@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Service extends Model
+class CartDraft extends Model
 {
     protected $guarded = [];
 
     protected $casts = [
-        'show_in_reservation' => 'boolean',
-        'show_in_pos' => 'boolean',
+        'items' => 'array',
     ];
 }
