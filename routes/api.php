@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\UnitHousingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -50,6 +51,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::put('/bookings/{booking}', [BookingController::class, 'update']);
+
+
+    Route::get('/units/filters', [UnitHousingController::class, 'filters']);
+    Route::get('/units/floors', [UnitHousingController::class, 'floors']);
+    Route::get('/units/daily-status', [UnitHousingController::class, 'dailyStatus']);
+    Route::post('/units/check-in', [UnitHousingController::class, 'checkIn']);
+    Route::post('/units/check-out', [UnitHousingController::class, 'checkOut']);
+
 
     Route::get('/search', [SearchController::class, 'autocomplete']);
 });

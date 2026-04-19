@@ -1,0 +1,2 @@
+<template><div class="flex flex-wrap gap-2"><button v-for="t in times" :key="t" type="button" class="px-2 py-1 border rounded text-xs" :class="modelValue===t?'bg-slate-900 text-white':''" @click="$emit('update:modelValue',t)">{{ t }}</button></div></template>
+<script setup>defineProps({modelValue:String,times:{type:Array,default:()=>['10:00 AM','11:00 AM','12:00 PM','01:00 PM','02:00 PM','03:00 PM']}}); defineEmits(['update:modelValue']);</script>

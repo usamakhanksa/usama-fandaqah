@@ -1,0 +1,2 @@
+<template><div class="bg-slate-100 p-1 rounded-full flex text-sm"><button class="px-4 py-1 rounded-full" :class="mode==='units'?'bg-black text-white':''" @click="$emit('change','units')">Units</button><button class="px-4 py-1 rounded-full" :class="mode==='daily'?'bg-black text-white':''" @click="$emit('change','daily')">Daily Status</button></div></template>
+<script setup>defineProps({mode:String});</script>
