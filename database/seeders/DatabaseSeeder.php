@@ -183,6 +183,96 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+
+
+        for ($i = 1; $i <= 120; $i++) {
+            DB::table('receipts')->insert([
+                'receipt_number' => 'REC'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'receipt_type' => fake()->randomElement(['Rent', 'Insurance', 'Service']),
+                'receipt_code' => (string) rand(1000000000, 9999999999),
+                'reason' => fake()->randomElement(['Rent', 'Late checkout', 'Service']),
+                'amount' => rand(200, 1500),
+                'employee_id' => rand(1, 22),
+                'date' => now()->subDays(rand(0, 90))->toDateString(),
+                'payment_method' => fake()->randomElement(['Cash', 'Credit Card', 'Bank Transfer', 'Mada', 'Agal']),
+                'status' => 'confirmed',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('expenses')->insert([
+                'expense_number' => 'EXP'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'expense_type' => fake()->randomElement(['Operations', 'Supplies', 'Maintenance']),
+                'expense_code' => (string) rand(1000000000, 9999999999),
+                'reason' => fake()->randomElement(['Rent', 'Utilities', 'Cleaning']),
+                'amount' => rand(150, 1200),
+                'employee_id' => rand(1, 22),
+                'date' => now()->subDays(rand(0, 90))->toDateString(),
+                'payment_method' => fake()->randomElement(['Cash', 'Credit Card', 'Bank Transfer', 'Mada', 'Agal']),
+                'status' => 'confirmed',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        for ($i = 1; $i <= 70; $i++) {
+            DB::table('bills')->insert([
+                'bill_number' => 'BLL'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'creation_date' => now()->subDays(rand(5, 120))->toDateString(),
+                'reason' => fake()->randomElement(['Rent', 'Room Damage', 'Services']),
+                'amount' => rand(200, 1800),
+                'employee_id' => rand(1, 22),
+                'collection_date' => now()->subDays(rand(0, 90))->toDateString(),
+                'status' => fake()->randomElement(['collected', 'not_done']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        for ($i = 1; $i <= 60; $i++) {
+            DB::table('credit_notes')->insert([
+                'note_number' => 'CRN'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'invoice_number' => 'INV'.str_pad((string) rand(1, 165), 5, '0', STR_PAD_LEFT),
+                'booking_number' => 'BK'.str_pad((string) rand(1, 165), 5, '0', STR_PAD_LEFT),
+                'amount' => rand(100, 800),
+                'employee_id' => rand(1, 22),
+                'creation_date' => now()->subDays(rand(0, 90))->toDateString(),
+                'visitor_name' => fake()->name(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        foreach (DB::table('receipts')->limit(120)->get() as $receipt) {
+            DB::table('fund_movements')->insert([
+                'movement_type' => 'receipt',
+                'reference_number' => $receipt->receipt_number,
+                'reason' => $receipt->reason,
+                'amount' => $receipt->amount,
+                'employee_id' => $receipt->employee_id,
+                'date' => $receipt->date,
+                'payment_method' => $receipt->payment_method,
+                'status' => 'confirmed',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        foreach (DB::table('expenses')->limit(120)->get() as $expense) {
+            DB::table('fund_movements')->insert([
+                'movement_type' => 'bills_of_exchange',
+                'reference_number' => $expense->expense_number,
+                'reason' => $expense->reason,
+                'amount' => $expense->amount,
+                'employee_id' => $expense->employee_id,
+                'date' => $expense->date,
+                'payment_method' => $expense->payment_method,
+                'status' => 'confirmed',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
         foreach ([
             ['WELCOME10', 'percent', 10, 75, true],
             ['SAR50', 'fixed', 50, null, true],

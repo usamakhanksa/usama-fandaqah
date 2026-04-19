@@ -29,11 +29,11 @@ const items = [
   { name: 'User Grouping', path: '/user-groups', icon: '🧩' },
 ];
 const financial = [
-  { name: 'Receipts Management', path: '/financial' },
-  { name: 'Expense Management', path: '/financial?tab=expenses' },
-  { name: 'Bills Management', path: '/financial?tab=bills' },
-  { name: 'Fund Movement Report', path: '/financial?tab=funds' },
-  { name: 'Credit Notes Management', path: '/financial?tab=credits' },
+  { name: 'Receipts Management', path: '/financial/receipts' },
+  { name: 'Expense Management', path: '/financial/expenses' },
+  { name: 'Bills Management', path: '/financial/bills' },
+  { name: 'Fund Movement Report', path: '/financial/fund-movement' },
+  { name: 'Credit Notes Management', path: '/financial/credit-notes' },
 ];
 const pos = [
   { name: 'Make Order', path: '/pos/orders' },

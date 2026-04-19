@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UnitHousingController;
 use App\Http\Controllers\Api\ReservationWorkflowController;
+use App\Http\Controllers\Api\FinancialManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -69,6 +70,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reservations/receipt/{booking}', [ReservationWorkflowController::class, 'receipt']);
     Route::get('/reservations/management/{booking}', [ReservationWorkflowController::class, 'bookingDetails']);
     Route::post('/reservations/management/{booking}/notes', [ReservationWorkflowController::class, 'addNote']);
+
+    Route::get('/financial/{module}', [FinancialManagementController::class, 'index']);
+    Route::post('/financial/{type}/drafts', [FinancialManagementController::class, 'storeDraft']);
+    Route::post('/financial/{type}/confirm', [FinancialManagementController::class, 'confirm']);
+
 
     Route::get('/search', [SearchController::class, 'autocomplete']);
 });

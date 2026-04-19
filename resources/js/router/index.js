@@ -3,6 +3,9 @@ import DashboardPage from '../pages/DashboardPage.vue';
 import RoomsPage from '../pages/RoomsPage.vue';
 import GuestsPage from '../pages/GuestsPage.vue';
 import SimplePage from '../pages/SimplePage.vue';
+import FinancialManagementPage from '../pages/FinancialManagementPage.vue';
+import FinancialEntryWizardPage from '../pages/FinancialEntryWizardPage.vue';
+import FinancialSuccessPage from '../pages/FinancialSuccessPage.vue';
 import UnitsPage from '../pages/UnitsPage.vue';
 import ReservationSchedulePage from '../pages/ReservationSchedulePage.vue';
 import ReservationCreatePage from '../pages/ReservationCreatePage.vue';
@@ -37,7 +40,17 @@ const routes = [
   { path: '/operations/payment-indebtedness/create', component: OperationsCheckoutPage, props: { mode: 'payment' } },
   { path: '/operations/check-out/create', component: OperationsCheckoutPage, props: { mode: 'checkout' } },
   { path: '/operations/check-out/success/:id', component: ReservationSuccessPage, props: { flow: 'checkout' } },
-  ...['financial', 'services', 'user-groups', 'pos', 'pos/orders', 'pos/services', 'pos/transactions', 'pos/products', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
+  { path: '/financial', redirect: '/financial/receipts' },
+  { path: '/financial/receipts', component: FinancialManagementPage },
+  { path: '/financial/receipts/create', component: FinancialEntryWizardPage },
+  { path: '/financial/receipts/success/:id', component: FinancialSuccessPage },
+  { path: '/financial/expenses', component: FinancialManagementPage },
+  { path: '/financial/expenses/create', component: FinancialEntryWizardPage },
+  { path: '/financial/expenses/success/:id', component: FinancialSuccessPage },
+  { path: '/financial/bills', component: FinancialManagementPage },
+  { path: '/financial/fund-movement', component: FinancialManagementPage },
+  { path: '/financial/credit-notes', component: FinancialManagementPage },
+  ...['services', 'user-groups', 'pos', 'pos/orders', 'pos/services', 'pos/transactions', 'pos/products', 'profile', 'settings'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];
 
