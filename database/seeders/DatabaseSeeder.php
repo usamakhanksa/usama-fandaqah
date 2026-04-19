@@ -42,14 +42,44 @@ class DatabaseSeeder extends Seeder
             DB::table('room_types')->insert(['name' => ['Twin Room', 'Deluxe', 'Suite', 'Family', 'Studio', 'Executive'][$i - 1], 'base_price' => rand(80, 350), 'created_at' => now(), 'updated_at' => now()]);
         }
 
+
+        foreach ([['Suite'], ['Deluxe'], ['Studio'], ['Family']] as $type) {
+            DB::table('unit_types')->insert(['name' => $type[0], 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+        foreach ([
+            ['name' => 'Available', 'slug' => 'available', 'color' => '#22c55e'],
+            ['name' => 'Booked', 'slug' => 'booked', 'color' => '#3b82f6'],
+            ['name' => 'Busy', 'slug' => 'busy', 'color' => '#ef4444'],
+            ['name' => 'Housekeeping', 'slug' => 'housekeeping', 'color' => '#f97316'],
+            ['name' => 'Maintenance', 'slug' => 'maintenance', 'color' => '#9ca3af'],
+        ] as $status) {
+            DB::table('unit_statuses')->insert([...$status, 'created_at' => now(), 'updated_at' => now()]);
+        }
+
         $statuses = ['available', 'occupied', 'reserved', 'maintenance', 'cleaning', 'not_ready'];
         for ($i = 1; $i <= 68; $i++) {
             $st = $statuses[array_rand($statuses)];
             DB::table('rooms')->insert(['room_type_id' => rand(1, 6), 'room_floor_id' => rand(1, 6), 'number' => str_pad((string) $i, 3, '0', STR_PAD_LEFT), 'name' => fake()->randomElement(['Elite Room', 'Premium Room', 'Ocean View', 'Classic Room']), 'floor' => rand(1, 6), 'price_per_day' => rand(200, 900), 'status' => $st, 'gender' => fake()->randomElement(['all', 'male', 'female']), 'thumbnail' => '/assets/avatars/guest'.(($i % 8) + 1).'.svg', 'created_at' => now(), 'updated_at' => now()]);
         }
 
-        for ($i = 1; $i <= 34; $i++) {
-            DB::table('units')->insert(['name' => "Unit $i", 'number' => 'U'.str_pad((string) $i, 3, '0', STR_PAD_LEFT), 'status' => fake()->randomElement(['active', 'inactive']), 'created_at' => now(), 'updated_at' => now()]);
+        for ($i = 1; $i <= 120; $i++) {
+            $floorId = (($i - 1) % 3) + 1;
+            DB::table('units')->insert([
+                'room_id' => rand(1, 68),
+                'room_floor_id' => $floorId,
+                'unit_type_id' => rand(1, 4),
+                'unit_status_id' => rand(1, 5),
+                'name' => 'Room Name',
+                'number' => (string) (200 + $i),
+                'status' => 'active',
+                'capacity' => rand(2, 5),
+                'beds' => rand(1, 3),
+                'baths' => rand(1, 2),
+                'thumbnail' => '/assets/avatars/guest'.(($i % 8) + 1).'.svg',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         for ($i = 1; $i <= 36; $i++) {
@@ -94,13 +124,17 @@ class DatabaseSeeder extends Seeder
         for ($i = 1; $i <= 260; $i++) {
             $checkIn = now()->subDays(rand(1, 15))->addDays(rand(0, 30));
             $checkOut = (clone $checkIn)->addDays(rand(1, 5));
-            DB::table('reservations')->insert(['code' => 'RSV'.str_pad((string) $i, 5, '0', STR_PAD_LEFT), 'guest_id' => rand(1, 130), 'room_id' => rand(1, 68), 'unit_id' => rand(1, 34), 'reservation_status_id' => rand(1, 5), 'check_in' => $checkIn, 'check_out' => $checkOut, 'stay_type' => rand(0, 1) ? 'checkin' : 'checkout', 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('reservations')->insert(['code' => 'RSV'.str_pad((string) $i, 5, '0', STR_PAD_LEFT), 'guest_id' => rand(1, 130), 'room_id' => rand(1, 68), 'unit_id' => rand(1, 120), 'reservation_status_id' => rand(1, 5), 'check_in' => $checkIn, 'check_out' => $checkOut, 'stay_type' => rand(0, 1) ? 'checkin' : 'checkout', 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+        for ($i = 1; $i <= 80; $i++) {
+            DB::table('check_in_records')->insert(['reservation_id' => $i, 'unit_id' => rand(1, 120), 'date' => now()->toDateString(), 'time' => fake()->randomElement(['10:00 AM', '11:00 AM', '12:00 PM']), 'note' => 'Early check-in', 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('check_out_records')->insert(['reservation_id' => $i, 'unit_id' => rand(1, 120), 'date' => now()->toDateString(), 'time' => fake()->randomElement(['01:00 PM', '02:00 PM', '03:00 PM']), 'note' => 'Standard checkout', 'final_charges' => rand(0, 250), 'created_at' => now(), 'updated_at' => now()]);
         }
 
         for ($i = 1; $i <= 165; $i++) {
             DB::table('bookings')->insert(['reservation_id' => $i, 'guest_id' => rand(1, 130), 'room_id' => rand(1, 68), 'check_in' => now()->addDays(rand(0, 20)), 'check_out' => now()->addDays(rand(21, 30)), 'total_amount' => rand(200, 1800), 'created_at' => now(), 'updated_at' => now()]);
         }
-
         for ($i = 1; $i <= 165; $i++) {
             DB::table('payments')->insert(['booking_id' => $i, 'amount' => rand(100, 1800), 'method' => ['cash', 'card', 'transfer'][array_rand([0, 1, 2])], 'created_at' => now(), 'updated_at' => now()]);
             DB::table('invoices')->insert(['booking_id' => $i, 'number' => 'INV'.str_pad((string) $i, 5, '0', STR_PAD_LEFT), 'amount' => rand(100, 1800), 'status' => fake()->randomElement(['paid', 'pending', 'unpaid', 'failed', 'refund']), 'created_at' => now(), 'updated_at' => now()]);
