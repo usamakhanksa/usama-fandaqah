@@ -1,0 +1,2 @@
+<template><div class="card"><div class="font-semibold">{{month}}</div><div class="grid grid-cols-7 gap-1 mt-2"><button v-for="d in 30" @click="selected=d" class="text-xs p-1 rounded-full" :class="selected===d?'bg-rose-500 text-white':'bg-slate-100'">{{d}}</button></div></div></template>
+<script setup>import { ref } from 'vue'; const selected=ref(new Date().getDate()); const month=new Date().toLocaleString('default',{month:'long',year:'numeric'});</script>
