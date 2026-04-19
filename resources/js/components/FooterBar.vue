@@ -1,0 +1,1 @@
+<template><footer class="text-xs text-slate-500 flex justify-between py-4"><span>© World Hotels Platform 2026</span><div class="space-x-3"><a href="#">FAQ</a><a href="#">Privacy policy</a><a href="#">Terms and laws</a></div></footer></template>

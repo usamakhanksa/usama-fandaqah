@@ -1,0 +1,2 @@
+<template><header class="bg-white border-b p-3 flex items-center justify-between"><div class="flex items-center gap-3"><button class="p-2">☰</button><button class="bg-rose-500 text-white px-4 py-2 rounded-lg">New Booking</button><SearchInput/></div><div class="flex items-center gap-3"><NotificationDropdown/><UserMenu/></div></header></template>
+<script setup>import SearchInput from './SearchInput.vue';import NotificationDropdown from './NotificationDropdown.vue';import UserMenu from './UserMenu.vue';</script>

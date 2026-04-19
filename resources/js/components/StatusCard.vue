@@ -1,0 +1,2 @@
+<template><div class="card"><h4 class="font-semibold">{{title}}</h4><div class="text-2xl">{{value}}</div><div class="h-2 bg-slate-200 rounded mt-2"><div class="h-2 bg-rose-500 rounded" :style="{width: pct+'%'}"></div></div><div class="text-xs mt-1">{{pct}}%</div></div></template>
+<script setup>const props=defineProps({title:String,value:Number}); const pct=Math.min(100,Math.round((props.value||0)*5));</script>

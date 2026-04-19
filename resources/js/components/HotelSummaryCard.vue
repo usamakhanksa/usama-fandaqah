@@ -1,0 +1,2 @@
+<template><div><h3 class="font-bold mb-3">Hotel Summary</h3><div class="space-y-2 text-sm"><div>Total Rooms: {{stats?.rooms||0}}</div><div>Total Guests: {{stats?.guests||0}}</div><div>Total Profit: {{stats?.profit||0}}</div></div><apexchart type="line" height="120" :options="opt" :series="[{data:[20,30,15,40,35,50]}]"/></div></template>
+<script setup>defineProps({stats:Object}); const opt={chart:{sparkline:{enabled:true}},stroke:{curve:'smooth'},colors:['#2563eb']};</script>

@@ -1,0 +1,1 @@
+<template><div><h3 class="font-bold">Customers</h3><apexchart type="donut" height="230" :options="opt" :series="[82,18]"/></div></template><script setup>const opt={labels:['Current customers','New customers'],colors:['#2563eb','#fb7185']};</script>
