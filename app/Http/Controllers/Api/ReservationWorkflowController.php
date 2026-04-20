@@ -21,8 +21,8 @@ class ReservationWorkflowController extends Controller
 {
     public function schedule(Request $request)
     {
-        $start = $request->date('start', now()->startOfWeek());
-        $end = $request->date('end', now()->endOfWeek());
+        $start = $request->date('start') ?: now()->startOfWeek();
+        $end = $request->date('end') ?: now()->endOfWeek();
 
         $rooms = Room::query()->with(['roomType'])->limit(20)->get();
         $events = Reservation::query()

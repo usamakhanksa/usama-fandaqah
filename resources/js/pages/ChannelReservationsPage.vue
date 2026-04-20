@@ -68,7 +68,10 @@ import api from '../services/api';
 const rows = ref([]);
 const channels = ref({});
 
-const totalRevenue = computed(() => rows.value.reduce((acc, r) => acc + Number(r.amount), 0).toLocaleString());
+const totalRevenue = computed(() => {
+  if (!Array.isArray(rows.value)) return 0;
+  return rows.value.reduce((acc, r) => acc + Number(r.amount || 0), 0).toLocaleString();
+});
 
 const statusColor = (s) => {
   if (s === 'Confirmed') return 'bg-emerald-100 text-emerald-700';
@@ -77,11 +80,22 @@ const statusColor = (s) => {
 };
 
 onMounted(async () => {
-  const [resRows, resChannels] = await Promise.all([
-    api.get('/channel-manager/reservations'),
-    api.get('/pos/stores'), // Reuse channel-like lookup if direct OTA channel list not found
-  ]);
-  rows.value = resRows.data;
-  resChannels.data.forEach(c => channels.value[c.id] = c.name);
+  try {
+    const [resRows, resChannels] = await Promise.all([
+      api.get('/channel-manager/reservations').catch(() => ({ data: [] })),
+      api.get('/pos/stores').catch(() => ({ data: [] })), // Reuse channel-like lookup if direct OTA channel list not found
+    ]);
+    
+    const rowsData = resRows.data?.data || resRows.data || [];
+    rows.value = Array.isArray(rowsData) ? rowsData : [];
+    
+    const channelsData = resChannels.data?.data || resChannels.data || [];
+    if (Array.isArray(channelsData)) {
+      channelsData.forEach(c => channels.value[c.id] = c.name);
+    }
+  } catch (error) {
+    console.error('Failed to load channel reservations:', error);
+    rows.value = [];
+  }
 });
 </script>

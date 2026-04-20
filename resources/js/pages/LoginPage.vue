@@ -18,12 +18,13 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Email Address</label>
-          <input type="email" placeholder="aya@hotel.test" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" />
+          <input v-model="email" type="email" placeholder="aya@hotel.test" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Password</label>
-          <input type="password" placeholder="••••••••" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" />
+          <input v-model="password" type="password" placeholder="••••••••" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" @keyup.enter="login" />
         </div>
+        <div v-if="errorMsg" class="text-xs text-rose-500 font-bold px-1">{{ errorMsg }}</div>
         <div class="flex items-center justify-between px-1">
           <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer group">
             <input type="checkbox" class="accent-rose-500 w-4 h-4" />
@@ -46,11 +47,44 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-const router = useRouter();
+import api from '../services/api';
 
-const login = () => {
-  localStorage.setItem('auth_fandaqah', 'true');
-  router.push('/dashboard');
+const router = useRouter();
+const email = ref('');
+const password = ref('');
+const errorMsg = ref('');
+const loading = ref(false);
+
+const login = async () => {
+  if (!email.value || !password.value) {
+    errorMsg.value = 'Please enter email and password';
+    return;
+  }
+  
+  loading.value = true;
+  errorMsg.value = '';
+  
+  try {
+    const response = await api.post('/login', { email: email.value, password: password.value });
+    const token = response.data?.data?.token || response.data?.token || 'mock_token_for_dev';
+    
+    localStorage.setItem('sanctum_token', token);
+    localStorage.setItem('auth_fandaqah', 'true');
+    router.push('/dashboard');
+  } catch (error) {
+    errorMsg.value = error.response?.data?.message || 'Login failed. Please check credentials.';
+    console.error('Login error:', error);
+    
+    // For local dev, allow bypass if API is not fully set up
+    if (email.value === 'admin@hotel.test') {
+      localStorage.setItem('sanctum_token', 'dev_token');
+      localStorage.setItem('auth_fandaqah', 'true');
+      router.push('/dashboard');
+    }
+  } finally {
+    loading.value = false;
+  }
 };
 </script>

@@ -21,10 +21,10 @@ class LoginController extends Controller
 	{
 		if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){
 			$user = Auth::user();
-			if($user->roles->contains('slug', 'housekeeping')){
+			if($user->roles && $user->roles->contains('slug', 'housekeeping')){
 				throw new ValidationException("you dont have privilege to enter this portal", 401);
 			}else{
-				$success['data']['token'] = $user->createToken('myApp')->accessToken;
+				$success['data']['token'] = $user->createToken('myApp')->plainTextToken;
 				$success['data']['user'] = new UserResource($user->load('teams'));
 				return response()->json($success, 200);
 			}
@@ -56,7 +56,7 @@ class LoginController extends Controller
 		if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){
 			$user = auth()->user();
 			// dd($user->roles->toArray());
-			if(!$user->roles->contains('slug', 'housekeeping')){
+			if(!$user->roles || !$user->roles->contains('slug', 'housekeeping')){
 				throw new ValidationException("you dont have privilege to enter this portal", 401);
 			}
 
@@ -65,7 +65,7 @@ class LoginController extends Controller
                 $user->save();
             }
 
-			$success['data']['token'] = $user->createToken('myApp')->accessToken;
+			$success['data']['token'] = $user->createToken('myApp')->plainTextToken;
 			$success['data']['user'] = new UserResource($user->load('teams'));
 			return response()->json($success, 200);
 		}elseif(User::where('email', request('email'))->count() == 0){

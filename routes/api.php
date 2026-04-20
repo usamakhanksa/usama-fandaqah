@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CompanyProfileController;
 use App\Http\Controllers\Api\DashboardController;
@@ -23,6 +24,10 @@ Route::get('/dashboard/revenue-metrics', [DashboardController::class, 'revenueMe
 Route::get('/dashboard/unit-status', [DashboardController::class, 'unitStatus']);
 Route::get('/notifications', [DashboardController::class, 'notifications']);
 Route::get('/settings/{category}', [\App\Http\Controllers\Api\SettingsController::class, 'index']);
+Route::post('/settings/global', [\App\Http\Controllers\Api\SettingsController::class, 'updateGlobal']);
+
+// Add Login Route
+Route::post('/login', [\App\Http\Controllers\Api\Auth\LoginController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reservations', [ReservationController::class, 'index']);
