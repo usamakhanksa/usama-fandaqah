@@ -27,11 +27,13 @@ import SettingsPage from '../pages/SettingsPage.vue';
 import ReportsPage from '../pages/ReportsPage.vue';
 import ChannelManagerPage from '../pages/ChannelManagerPage.vue';
 import ManageCategoriesPage from '../pages/ManageCategoriesPage.vue';
+import LeadsPage from '../pages/LeadsPage.vue';
 import ChannelReservationsPage from '../pages/ChannelReservationsPage.vue';
 
 const routes = [
   { path: '/login', component: LoginPage, name: 'login' },
   { path: '/dashboard', component: DashboardPage, name: 'dashboard' },
+  { path: '/leads', component: LeadsPage, name: 'leads' },
   { path: '/rooms', component: RoomsPage },
   { path: '/guests', component: GuestsPage },
   { path: '/guests/companies', component: GuestsPage },

@@ -116,4 +116,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/maintenance', [\App\Http\Controllers\Api\ReportsController::class, 'unitMaintenance']);
 
     Route::get('/search', [SearchController::class, 'autocomplete']);
+
+    // Admin Lead Routes
+    Route::get('/leads', [LeadController::class, 'index']);
+    Route::get('/leads/stats', [LeadController::class, 'stats']);
+    Route::put('/leads/{lead}', [LeadController::class, 'update']);
+    Route::delete('/leads/{lead}', [LeadController::class, 'destroy']);
 });
+
+// Public Lead Submission
+Route::post('/leads/submit', [LeadController::class, 'store']);

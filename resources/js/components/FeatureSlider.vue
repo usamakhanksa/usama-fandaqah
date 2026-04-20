@@ -11,7 +11,7 @@
       <!-- Track -->
       <div class="slider-track" ref="trackRef" :style="trackStyle">
         <template v-for="card in displayCards" :key="card._uid">
-          <div :class="['feature-card', card.colorClass]" :style="{ width: store.cardWidth + 'px' }">
+          <div :class="['feature-card', card.colorClass]" :style="{ width: store.cardWidth + 'px' }" @click="showModal = true">
             <!-- Icon -->
             <div class="card-icon">
               <component :is="iconMap[card.iconType] || iconMap.mail" class="card-svg" />
@@ -21,11 +21,13 @@
               <h3 class="card-title">{{ card.title }}</h3>
               <p class="card-description">{{ card.description }}</p>
             </div>
-            <!-- Arrow -->
-            <svg class="share-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
+            <!-- Action (Paper Plane) -->
+            <div class="action-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </div>
           </div>
         </template>
       </div>
@@ -40,17 +42,22 @@
       <!-- Progress Bar -->
       <div class="slider-progress" :style="progressStyle" />
     </div>
+
+    <!-- Lead Capture Modal -->
+    <LeadCaptureModal :show="showModal" @close="showModal = false" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, h } from 'vue';
 import { useSliderStore } from '../stores/slider';
+import LeadCaptureModal from './LeadCaptureModal.vue';
 
 const store = useSliderStore();
 const paused = ref(false);
 const trackRef = ref(null);
 const offset = ref(0);
+const showModal = ref(false);
 let rafId = null;
 let lastTime = null;
 
@@ -312,25 +319,43 @@ const iconMap = {
 .card-purple .card-description,
 .card-blue .card-description { color: #f2f0eb; opacity: 0.8; }
 
-/* Share arrow */
-.share-icon {
+/* Action button (Paper Plane) */
+.action-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 20px;
-  height: 20px;
-  opacity: 0.55;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  color: inherit;
+  opacity: 0.6;
   transition: all 0.3s ease;
-  z-index: 1;
+  z-index: 5;
 }
-.card-coral .share-icon,
-.card-beige .share-icon,
-.card-peach .share-icon { stroke: #2a273c; }
-.card-navy .share-icon,
-.card-green .share-icon,
-.card-purple .share-icon,
-.card-blue .share-icon { stroke: #f2f0eb; }
-.feature-card:hover .share-icon { opacity: 1; transform: scale(1.15); }
+
+.card-coral .action-btn,
+.card-beige .action-btn,
+.card-peach .action-btn { color: #2a273c; stroke: #2a273c; }
+.card-navy .action-btn,
+.card-green .action-btn,
+.card-purple .action-btn,
+.card-blue .action-btn { color: #f2f0eb; stroke: #f2f0eb; }
+
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.feature-card:hover .action-btn { 
+  opacity: 1; 
+  transform: scale(1.1) rotate(-10deg);
+  background: rgba(255, 255, 255, 0.25);
+}
 
 /* Nav buttons */
 .nav-btn {

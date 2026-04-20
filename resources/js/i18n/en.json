@@ -1,0 +1,33 @@
+{
+  "dashboard": {
+    "welcome": "Welcome Back",
+    "slider_desc": "This Slider For Any Update. Lorem ipsum dolor sit amet...",
+    "explore": "Explore updates",
+    "recent_status": "Recent Status",
+    "booked_rooms": "New Booked Rooms",
+    "check_in_today": "Check In Today",
+    "check_out_today": "Check Out Today",
+    "progress": "Progress",
+    "customers": "Customers",
+    "customer_desc": "Customers that attend to our hotel",
+    "new_customers": "New customers",
+    "current_customers": "Current customers",
+    "daily_customers": "Daily customers",
+    "weekly_new": "Weekly new customers",
+    "upcoming": "Upcoming Reservations",
+    "check_in": "Check In",
+    "check_out": "Check Out",
+    "registration": "Registration",
+    "see_all": "See All",
+    "active_users": "Active Users",
+    "total_revenue": "Total Revenue",
+    "hotel_summary": "Hotel Summary",
+    "total_rooms": "Total Rooms",
+    "total_guests": "Total Guests",
+    "total_profit": "Total Profit",
+    "reservation_rate": "On-time Reservations Rate",
+    "unit_status": "The Status Of The Units",
+    "show": "Show",
+    "monthly": "Monthly"
+  }
+}

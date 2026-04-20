@@ -1,13 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body { font-family: Inter, system-ui, sans-serif; }
-.card { @apply bg-white rounded-2xl shadow-sm; }
-.input { @apply w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-200; }
-.btn-primary { @apply bg-rose-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-rose-600; }
-.btn-outline { @apply border border-slate-200 bg-white text-slate-700 px-3 py-2 rounded-lg text-sm hover:bg-slate-50; }
+:root {
+  --coral-red: #e95a54;
+  --dark-navy: #2a273c;
+  --soft-beige: #f2f0eb;
+  --muted-green: #8f9793;
+  --light-peach: #fbcdab;
+}
 
-.label { @apply block text-xs text-slate-600 mb-1; }
+body { 
+  font-family: 'Inter', sans-serif;
+  @apply bg-[#f8fafc] text-[#2a273c] antialiased;
+}
 
-.btn-secondary { @apply border border-slate-200 bg-white text-slate-700 px-3 py-2 rounded-lg text-sm hover:bg-slate-50; }
+/* Corporate Card Style */
+.card { 
+  @apply bg-white rounded-[2.5rem] border border-slate-100 shadow-sm transition-all duration-300;
+}
+
+.card:hover {
+  @apply shadow-xl -translate-y-1;
+}
+
+/* Corporate Inputs */
+.input { 
+  @apply w-full rounded-xl border-2 border-[#f2f0eb] bg-white px-4 py-3 text-sm font-medium transition-all outline-none;
+}
+
+.input:focus {
+  @apply border-[#e95a54] ring-4 ring-[#e95a54]/10;
+}
+
+/* Premium Buttons */
+.btn-primary { 
+  @apply bg-gradient-to-r from-[#e95a54] to-[#f43f5e] text-white px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-[#e95a54]/20 hover:scale-[1.02] active:scale-[0.98] transition-all;
+}
+
+.btn-secondary { 
+  @apply bg-[#2a273c] text-white px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-black/10 hover:bg-[#1f1d2e] transition-all;
+}
+
+.btn-outline { 
+  @apply border-2 border-[#f2f0eb] bg-white text-[#2a273c] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-[#f2f0eb] transition-all;
+}
+
+/* Modern Headings */
+h1, h2, h3 {
+  @apply tracking-tight font-black;
+}
+
+/* Transitions */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
