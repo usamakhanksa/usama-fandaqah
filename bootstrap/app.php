@@ -7,14 +7,16 @@ use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
-        // Only keep known working providers
+        // Core Providers
         App\Providers\AppServiceProvider::class,
-        R64\NovaFields\FieldServiceProvider::class,
+        Laravel\Tinker\TinkerServiceProvider::class,
+        Filament\FilamentServiceProvider::class,
+        Spatie\Translatable\TranslatableServiceProvider::class,
+        App\Providers\Filament\AdminPanelProvider::class,
 
-        // Commented old/abandoned providers
+        // Package Providers
+        R64\NovaFields\FieldServiceProvider::class,
         App\Providers\NovaServiceProvider::class,
-        // Alfa6661\AutoNumber\AutoNumberServiceProvider::class,
-        // AlexBowers\MultipleDashboard\ToolServiceProvider::class,
         niklasravnsborg\LaravelPdf\PdfServiceProvider::class,
     ])
     ->withRouting(

@@ -4,7 +4,7 @@
     <div 
       v-for="column in columns" 
       :key="column.id" 
-      class="flex-shrink-0 w-80 bg-slate-50/50 rounded-[2rem] p-4 flex flex-col border border-slate-100"
+      class="flex-shrink-0 w-80 bg-slate-50/50 custom-rounded p-4 flex flex-col border border-slate-100"
     >
       <div class="flex justify-between items-center mb-4 px-2">
         <div class="flex items-center gap-2">

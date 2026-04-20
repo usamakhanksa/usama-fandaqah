@@ -208,6 +208,7 @@ return [
         App\Providers\EventServiceProvider::class,
         // App\Providers\TelescopeServiceProvider::class,
         App\Providers\NovaServiceProvider::class,
+        App\Providers\Filament\AdminPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
         // ThemeServiceProvider::class, // TODO: install surelab/theme via composer
         // Maatwebsite\Excel\ExcelServiceProvider::class, // TODO: install maatwebsite/excel

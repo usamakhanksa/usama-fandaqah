@@ -1,7 +1,7 @@
 <template>
   <div class="p-8 space-y-6 bg-[#f8f9fa] min-h-full">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row justify-between items-end gap-6 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-50">
+    <div class="flex flex-col md:flex-row justify-between items-end gap-6 bg-white p-8 custom-rounded shadow-sm border border-slate-50">
       <div>
         <h1 class="text-3xl font-black text-[#2a273c]">{{ $t('leads.title') }}</h1>
         <p class="text-[#8f9793] font-medium mt-1">{{ $t('leads.desc') }}</p>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Filters & View Toggle -->
-    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">
+    <div class="bg-white p-6 custom-rounded border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">
       <div class="relative flex-1 min-w-[280px]">
         <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input 
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Table View -->
-    <div v-if="viewMode === 'table'" class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+    <div v-if="viewMode === 'table'" class="bg-white custom-rounded border border-slate-100 shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left">
           <thead>
@@ -117,7 +117,7 @@
 
     <!-- Grid View -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-       <div v-for="lead in leads" :key="lead.id" class="bg-white p-8 rounded-[2.5rem] border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group overflow-hidden relative">
+       <div v-for="lead in leads" :key="lead.id" class="bg-white p-8 custom-rounded-large border border-slate-50 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group overflow-hidden relative">
           <div class="absolute top-0 right-0 p-6 flex justify-between w-full pointer-events-none">
              <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest transform -rotate-90 origin-right translate-x-2">{{ lead.source || 'Slider' }}</span>
              <span 
@@ -222,6 +222,6 @@ onMounted(fetchLeads);
 <style scoped>
 [dir="rtl"] .text-start { text-align: right; }
 [dir="rtl"] .text-end { text-align: left; }
-.rounded-\[2rem\] { border-radius: 2rem; }
-.rounded-\[2\.5rem\] { border-radius: 2.5rem; }
+.custom-rounded { border-radius: 2rem; }
+.custom-rounded-large { border-radius: 2.5rem; }
 </style>

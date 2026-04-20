@@ -20,7 +20,8 @@ return new class extends Migration {
             $table->string('priority')->default('medium'); // low, medium, high
             $table->text('notes')->nullable();
             $table->timestamp('contacted_at')->nullable();
-            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedInteger('assigned_to')->nullable();
+            $table->foreign('assigned_to')->references('id')->on('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
 

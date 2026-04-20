@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="relative overflow-hidden rounded-[2rem] p-8 shadow-sm border border-slate-50 transition-all hover:scale-[1.02]"
+    class="relative overflow-hidden custom-rounded p-8 shadow-sm border border-slate-50 transition-all hover:scale-[1.02]"
     :style="{ backgroundColor: color, color: textColor }"
   >
     <div class="space-y-4 relative z-10">

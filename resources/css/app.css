@@ -17,6 +17,15 @@ body {
   @apply bg-[#f8fafc] text-[#2a273c] antialiased;
 }
 
+/* Custom rounded class to replace Tailwind arbitrary value syntax */
+.custom-rounded { 
+  border-radius: 2rem;
+}
+
+.custom-rounded-large { 
+  border-radius: 2.5rem;
+}
+
 /* Corporate Card Style */
 .card { 
   @apply bg-white rounded-[2.5rem] border border-slate-100 shadow-sm transition-all duration-300;

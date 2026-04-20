@@ -7,13 +7,16 @@
         "64robots/nova-fields": "^0.23.0",
         "alexbowers/nova-multiple-dashboard": "^1.0",
         "barryvdh/laravel-dompdf": "^3.1",
+        "filament/filament": "^3.2",
         "laravel/framework": "^11.0",
         "laravel/nova": "*",
         "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.9",
         "niklasravnsborg/laravel-pdf": "^4.1",
         "pktharindu/nova-permissions": "^3.1",
         "predis/predis": "^3.4",
         "spatie/laravel-activitylog": "^4.12",
+        "spatie/laravel-translatable": "^6.0",
         "watson/rememberable": "^7.1"
     },
     "require-dev": {

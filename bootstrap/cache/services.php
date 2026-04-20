@@ -42,11 +42,16 @@
     38 => 'App\\Providers\\AuthServiceProvider',
     39 => 'App\\Providers\\EventServiceProvider',
     40 => 'App\\Providers\\NovaServiceProvider',
-    41 => 'App\\Providers\\RouteServiceProvider',
-    42 => 'App\\Providers\\AppServiceProvider',
-    43 => 'R64\\NovaFields\\FieldServiceProvider',
-    44 => 'App\\Providers\\NovaServiceProvider',
-    45 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
+    41 => 'App\\Providers\\Filament\\AdminPanelProvider',
+    42 => 'App\\Providers\\RouteServiceProvider',
+    43 => 'App\\Providers\\AppServiceProvider',
+    44 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    45 => 'Filament\\FilamentServiceProvider',
+    46 => 'Spatie\\Translatable\\TranslatableServiceProvider',
+    47 => 'App\\Providers\\Filament\\AdminPanelProvider',
+    48 => 'R64\\NovaFields\\FieldServiceProvider',
+    49 => 'App\\Providers\\NovaServiceProvider',
+    50 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
   ),
   'eager' => 
   array (
@@ -79,11 +84,15 @@
     26 => 'App\\Providers\\AuthServiceProvider',
     27 => 'App\\Providers\\EventServiceProvider',
     28 => 'App\\Providers\\NovaServiceProvider',
-    29 => 'App\\Providers\\RouteServiceProvider',
-    30 => 'App\\Providers\\AppServiceProvider',
-    31 => 'R64\\NovaFields\\FieldServiceProvider',
-    32 => 'App\\Providers\\NovaServiceProvider',
-    33 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
+    29 => 'App\\Providers\\Filament\\AdminPanelProvider',
+    30 => 'App\\Providers\\RouteServiceProvider',
+    31 => 'App\\Providers\\AppServiceProvider',
+    32 => 'Filament\\FilamentServiceProvider',
+    33 => 'Spatie\\Translatable\\TranslatableServiceProvider',
+    34 => 'App\\Providers\\Filament\\AdminPanelProvider',
+    35 => 'R64\\NovaFields\\FieldServiceProvider',
+    36 => 'App\\Providers\\NovaServiceProvider',
+    37 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
   ),
   'deferred' => 
   array (
@@ -235,6 +244,7 @@
     'validator' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
+    'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
   array (
@@ -272,6 +282,9 @@
     array (
     ),
     'Illuminate\\Validation\\ValidationServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Tinker\\TinkerServiceProvider' => 
     array (
     ),
   ),
