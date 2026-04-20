@@ -3,6 +3,7 @@ import { createPinia } from 'pinia';
 import router from './router';
 import App from './App.vue';
 import VueApexCharts from 'vue3-apexcharts';
+import i18n from './i18n';
 
 const app = createApp(App);
 
@@ -17,7 +18,11 @@ app.config.errorHandler = (err, instance, info) => {
 };
 
 try {
-  app.use(createPinia()).use(router).use(VueApexCharts).mount('#app');
+  app.use(createPinia())
+     .use(router)
+     .use(VueApexCharts)
+     .use(i18n)
+     .mount('#app');
 } catch (e) {
   console.error('[Mount Error]', e);
   const el = document.getElementById('app');

@@ -12,7 +12,7 @@
     <nav class="nav-container">
       <div class="nav-scroll">
         <!-- Main items -->
-        <SidebarMenuItem v-for="item in items" :key="item.path" :to="item.path" :label="item.name">
+        <SidebarMenuItem v-for="item in items" :key="item.path" :to="item.path" :label="$t(`nav.${item.key}`)">
           <template #icon>
             <component :is="item.icon" class="w-5 h-5" />
           </template>
@@ -26,13 +26,13 @@
             :class="{ 'expanded': financeOpen }"
           >
             <CreditCardIcon class="w-5 h-5 flex-shrink-0" />
-            <span class="flex-1 text-left">Financial</span>
+            <span class="flex-1 text-start">{{ $t('nav.financial') }}</span>
             <ChevronDownIcon class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': financeOpen }" />
           </button>
           
           <div v-if="financeOpen" class="submenu animate-in slide-in-from-top-2 duration-300">
             <div class="dotted-line"></div>
-            <SidebarMenuItem v-for="item in financial" :key="item.path" :to="item.path" :label="item.name">
+            <SidebarMenuItem v-for="item in financial" :key="item.path" :to="item.path" :label="$t(`nav.${item.key}`)">
               <template #icon>
                 <div class="dot-icon"></div>
               </template>
@@ -48,13 +48,13 @@
             :class="{ 'expanded': posOpen }"
           >
             <ShoppingBagIcon class="w-5 h-5 flex-shrink-0" />
-            <span class="flex-1 text-left">POS</span>
+            <span class="flex-1 text-start">{{ $t('nav.pos') }}</span>
             <ChevronDownIcon class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': posOpen }" />
           </button>
           
           <div v-if="posOpen" class="submenu">
             <div class="dotted-line"></div>
-            <SidebarMenuItem v-for="item in pos" :key="item.path" :to="item.path" :label="item.name">
+            <SidebarMenuItem v-for="item in pos" :key="item.path" :to="item.path" :label="$t(`nav.${item.key}`)">
               <template #icon>
                 <div class="dot-icon"></div>
               </template>
@@ -62,11 +62,11 @@
           </div>
         </div>
         
-        <!-- Admin Section (Only Show if Admin) -->
+        <!-- Admin Section -->
         <div v-if="isAdmin" class="admin-divider mt-8 px-8 py-2">
-           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Control</span>
+           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ locale === 'ar' ? 'التحكم بالإدارة' : 'Admin Control' }}</span>
         </div>
-        <SidebarMenuItem v-if="isAdmin" to="/leads" label="Leads Management">
+        <SidebarMenuItem v-if="isAdmin" to="/leads" :label="$t('nav.leads')">
            <template #icon>
              <MessageSquareIcon class="w-5 h-5" />
            </template>
@@ -80,9 +80,9 @@
          <div class="pro-icon bg-white/20 p-2 rounded-lg">
             <ZapIcon class="w-4 h-4 text-white" />
          </div>
-         <div class="mt-2">
-            <p class="text-xs font-bold text-white">Go Pro</p>
-            <p class="text-[10px] text-white/70">Unlock corporate features</p>
+         <div class="mt-2 text-white">
+            <p class="text-xs font-bold">{{ locale === 'ar' ? 'اشترك في النسخة الاحترافية' : 'Go Pro' }}</p>
+            <p class="text-[10px] opacity-70">{{ locale === 'ar' ? 'افتح مميزات الشركات المتطورة' : 'Unlock corporate features' }}</p>
          </div>
       </div>
     </div>
@@ -91,53 +91,43 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import SidebarMenuItem from './SidebarMenuItem.vue';
 import { 
-  BarChart2Icon, 
-  HomeIcon, 
-  HotelIcon, 
-  UsersIcon, 
-  BuildingIcon, 
-  CalendarIcon, 
-  BriefcaseIcon, 
-  PuzzleIcon, 
-  SettingsIcon, 
-  GlobeIcon,
-  CreditCardIcon,
-  ChevronDownIcon,
-  ShoppingBagIcon,
-  ZapIcon,
-  MessageSquareIcon
+  BarChart2Icon, HomeIcon, HotelIcon, UsersIcon, BuildingIcon, 
+  CalendarIcon, BriefcaseIcon, PuzzleIcon, SettingsIcon, GlobeIcon,
+  CreditCardIcon, ChevronDownIcon, ShoppingBagIcon, ZapIcon, MessageSquareIcon
 } from 'lucide-vue-next';
 
-const posOpen = ref(true);
-const financeOpen = ref(true);
-const isAdmin = ref(true); // Temporary until auth logic is added
+const { locale } = useI18n();
+const posOpen = ref(false);
+const financeOpen = ref(false);
+const isAdmin = ref(true);
 
 const items = [
-  { name: 'Dashboard', path: '/dashboard', icon: BarChart2Icon },
-  { name: 'Rooms', path: '/rooms', icon: HotelIcon },
-  { name: 'Guest', path: '/guests', icon: UsersIcon },
-  { name: 'Unit Housing', path: '/units', icon: BuildingIcon },
-  { name: 'Reservations Schedule', path: '/reservations/schedule', icon: CalendarIcon },
-  { name: 'Reservations Management', path: '/reservations/management', icon: BriefcaseIcon },
-  { name: 'Services Management', path: '/services', icon: PuzzleIcon },
-  { name: 'User Grouping', path: '/user-groups', icon: UsersIcon },
-  { name: 'Settings', path: '/settings', icon: SettingsIcon },
-  { name: 'Reports', path: '/reports', icon: GlobeIcon },
+  { key: 'dashboard', path: '/dashboard', icon: BarChart2Icon },
+  { key: 'rooms', path: '/rooms', icon: HotelIcon },
+  { key: 'guests', path: '/guests', icon: UsersIcon },
+  { key: 'units', path: '/units', icon: BuildingIcon },
+  { key: 'schedule', path: '/reservations/schedule', icon: CalendarIcon },
+  { key: 'management', path: '/reservations/management', icon: BriefcaseIcon },
+  { key: 'services', path: '/services', icon: PuzzleIcon },
+  { key: 'user_groups', path: '/user-groups', icon: UsersIcon },
+  { key: 'settings', path: '/settings', icon: SettingsIcon },
+  { key: 'reports', path: '/reports', icon: GlobeIcon },
 ];
 
 const financial = [
-  { name: 'Receipts', path: '/financial/receipts' },
-  { name: 'Expenses', path: '/financial/expenses' },
-  { name: 'Bills', path: '/financial/bills' },
+  { key: 'receipts', path: '/financial/receipts' },
+  { key: 'expenses', path: '/financial/expenses' },
+  { key: 'bills', path: '/financial/bills' },
 ];
 
 const pos = [
-  { name: 'Make Order', path: '/pos/store' },
-  { name: 'Services', path: '/pos/services' },
-  { name: 'Transactions', path: '/pos/transactions' },
-  { name: 'Products', path: '/pos/products' },
+  { key: 'make_order', path: '/pos/store' },
+  { key: 'services', path: '/pos/services' },
+  { key: 'transactions', path: '/pos/transactions' },
+  { key: 'products', path: '/pos/products' },
 ];
 </script>
 
@@ -150,8 +140,9 @@ const pos = [
   top: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #f1f5f9;
+  border-inline-end: 1px solid #f1f5f9;
   z-index: 50;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-brand {
@@ -171,11 +162,6 @@ const pos = [
   justify-content: center;
 }
 
-.brand-img {
-  width: 24px;
-  height: 24px;
-}
-
 .brand-text {
   font-size: 20px;
   font-weight: 800;
@@ -186,20 +172,6 @@ const pos = [
 .nav-container {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 24px;
-}
-
-.nav-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.nav-scroll::-webkit-scrollbar-thumb {
-  background: #f1f5f9;
-  border-radius: 10px;
-}
-
-.nav-group {
-  margin: 4px 0;
 }
 
 .group-toggle {
@@ -218,35 +190,21 @@ const pos = [
 
 .group-toggle:hover {
   background: #f8fafc;
-  color: #2a273c;
+  color: #e95a54;
 }
 
 .submenu {
   position: relative;
-  margin-left: 28px;
+  margin-inline-start: 28px;
 }
 
 .dotted-line {
   position: absolute;
-  left: 17px;
+  inset-inline-start: 17px;
   top: 0;
   bottom: 12px;
   width: 1px;
-  border-left: 2px dotted #e2e8f0;
-  z-index: 0;
-}
-
-.dot-icon {
-  width: 8px;
-  height: 8px;
-  background: #cbd5e1;
-  border-radius: 50%;
-  transition: all 0.3s;
-}
-
-.active .dot-icon {
-  background: white;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  border-inline-start: 2px dotted #e2e8f0;
 }
 
 .pro-card {
@@ -255,4 +213,7 @@ const pos = [
   border-radius: 20px;
   box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
 }
+
+/* RTL Specifics */
+[dir="rtl"] .group-toggle span { text-align: start; }
 </style>

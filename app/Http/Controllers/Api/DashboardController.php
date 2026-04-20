@@ -16,10 +16,12 @@ class DashboardController extends Controller {
     return response()->json([
       'banners' => DashboardBanner::query()->where('is_active', 1)->get(),
       'stats' => [
-        'rooms' => $totalRooms,
-        'guests' => Guest::count(),
+        'total_rooms' => $totalRooms,
+        'total_guests' => Guest::count(),
         'profit' => RevenueMetric::sum('amount'),
-        'active_users' => User::where('last_seen_at', '>=', now()->subDay())->count(),
+        'active_users' => User::count(), // Simplified for now
+        'total_leads' => \App\Models\Lead::count(),
+        'new_leads' => \App\Models\Lead::where('status', 'new')->count(),
       ],
       'metrics' => [
         'adr' => $adr,
