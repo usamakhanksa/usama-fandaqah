@@ -1,0 +1,22 @@
+:root {
+  --primary: #e95a54;
+  --sidebar-bg: #2a273c;
+  --content-bg: #f2f0eb;
+  --muted: #8f9793;
+  --accent-soft: #fbcdab;
+}
+
+body, .content {
+  background: var(--content-bg) !important;
+}
+
+.sidebar, .sidebar ul {
+  background: var(--sidebar-bg) !important;
+}
+
+.sidebar .router-link-active,
+.sidebar .active,
+[dusk="sidebar"] .router-link-active {
+  background: var(--primary) !important;
+  color: var(--content-bg) !important;
+}
