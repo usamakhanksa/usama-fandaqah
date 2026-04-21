@@ -1,82 +1,50 @@
 <template>
-  <RouterLink 
-    :to="to" 
-    class="sidebar-item group" 
-    :class="{ 'active': $route.path === to }"
-  >
-    <div class="item-icon">
-       <slot name="icon">
-         <span>{{ icon }}</span>
-       </slot>
-    </div>
-    <span class="item-label">{{ label }}</span>
-    <div v-if="$route.path === to" class="active-indicator"></div>
-  </RouterLink>
+  <div class="mb-1">
+    <RouterLink
+      v-if="item.path"
+      :to="item.path"
+      class="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition"
+      :class="isActive(item.path) ? 'bg-coral text-white' : 'text-beige hover:bg-sage/20'"
+    >
+      <component :is="item.icon" class="h-4 w-4" />
+      <span>{{ item.label }}</span>
+    </RouterLink>
+
+    <details v-else class="rounded-md" :open="isOpen">
+      <summary class="flex cursor-pointer list-none items-center gap-2 rounded-md px-3 py-2 text-sm text-beige hover:bg-sage/20">
+        <component :is="item.icon" class="h-4 w-4" />
+        <span>{{ item.label }}</span>
+      </summary>
+
+      <div class="ml-4 mt-1 border-l border-sage/40 pl-2">
+        <SidebarMenuItem
+          v-for="child in item.children"
+          :key="child.route || child.label"
+          :item="child"
+        />
+      </div>
+    </details>
+  </div>
 </template>
 
 <script setup>
-defineProps({ 
-  to: { type: String, required: true }, 
-  icon: String, 
-  label: { type: String, required: true }
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
+  },
 });
+
+const route = useRoute();
+const isActive = (path) => route.path === path;
+
+const hasActiveDescendant = (node) => {
+  if (!node.children) return false;
+  return node.children.some((child) => child.path === route.path || hasActiveDescendant(child));
+};
+
+const isOpen = computed(() => hasActiveDescendant(props.item));
 </script>
-
-<style scoped>
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  margin: 4px 12px;
-  border-radius: 16px;
-  text-decoration: none;
-  color: #64748b;
-  font-weight: 500;
-  font-size: 14px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.item-icon {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
-}
-
-.item-label {
-  flex: 1;
-  white-space: nowrap;
-}
-
-/* Hover State */
-.sidebar-item:hover {
-  background-color: #f8fafc;
-  color: #e95a54;
-}
-
-.sidebar-item:hover .item-icon {
-  transform: translateX(2px);
-}
-
-/* Active State - Red Bubble Style Like Image */
-.sidebar-item.active {
-  background: linear-gradient(135deg, #e95a54 0%, #ef4444 100%);
-  color: white;
-  box-shadow: 0 10px 20px -5px rgba(233, 90, 84, 0.4);
-  transform: scale(1.02);
-}
-
-.sidebar-item.active .item-icon {
-  color: white;
-}
-
-.sidebar-item.active .item-label {
-  font-weight: 700;
-}
-</style>

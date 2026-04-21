@@ -118,22 +118,22 @@ export const sidebarConfig = [
         label: 'Reports',
         icon: FileText,
         children: [
-          { label: '📥 Deposits', route: 'reports.deposits', path: '/reports/deposits', icon: Download, permission: 'view deposits report' },
-          { label: '📤 Withdraws', route: 'reports.withdraws', path: '/reports/withdraws', icon: Upload, permission: 'view withdraws report' },
-          { label: '🛡️ Safe Movement Report', route: 'reports.safe-movement', path: '/reports/safe-movement', icon: Shield, permission: 'view safe movement report' },
-          { label: '👥 Customer Movement', route: 'reports.customer-movement', path: '/reports/customer-movement', icon: UsersRound, permission: 'view customer movement report' },
-          { label: '🛎️ Services Report', route: 'reports.services', path: '/reports/services', icon: BellRing, permission: 'view services report' },
-          { label: '📅 Monthly Report', route: 'reports.monthly', path: '/reports/monthly', icon: Calendar, permission: 'view monthly report' },
-          { label: '🏢 Units Movement Report', route: 'reports.units-movement', path: '/reports/units-movement', icon: Building2, permission: 'view units movement report' },
-          { label: '📊 Occupancy Ratio', route: 'reports.occupancy-ratio', path: '/reports/occupancy-ratio', icon: PieChart, permission: 'view occupancy ratio report' },
-          { label: '🧹 Cleaning Movement', route: 'reports.cleaning-movement', path: '/reports/cleaning-movement', icon: BrushCleaning, permission: 'view cleaning movement report' },
-          { label: '🛠️ Maintenance Movement', route: 'reports.maintenance-movement', path: '/reports/maintenance-movement', icon: Wrench, permission: 'view maintenance movement report' },
-          { label: '🔄 Reservation Transfers', route: 'reports.reservation-transfers', path: '/reports/reservation-transfers', icon: RefreshCcw, permission: 'view reservation transfers report' },
-          { label: '⚖️ Revenues & Taxes', route: 'reports.revenues-taxes', path: '/reports/revenues-taxes', icon: Scale, permission: 'view revenues taxes report' },
-          { label: '📅 Reservation Resources', route: 'reports.reservation-resources', path: '/reports/reservation-resources', icon: Calendar, permission: 'view reservation resources report' },
-          { label: '📄 Employee Contracts', route: 'reports.employee-contracts', path: '/reports/employee-contracts', icon: FileBadge, permission: 'view employee contracts report' },
-          { label: '🧾 Invoices Report', route: 'reports.invoices', path: '/reports/invoices', icon: Receipt, permission: 'view invoices report' },
-          { label: '☀️ Daily report', route: 'reports.daily', path: '/reports/daily', icon: Sun, permission: 'view daily report' },
+          { label: 'Deposits', route: 'reports.deposits', path: '/reports/deposits', icon: Download, permission: 'view deposits report' },
+          { label: 'Withdraws', route: 'reports.withdraws', path: '/reports/withdraws', icon: Upload, permission: 'view withdraws report' },
+          { label: 'Safe Movement Report', route: 'reports.safe-movement', path: '/reports/safe-movement', icon: Shield, permission: 'view safe movement report' },
+          { label: 'Customer Movement', route: 'reports.customer-movement', path: '/reports/customer-movement', icon: UsersRound, permission: 'view customer movement report' },
+          { label: 'Services Report', route: 'reports.services', path: '/reports/services', icon: BellRing, permission: 'view services report' },
+          { label: 'Monthly Report', route: 'reports.monthly', path: '/reports/monthly', icon: Calendar, permission: 'view monthly report' },
+          { label: 'Units Movement Report', route: 'reports.units-movement', path: '/reports/units-movement', icon: Building2, permission: 'view units movement report' },
+          { label: 'Occupancy Ratio', route: 'reports.occupancy-ratio', path: '/reports/occupancy-ratio', icon: PieChart, permission: 'view occupancy ratio report' },
+          { label: 'Cleaning Movement', route: 'reports.cleaning-movement', path: '/reports/cleaning-movement', icon: BrushCleaning, permission: 'view cleaning movement report' },
+          { label: 'Maintenance Movement', route: 'reports.maintenance-movement', path: '/reports/maintenance-movement', icon: Wrench, permission: 'view maintenance movement report' },
+          { label: 'Reservation Transfers', route: 'reports.reservation-transfers', path: '/reports/reservation-transfers', icon: RefreshCcw, permission: 'view reservation transfers report' },
+          { label: 'Revenues & Taxes', route: 'reports.revenues-taxes', path: '/reports/revenues-taxes', icon: Scale, permission: 'view revenues taxes report' },
+          { label: 'Reservation Resources', route: 'reports.reservation-resources', path: '/reports/reservation-resources', icon: Calendar, permission: 'view reservation resources report' },
+          { label: 'Employee Contracts', route: 'reports.employee-contracts', path: '/reports/employee-contracts', icon: FileBadge, permission: 'view employee contracts report' },
+          { label: 'Invoices Report', route: 'reports.invoices', path: '/reports/invoices', icon: Receipt, permission: 'view invoices report' },
+          { label: 'Daily Report', route: 'reports.daily', path: '/reports/daily', icon: Sun, permission: 'view daily report' },
         ],
       },
     ],
@@ -178,4 +178,15 @@ export const flattenSidebarRoutes = (nodes = sidebarConfig, list = []) => {
     if (node.children?.length) flattenSidebarRoutes(node.children, list);
   });
   return list;
+};
+
+const segmentToPascal = (segment) => segment
+  .split('-')
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join('');
+
+export const pagePathFromRoute = (path) => {
+  const cleaned = path.replace(/^\//, '').split('/').filter(Boolean);
+  if (cleaned.length === 0) return 'Dashboard';
+  return cleaned.map(segmentToPascal).join('/');
 };
