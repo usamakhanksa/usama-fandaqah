@@ -543,5 +543,6 @@ class DatabaseSeeder extends Seeder
         foreach (['Direct', 'Booking.com', 'Expedia', 'Walk-in', 'Referral'] as $res) {
             DB::table('reservation_resources')->insert(['name' => $res, 'created_at' => now(), 'updated_at' => now()]);
         }
+        $this->call(HotelModuleScaffoldSeeder::class);
     }
 }
