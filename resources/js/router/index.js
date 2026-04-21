@@ -30,22 +30,23 @@ import ManageCategoriesPage from '../pages/ManageCategoriesPage.vue';
 import LeadsPage from '../pages/LeadsPage.vue';
 import ChannelReservationsPage from '../pages/ChannelReservationsPage.vue';
 import ModuleScaffoldPage from '../pages/ModuleScaffoldPage.vue';
-import { moduleScaffoldPages } from '../config/moduleScaffold';
+import { flattenSidebarRoutes } from '../config/sidebarConfig';
 
 
-const scaffoldRoutes = moduleScaffoldPages.flatMap((group) =>
-  group.pages.map((page) => ({
-    path: page.path,
-    component: ModuleScaffoldPage,
-    props: {
-      title: page.title,
-      group: group.group,
-      table: page.table,
-      columns: page.columns,
-      seed: page.seed,
-    },
-  })),
-);
+const scaffoldRoutes = flattenSidebarRoutes().filter((page) => page.path !== '/dashboard').map((page) => ({
+  path: page.path,
+  name: page.route,
+  component: ModuleScaffoldPage,
+  props: {
+    title: page.label,
+    group: 'Operational Module',
+    table: 'Mapped from SQL dump/OPERA scope',
+    columns: 'Configured in migrations + models per domain',
+    seed: 'Initially empty by design, add first record from UI',
+    permission: page.permission,
+  },
+  meta: { permission: page.permission },
+}));
 
 const routes = [
   { path: '/login', component: LoginPage, name: 'login' },
