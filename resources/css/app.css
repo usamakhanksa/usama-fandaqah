@@ -12,66 +12,27 @@
   --light-peach: #fbcdab;
 }
 
-body { 
+body {
   font-family: 'Inter', sans-serif;
-  @apply bg-[#f2f0eb] text-[#2a273c] antialiased;
+  @apply antialiased;
+  background: var(--soft-beige);
+  color: var(--dark-navy);
 }
 
-/* Corporate Card Style */
-.card { 
-  @apply bg-[#f2f0eb] rounded-[2.5rem] border border-[#8f9793] shadow-sm transition-all duration-300;
-}
+.card { @apply rounded-[2rem] border shadow-sm transition-all duration-300; background: var(--soft-beige); border-color: var(--muted-green); }
+.card:hover { @apply shadow-md -translate-y-1; }
 
-.card:hover {
-  @apply shadow-md -translate-y-1;
-}
+.input { @apply w-full rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all outline-none; background: var(--soft-beige); border-color: var(--muted-green); }
+.input:focus { box-shadow: 0 0 0 4px rgb(233 90 84 / 0.10); border-color: var(--coral-red); }
 
-/* Corporate Inputs */
-.input { 
-  @apply w-full rounded-xl border-2 border-[#8f9793] bg-[#f2f0eb] px-4 py-3 text-sm font-medium transition-all outline-none;
-}
+.btn-primary { @apply px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all; background: var(--coral-red); color: var(--soft-beige); }
+.btn-primary:hover { filter: brightness(.96); }
 
-.input:focus {
-  @apply border-[#e95a54] ring-4 ring-[#e95a54]/10;
-}
+.btn-secondary { @apply px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all; background: var(--dark-navy); color: var(--soft-beige); }
+.btn-outline { @apply px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all border-2; border-color: var(--muted-green); background: var(--soft-beige); color: var(--dark-navy); }
+.btn-outline:hover { background: var(--light-peach); }
 
-/* Premium Buttons */
-.btn-primary { 
-  @apply bg-[#e95a54] text-[#f2f0eb] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all;
-}
-
-.btn-secondary { 
-  @apply bg-[#2a273c] text-[#f2f0eb] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:opacity-90 transition-all;
-}
-
-.btn-outline { 
-  @apply border-2 border-[#8f9793] bg-[#f2f0eb] text-[#2a273c] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-[#fbcdab] transition-all;
-}
-
-/* Modern Headings */
-h1, h2, h3 {
-  @apply tracking-tight font-black;
-}
-
-/* Transitions */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #f2f0eb;
-}
-::-webkit-scrollbar-thumb {
-  background: #8f9793;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #e95a54;
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--soft-beige); }
+::-webkit-scrollbar-thumb { background: var(--muted-green); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--coral-red); }
