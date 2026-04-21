@@ -30,7 +30,7 @@ class LoginController extends Controller
 				return response()->json(['message' => "you dont have privilege to enter this portal"], 401);
 			}else{
 				$success['data']['token'] = $user->createToken('myApp')->plainTextToken;
-				$success['data']['user'] = new UserResource($user->load('teams'));
+				$success['data']['user'] = new UserResource($user->load('teams', 'roles'));
 				return response()->json($success, 200);
 			}
 		}

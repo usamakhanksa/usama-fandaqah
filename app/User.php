@@ -25,6 +25,21 @@ class User extends SparkUser
     use HasApiTokens;
     use SoftDeletes;
 
+    public function role()
+    {
+        return $this->belongsTo(\App\Models\Role::class, 'role_id');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(\App\Models\Role::class, 'role_user');
+    }
+
+    public function teams()
+    {
+        return $this->belongsToMany(\App\Team::class, 'team_users', 'user_id', 'team_id');
+    }
+
     /**
      * The attributes that are mass assignable.
      *

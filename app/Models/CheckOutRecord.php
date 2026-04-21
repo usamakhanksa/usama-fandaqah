@@ -1,20 +1,18 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CheckOutRecord extends Model
 {
     protected $guarded = [];
+    protected $table = 'check_out_records';
 
-    public function reservation(): BelongsTo
+    public function reservation()
     {
         return $this->belongsTo(Reservation::class);
     }
 
-    public function unit(): BelongsTo
+    public function unit()
     {
         return $this->belongsTo(Unit::class);
     }

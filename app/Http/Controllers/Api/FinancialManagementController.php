@@ -8,7 +8,7 @@ use App\Models\CreditNote;
 use App\Models\Expense;
 use App\Models\FundMovement;
 use App\Models\Receipt;
-use App\Models\User;
+use App\User;
 use Illuminate\Http\Request;
 
 class FinancialManagementController extends Controller

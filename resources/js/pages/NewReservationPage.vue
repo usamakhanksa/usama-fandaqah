@@ -484,7 +484,7 @@ onMounted(async () => {
 }
 .form-select {
   @apply w-full bg-[#f2f0eb]/50 border-2 border-transparent focus:border-[#e95a54] rounded-xl px-4 py-3 outline-none transition-all font-bold text-[#2a273c] shadow-sm appearance-none disabled:opacity-50;
-  background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232a273c' opacity='0.4'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\");
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20fill%3D'none'%20viewBox%3D'0%200%2024%2024'%20stroke%3D'%232a273c'%20stroke-width%3D'3'%3E%3Cpath%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%20d%3D'M19%209l-7%207-7-7'%2F%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1.2rem;

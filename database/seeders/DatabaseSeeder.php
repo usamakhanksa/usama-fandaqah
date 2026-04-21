@@ -7,7 +7,7 @@ use App\Models\CompanyProfile;
 use App\Models\Country;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
+use App\User;
 use App\Models\Room;
 use App\Models\RoomFloor;
 use App\Models\Unit;
@@ -187,9 +187,12 @@ class DatabaseSeeder extends Seeder
 
         // 9. Leads
         for ($i = 1; $i <= 10; $i++) {
+            $fname = fake()->firstName();
+            $lname = fake()->lastName();
             DB::table('leads')->updateOrInsert(['email' => "lead{$i}@example.com"], [
-                'first_name' => fake()->firstName(),
-                'last_name' => fake()->lastName(),
+                'first_name' => $fname,
+                'last_name' => $lname,
+                'full_name' => $fname . ' ' . $lname,
                 'phone' => '+966' . rand(500000000, 599999999),
                 'status' => 'new',
                 'created_at' => now(),
@@ -230,15 +233,18 @@ class DatabaseSeeder extends Seeder
             DB::table('reservation_statuses')->updateOrInsert(['name' => $status], ['created_at' => now(), 'updated_at' => now()]);
         }
 
-        // 12. Reservations (Bypassing Virtual Columns if any, but using date_in/date_out safely)
+        // 12. Reservations & Bookings
         $r_status = DB::table('reservation_statuses')->first();
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
           $in = now()->addDays(rand(-5, 5))->toDateString();
           $out = now()->addDays(rand(6, 10))->toDateString();
-          DB::table('reservations')->insertOrIgnore([
+          $guest_id = rand(1, 10);
+          $room_id = rand(1, 25);
+          
+          $res_id = DB::table('reservations')->insertGetId([
               'code' => 'RSV' . Str::random(8),
-              'guest_id' => rand(1, 10),
-              'room_id' => rand(1, 20),
+              'guest_id' => $guest_id,
+              'room_id' => $room_id,
               'unit_id' => rand(1, 20),
               'reservation_status_id' => $r_status?->id ?? 1,
               'status' => 'CheckedIn',
@@ -247,6 +253,29 @@ class DatabaseSeeder extends Seeder
               'stay_type' => 'checkin',
               'created_at' => now(),
               'updated_at' => now()
+          ]);
+
+          $booking_id = DB::table('bookings')->insertGetId([
+              'reservation_id' => $res_id,
+              'guest_id' => $guest_id,
+              'room_id' => $room_id,
+              'check_in' => $in,
+              'check_out' => $out,
+              'total_amount' => rand(1000, 5000),
+              'created_at' => now(),
+              'updated_at' => now()
+          ]);
+
+          DB::table('financial_records')->insert([
+              ['booking_id' => $booking_id, 'label' => 'Room Charge', 'amount' => rand(800, 1500), 'type' => 'debit', 'created_at' => now()],
+              ['booking_id' => $booking_id, 'label' => 'Service Fee', 'amount' => 50, 'type' => 'debit', 'created_at' => now()],
+          ]);
+
+          DB::table('reservation_notes')->insert([
+              'booking_id' => $booking_id,
+              'user_id' => 1,
+              'note' => 'System seeded reservation.',
+              'created_at' => now()
           ]);
         }
     }

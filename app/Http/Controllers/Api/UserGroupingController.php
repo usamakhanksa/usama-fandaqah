@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

@@ -22,7 +22,7 @@ class Lead extends Model
 
     public function assignedUser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'assigned_to');
+        return $this->belongsTo(\App\User::class, 'assigned_to');
     }
 
     public function getStatusColorAttribute(): string

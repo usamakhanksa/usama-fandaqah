@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 space-y-6 bg-[#f8f9fa] min-h-full">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-50">
       <div>
         <h1 class="text-2xl font-bold text-[#2a273c]">{{ $t('nav.management') }}</h1>
         <nav class="text-xs text-slate-400 mt-1 flex gap-2">
@@ -23,7 +23,7 @@
     </div>
 
     <!-- Filters & View Toggles -->
-    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 flex flex-col lg:flex-row gap-4 items-center">
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-50 flex flex-col lg:flex-row gap-4 items-center">
       <div class="relative flex-1 w-full">
         <input 
           v-model="filters.search" 
@@ -66,7 +66,7 @@
     </div>
 
     <!-- View Content -->
-    <div v-if="viewType === 'list'" class="bg-white rounded-[2rem] shadow-sm border border-slate-50 overflow-hidden">
+    <div v-if="viewType === 'list'" class="bg-white rounded-3xl shadow-sm border border-slate-50 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -121,7 +121,7 @@
 
     <!-- Grid View -->
     <div v-else-if="viewType === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="row in rows" :key="row.id" class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-50 hover:border-[#e95a54] transition-all group">
+      <div v-for="row in rows" :key="row.id" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-50 hover:border-[#e95a54] transition-all group">
          <div class="flex justify-between items-start mb-4">
            <div class="w-12 h-12 rounded-2xl bg-[#f2f0eb] flex items-center justify-center text-[#2a273c] font-black text-lg uppercase group-hover:bg-[#e95a54] group-hover:text-white transition-colors">
               {{ row.guest?.name?.charAt(0) }}
@@ -191,7 +191,6 @@ onMounted(load);
 </script>
 
 <style scoped>
-.rounded-[2rem] { border-radius: 2rem; }
 .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
 [dir="rtl"] .text-start { text-align: right; }
