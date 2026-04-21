@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('leads', function (Blueprint $table) {
+        if (!Schema::hasTable('leads')) {
+            Schema::create('leads', function (Blueprint $table) {
             $table->id();
             $table->string('full_name');
             $table->string('email');
@@ -28,6 +29,7 @@ return new class extends Migration {
             $table->index('created_at');
         });
     }
+}
 
     public function down(): void
     {

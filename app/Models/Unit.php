@@ -39,4 +39,9 @@ class Unit extends Model
     {
         return $this->hasMany(CheckOutRecord::class);
     }
+
+    public function getNumberAttribute()
+    {
+        return $this->unit_number;
+    }
 }

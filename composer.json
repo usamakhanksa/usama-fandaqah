@@ -10,6 +10,7 @@
         "laravel/framework": "^11.0",
         "laravel/nova": "*",
         "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^3.0",
         "niklasravnsborg/laravel-pdf": "^4.1",
         "pktharindu/nova-permissions": "^3.1",
         "predis/predis": "^3.4",

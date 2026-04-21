@@ -30,23 +30,24 @@
     26 => 'Laravel\\Fortify\\FortifyServiceProvider',
     27 => 'Laravel\\Nova\\NovaCoreServiceProvider',
     28 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    29 => 'Carbon\\Laravel\\ServiceProvider',
-    30 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
-    31 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    32 => 'Pktharindu\\NovaPermissions\\ToolServiceProvider',
-    33 => 'Rap2hpoutre\\FastExcel\\Providers\\FastExcelServiceProvider',
-    34 => 'Spatie\\Activitylog\\ActivitylogServiceProvider',
-    35 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
-    36 => 'Barryvdh\\DomPDF\\ServiceProvider',
-    37 => 'App\\Providers\\AppServiceProvider',
-    38 => 'App\\Providers\\AuthServiceProvider',
-    39 => 'App\\Providers\\EventServiceProvider',
-    40 => 'App\\Providers\\NovaServiceProvider',
-    41 => 'App\\Providers\\RouteServiceProvider',
-    42 => 'App\\Providers\\AppServiceProvider',
-    43 => 'R64\\NovaFields\\FieldServiceProvider',
-    44 => 'App\\Providers\\NovaServiceProvider',
-    45 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
+    29 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    30 => 'Carbon\\Laravel\\ServiceProvider',
+    31 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
+    32 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    33 => 'Pktharindu\\NovaPermissions\\ToolServiceProvider',
+    34 => 'Rap2hpoutre\\FastExcel\\Providers\\FastExcelServiceProvider',
+    35 => 'Spatie\\Activitylog\\ActivitylogServiceProvider',
+    36 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
+    37 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    38 => 'App\\Providers\\AppServiceProvider',
+    39 => 'App\\Providers\\AuthServiceProvider',
+    40 => 'App\\Providers\\EventServiceProvider',
+    41 => 'App\\Providers\\NovaServiceProvider',
+    42 => 'App\\Providers\\RouteServiceProvider',
+    43 => 'App\\Providers\\AppServiceProvider',
+    44 => 'R64\\NovaFields\\FieldServiceProvider',
+    45 => 'App\\Providers\\NovaServiceProvider',
+    46 => 'niklasravnsborg\\LaravelPdf\\PdfServiceProvider',
   ),
   'eager' => 
   array (
@@ -235,6 +236,7 @@
     'validator' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
+    'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
   array (
@@ -272,6 +274,9 @@
     array (
     ),
     'Illuminate\\Validation\\ValidationServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Tinker\\TinkerServiceProvider' => 
     array (
     ),
   ),

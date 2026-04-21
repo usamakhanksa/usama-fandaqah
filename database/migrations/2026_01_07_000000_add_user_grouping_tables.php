@@ -7,35 +7,41 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('permissions', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->string('group')->default('general');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('permissions')) {
+            Schema::create('permissions', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('slug')->unique();
+                $table->string('group')->default('general');
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('role_user', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->timestamps();
-            $table->unique(['role_id', 'user_id']);
-        });
+        if (!Schema::hasTable('role_user')) {
+            Schema::create('role_user', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->timestamps();
+                $table->unique(['role_id', 'user_id']);
+            });
+        }
 
-        Schema::create('permission_role', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('permission_id')->constrained()->cascadeOnDelete();
-            $table->boolean('enabled')->default(false);
-            $table->boolean('anyone')->default(false);
-            $table->boolean('can_create')->default(false);
-            $table->boolean('can_edit')->default(false);
-            $table->boolean('can_view')->default(false);
-            $table->boolean('can_remove')->default(false);
-            $table->timestamps();
-            $table->unique(['role_id', 'permission_id']);
-        });
+        if (!Schema::hasTable('permission_role')) {
+            Schema::create('permission_role', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('permission_id')->constrained()->cascadeOnDelete();
+                $table->boolean('enabled')->default(false);
+                $table->boolean('anyone')->default(false);
+                $table->boolean('can_create')->default(false);
+                $table->boolean('can_edit')->default(false);
+                $table->boolean('can_view')->default(false);
+                $table->boolean('can_remove')->default(false);
+                $table->timestamps();
+                $table->unique(['role_id', 'permission_id']);
+            });
+        }
     }
 
     public function down(): void

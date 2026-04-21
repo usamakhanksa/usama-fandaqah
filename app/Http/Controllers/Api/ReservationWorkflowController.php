@@ -137,8 +137,8 @@ class ReservationWorkflowController extends Controller
                 'room_id' => $room->id,
                 'unit_id' => $data['details']['unit_id'] ?? null,
                 'reservation_status_id' => 2,
-                'check_in' => $data['details']['check_in'],
-                'check_out' => $data['details']['check_out'],
+                'date_in' => $data['details']['check_in'],
+                'date_out' => $data['details']['check_out'],
                 'stay_type' => 'checkin',
             ]);
 

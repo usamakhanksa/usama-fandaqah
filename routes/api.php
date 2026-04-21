@@ -108,7 +108,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pos/cart', [PosController::class, 'cart']);
     Route::post('/pos/cart/items', [PosController::class, 'updateCart']);
     Route::delete('/pos/cart/items', [PosController::class, 'clearCart']);
-    Route::post('/pos/checkout', [PosController::class, 'checkout']);
+    Route::get('/pos/checkout', [PosController::class, 'checkout']);
+
+    Route::get('/service-categories', [\App\Http\Controllers\Api\ServiceCategoryController::class, 'index']);
+    Route::post('/service-categories', [\App\Http\Controllers\Api\ServiceCategoryController::class, 'store']);
+    Route::get('/service-categories/users', [\App\Http\Controllers\Api\ServiceCategoryController::class, 'users']);
+    Route::get('/service-categories/{serviceCategory}', [\App\Http\Controllers\Api\ServiceCategoryController::class, 'show']);
+    Route::put('/service-categories/{serviceCategory}', [\App\Http\Controllers\Api\ServiceCategoryController::class, 'update']);
+    Route::delete('/service-categories/{serviceCategory}', [\App\Http\Controllers\Api\ServiceCategoryController::class, 'destroy']);
 
 
     Route::get('/reports/deposits', [\App\Http\Controllers\Api\ReportsController::class, 'revenueTax']); // Mapping existing for demo

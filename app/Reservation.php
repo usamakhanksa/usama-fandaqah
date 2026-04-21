@@ -16,7 +16,7 @@ use App\Interfaces\WalletFloat;
 use Illuminate\Support\Facades\DB;
 use App\Events\ReservationCanceled;
 use Vinkla\Hashids\Facades\Hashids;
-use Laravelista\Comments\Commentable;
+// use Laravelista\Comments\Commentable;
 use Watson\Rememberable\Rememberable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Log;
 
 class Reservation extends Model implements  Wallet, WalletFloat
 {
-    use Rememberable, Commentable, SoftDeletes, HasWalletFloat, HasTeam, LogsActivity;
+    use Rememberable, /* Commentable, */ SoftDeletes, HasWalletFloat, HasTeam, LogsActivity;
 
     /**
      * reservation statuses
@@ -695,7 +695,7 @@ class Reservation extends Model implements  Wallet, WalletFloat
             ->where('team_id', '=', auth()->user()->current_team_id)
             ->where('status', '=', self::STATUS_CONFIRMED)
             ->whereNull('checked_out')
-            ->orWhere('date_out', '!= and <', $carbon->startOfDay()->toDateTimeString())
+            ->orWhere('date_out', '<', $carbon->startOfDay()->toDateTimeString())
             ->count();
     }
 

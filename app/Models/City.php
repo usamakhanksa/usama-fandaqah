@@ -8,6 +8,10 @@ class City extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'title' => 'array',
+    ];
+
     public function country()
     {
         return $this->belongsTo(Country::class);
