@@ -29,6 +29,7 @@ import ChannelManagerPage from '../pages/ChannelManagerPage.vue';
 import ManageCategoriesPage from '../pages/ManageCategoriesPage.vue';
 import LeadsPage from '../pages/LeadsPage.vue';
 import ServiceCategoriesPage from '../pages/ServiceCategoriesPage.vue';
+import NewReservationPage from '../pages/NewReservationPage.vue';
 import ChannelReservationsPage from '../pages/ChannelReservationsPage.vue';
 
 const routes = [
@@ -88,6 +89,8 @@ const routes = [
   { path: '/channel-manager/availability-rates', component: ManageCategoriesPage },
   { path: '/channel-manager/reservations', component: ChannelReservationsPage },
   { path: '/services', component: ServiceCategoriesPage },
+  { path: '/new-reservation', component: NewReservationPage, name: 'new-reservation' },
+  { path: '/new-reservation/:id', component: NewReservationPage, name: 'edit-reservation' },
   { path: '/profile', component: SimplePage, props: { title: 'profile' } },
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];

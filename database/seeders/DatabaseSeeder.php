@@ -188,7 +188,8 @@ class DatabaseSeeder extends Seeder
         // 9. Leads
         for ($i = 1; $i <= 10; $i++) {
             DB::table('leads')->updateOrInsert(['email' => "lead{$i}@example.com"], [
-                'full_name' => fake()->name(),
+                'first_name' => fake()->firstName(),
+                'last_name' => fake()->lastName(),
                 'phone' => '+966' . rand(500000000, 599999999),
                 'status' => 'new',
                 'created_at' => now(),
@@ -239,7 +240,8 @@ class DatabaseSeeder extends Seeder
               'guest_id' => rand(1, 10),
               'room_id' => rand(1, 20),
               'unit_id' => rand(1, 20),
-              'reservation_status_id' => $r_status->id,
+              'reservation_status_id' => $r_status?->id ?? 1,
+              'status' => 'CheckedIn',
               'check_in' => $in,
               'check_out' => $out,
               'stay_type' => 'checkin',

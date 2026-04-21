@@ -70,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/units/daily-status', [UnitHousingController::class, 'dailyStatus']);
     Route::post('/units/check-in', [UnitHousingController::class, 'checkIn']);
     Route::post('/units/check-out', [UnitHousingController::class, 'checkOut']);
+    Route::post('/units/{unit}/status', [UnitHousingController::class, 'updateStatus']);
 
     Route::get('/reservations/schedule', [ReservationWorkflowController::class, 'schedule']);
     Route::post('/reservations/drafts', [ReservationWorkflowController::class, 'saveDraft']);

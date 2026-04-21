@@ -17,24 +17,25 @@ class LoginController extends Controller
 	*login api
 	* @return \Illuminate\Http\Response
 	*/
-	public function login()
+	public function login(Request $request)
 	{
-		if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){
+		$request->validate([
+			'email' => 'required|email',
+			'password' => 'required',
+		]);
+
+		if(Auth::attempt($request->only('email', 'password'))){
 			$user = Auth::user();
 			if($user->roles && $user->roles->contains('slug', 'housekeeping')){
-				throw new ValidationException("you dont have privilege to enter this portal", 401);
+				return response()->json(['message' => "you dont have privilege to enter this portal"], 401);
 			}else{
 				$success['data']['token'] = $user->createToken('myApp')->plainTextToken;
 				$success['data']['user'] = new UserResource($user->load('teams'));
 				return response()->json($success, 200);
 			}
+		}
 
-		}elseif(User::where('email', request('email'))->count() == 0){
-			throw new ValidationException(__("We can't find a user with that e-mail address."), 401);
-		}
-		else{
-			throw new ValidationException(__("password incorrect"), 401);
-		}
+		return response()->json(['message' => 'Invalid email or password'], 401);
 	}
 
 	/**

@@ -38,6 +38,9 @@ class UnitHousingController extends Controller
                 ->orderBy('number')
                 ->get();
 
+            // Load latest reservation for occupied units
+            $units->load(['unitStatus', 'unitType']);
+            
             $legend = UnitStatus::query()->get(['id', 'name', 'slug', 'color'])->map(function (UnitStatus $status) use ($units) {
                 return [
                     'name' => $status->name,
@@ -51,18 +54,31 @@ class UnitHousingController extends Controller
                 'id' => $floor->id,
                 'name' => $floor->name,
                 'count' => $units->count(),
-                'units' => $units->map(fn (Unit $u) => [
-                    'id' => $u->id,
-                    'name' => $u->name,
-                    'number' => $u->number,
-                    'capacity' => $u->capacity,
-                    'beds' => $u->beds,
-                    'baths' => $u->baths,
-                    'status_slug' => $u->unitStatus?->slug ?? 'maintenance',
-                    'status_name' => $u->unitStatus?->name ?? 'Maintenance',
-                    'status_color' => $u->unitStatus?->color ?? '#9ca3af',
-                    'action' => $this->actionByStatus($u->unitStatus?->slug),
-                ])->values(),
+                'units' => $units->map(function (Unit $u) {
+                    $res = null;
+                    if ($u->unitStatus?->slug === 'occupied') {
+                        $res = Reservation::where('unit_id', $u->id)
+                            ->where('stay_type', '!=', 'checkout')
+                            ->with('guest')
+                            ->latest()
+                            ->first();
+                    }
+
+                    return [
+                        'id' => $u->id,
+                        'name' => $u->name,
+                        'number' => $u->number,
+                        'capacity' => $u->capacity,
+                        'beds' => $u->beds,
+                        'baths' => $u->baths,
+                        'status_slug' => $u->unitStatus?->slug ?? 'maintenance',
+                        'status_name' => $u->unitStatus?->name ?? 'Maintenance',
+                        'status_color' => $u->unitStatus?->color ?? '#9ca3af',
+                        'customer_name' => $res?->guest?->name,
+                        'reservation_id' => $res?->id,
+                        'action' => $this->actionByStatus($u->unitStatus?->slug),
+                    ];
+                })->values(),
                 'legend' => $legend,
             ];
         });
@@ -143,6 +159,17 @@ class UnitHousingController extends Controller
         ]);
 
         return response()->json($record, 201);
+    }
+
+    public function updateStatus(Request $request, Unit $unit)
+    {
+        $data = $request->validate([
+            'status_id' => ['required', 'exists:unit_statuses,id'],
+        ]);
+
+        $unit->update(['unit_status_id' => $data['status_id']]);
+
+        return response()->json(['message' => 'Status updated successfully']);
     }
 
     private function dailyRow(Reservation $reservation, string $type): array
