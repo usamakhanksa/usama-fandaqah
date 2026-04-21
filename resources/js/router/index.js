@@ -29,6 +29,23 @@ import ChannelManagerPage from '../pages/ChannelManagerPage.vue';
 import ManageCategoriesPage from '../pages/ManageCategoriesPage.vue';
 import LeadsPage from '../pages/LeadsPage.vue';
 import ChannelReservationsPage from '../pages/ChannelReservationsPage.vue';
+import ModuleScaffoldPage from '../pages/ModuleScaffoldPage.vue';
+import { moduleScaffoldPages } from '../config/moduleScaffold';
+
+
+const scaffoldRoutes = moduleScaffoldPages.flatMap((group) =>
+  group.pages.map((page) => ({
+    path: page.path,
+    component: ModuleScaffoldPage,
+    props: {
+      title: page.title,
+      group: group.group,
+      table: page.table,
+      columns: page.columns,
+      seed: page.seed,
+    },
+  })),
+);
 
 const routes = [
   { path: '/login', component: LoginPage, name: 'login' },
@@ -87,6 +104,7 @@ const routes = [
   { path: '/channel-manager/availability-rates', component: ManageCategoriesPage },
   { path: '/channel-manager/reservations', component: ChannelReservationsPage },
   ...['services', 'profile'].map((p) => ({ path: `/${p}`, component: SimplePage, props: { title: p } })),
+  ...scaffoldRoutes,
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ];
 

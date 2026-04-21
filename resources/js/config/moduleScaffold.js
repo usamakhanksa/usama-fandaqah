@@ -1,0 +1,96 @@
+export const moduleScaffoldPages = [
+  {
+    group: 'Client Relations',
+    pages: [
+      { path: '/client-relations/profiles', title: 'Profiles', table: 'profiles', columns: 'id, first_name, last_name, email, phone, type, nationality, passport_no, vip_status, timestamps, softDeletes', seed: '50 guests + 10 companies' },
+      { path: '/client-relations/activities', title: 'Activities', table: 'activities', columns: 'id, profile_id nullable, actionable_type, actionable_id, type, subject, due_date, completed_at, assigned_to_user_id, notes, timestamps', seed: '20 open tasks' },
+      { path: '/client-relations/memberships', title: 'Memberships', table: 'memberships', columns: 'id, profile_id, program_id, membership_number unique, points_balance, tier_expiry, timestamps', seed: '10 seeded members' },
+      { path: '/client-relations/sales', title: 'Sales Accounts', table: 'sales_accounts', columns: 'id, profile_id, account_type, credit_limit, commission_percent, tax_id, timestamps', seed: '5 corporate accounts' },
+    ],
+  },
+  {
+    group: 'Bookings',
+    pages: [
+      { path: '/bookings/reservations', title: 'Reservations', table: 'reservations', columns: 'confirmation_no, profile_id, check_in, check_out, adults, children, status, total_amount, room_type_id, rate_code_id, source, checked_in_at, checked_out_at', seed: '20 future reservations' },
+      { path: '/bookings/blocks', title: 'Blocks', table: 'blocks', columns: 'block_code, name, profile_id, start_date, end_date, cut_off_date, status, released_rooms', seed: '2 wedding + 1 conference blocks' },
+      { path: '/bookings/events', title: 'Events', table: 'events', columns: 'block_id nullable, name, function_space_id, start_time, end_time, attendees, setup_style, status', seed: '5 sample events' },
+    ],
+  },
+  {
+    group: 'Front Desk',
+    pages: [
+      { path: '/front-desk/arrivals', title: 'Arrivals Lens', table: 'reservations (query lens)', columns: 'check_in = today and status != cancelled', seed: 'computed' },
+      { path: '/front-desk/in-house', title: 'In-House Lens', table: 'reservations (query lens)', columns: 'checked_in_at not null and checked_out_at null', seed: 'computed' },
+      { path: '/front-desk/departures', title: 'Departures Lens', table: 'reservations (query lens)', columns: 'check_out = today', seed: 'computed' },
+      { path: '/front-desk/workspace', title: 'Workspace', table: 'guest_messages + wake_up_calls', columns: 'guest_messages(reservation_id, message_text, delivered), wake_up_calls(reservation_id, call_time, status)', seed: '5 messages + 2 wake-up calls' },
+    ],
+  },
+  {
+    group: 'Inventory & Rooms',
+    pages: [
+      { path: '/inventory-rooms/room-management', title: 'Room Management', table: 'rooms', columns: 'room_number, room_type_id, floor, status, hk_status, out_of_order, out_of_service', seed: '50 rooms across 3 types' },
+      { path: '/inventory-rooms/housekeeping', title: 'Housekeeping', table: 'housekeeping_tasks', columns: 'room_id, assigned_to_user_id, task_type, status, completed_at', seed: 'daily dirty-room tasks' },
+      { path: '/inventory-rooms/restrictions', title: 'Restrictions', table: 'rate_restrictions', columns: 'rate_code_id, room_type_id, start_date, end_date, min_los, max_los, closed_to_arrival', seed: 'Saturday CTA rule' },
+    ],
+  },
+  {
+    group: 'Financials',
+    pages: [
+      { path: '/financials/accounts-receivable', title: 'Accounts Receivable', table: 'ar_invoices', columns: 'profile_id, invoice_number, total, balance, due_date, status', seed: '3 unpaid invoices' },
+      { path: '/financials/cashiering', title: 'Cashiering', table: 'folios + folio_transactions', columns: 'folios(reservation_id, folio_no, balance, status), folio_transactions(folio_id, transaction_code_id, amount, description, posted_date, user_id)', seed: 'room charges + payment' },
+      { path: '/financials/end-of-day', title: 'End of Day', table: 'audit_logs', columns: 'business_date, user_id, action, summary_json', seed: 'last 7 days logs' },
+      { path: '/financials/comp-accounting', title: 'Comp Accounting', table: 'comp_requests', columns: 'profile_id, amount, reason, approved_by_user_id, status', seed: '2 pending requests' },
+    ],
+  },
+  {
+    group: 'Reports & Analytics',
+    pages: [
+      { path: '/reports/deposits', title: 'Deposits', table: 'folio_transactions', columns: 'filter transaction_code = Deposit', seed: 'read-only query' },
+      { path: '/reports/withdraws', title: 'Withdraws', table: 'folio_transactions', columns: 'filter transaction_code = Payment', seed: 'read-only query' },
+      { path: '/reports/safe-movement', title: 'Safe Movement', table: 'safe_logs', columns: 'user_id, action, amount, logged_at', seed: 'sample safe opens/closes' },
+      { path: '/reports/customer-movement', title: 'Customer Movement', table: 'profiles + reservations', columns: 'profiles.created_at compared to last stay date', seed: 'computed' },
+      { path: '/reports/services', title: 'Services Report', table: 'folio_transactions/service tables', columns: 'aggregate service rows', seed: 'computed' },
+      { path: '/reports/monthly', title: 'Monthly Report', table: 'reservations + folios', columns: 'monthly aggregates', seed: 'computed' },
+      { path: '/reports/units-movement', title: 'Units Movement', table: 'reservations + reservation_change_logs', columns: 'unit assignment changes', seed: 'computed' },
+      { path: '/reports/occupancy-ratio', title: 'Occupancy Ratio', table: 'reservations + rooms', columns: 'occupied_count / total_rooms', seed: 'computed' },
+      { path: '/reports/cleaning-movement', title: 'Cleaning Movement', table: 'housekeeping_tasks', columns: 'task_type, status, completed_at', seed: 'computed' },
+      { path: '/reports/maintenance-movement', title: 'Maintenance Movement', table: 'maintenance_requests', columns: 'reservation_id, category_id, status, completed_at', seed: 'computed' },
+      { path: '/reports/reservation-transfers', title: 'Reservation Transfers', table: 'reservation_change_logs', columns: 'reservation_id, from_room_id, to_room_id, changed_by, changed_at, reason', seed: 'transfer samples' },
+      { path: '/reports/revenues-taxes', title: 'Revenues & Taxes', table: 'folio_transactions + tax_rates', columns: 'aggregated net/tax', seed: 'computed' },
+      { path: '/reports/reservation-resources', title: 'Reservation Resources', table: 'resource_categories + pivot', columns: 'category assignment to reservation', seed: 'default categories' },
+      { path: '/reports/employee-contracts', title: 'Employee Contracts', table: 'employee_contracts', columns: 'employee_name, contract_type, start_date, end_date, status', seed: 'sample contracts' },
+      { path: '/reports/invoices', title: 'Invoices Report', table: 'ar_invoices', columns: 'invoice_number, total, balance, due_date, status', seed: 'read-only query' },
+      { path: '/reports/daily', title: 'Daily Report', table: 'scheduled_reports', columns: 'report_name, parameters_json, frequency, email_recipients, last_run_at', seed: 'default schedules' },
+    ],
+  },
+  {
+    group: 'Miscellaneous',
+    pages: [
+      { path: '/misc/exports', title: 'Exports', table: 'exports', columns: 'user_id, type, file_path, status, created_at', seed: 'optional' },
+      { path: '/misc/interfaces', title: 'Interfaces', table: 'interface_logs', columns: 'interface_name, request_payload, response_payload, status, created_at', seed: 'optional' },
+      { path: '/misc/service-requests', title: 'Service Requests', table: 'service_requests', columns: 'reservation_id, request_type, description, status, assigned_to', seed: '3 open requests' },
+    ],
+  },
+  {
+    group: 'Settings',
+    pages: [
+      { path: '/settings/header-slider', title: 'Header & Slider', table: 'website_sliders', columns: 'image_path, title, sort_order', seed: 'default slides' },
+      { path: '/settings/general', title: 'General Settings', table: 'settings', columns: 'key unique, value text', seed: 'hotel identity defaults' },
+      { path: '/settings/facility', title: 'Facility Settings', table: 'facilities', columns: 'name, icon, description', seed: 'pool/gym defaults' },
+      { path: '/settings/hotel-amenities', title: 'Hotel Amenities', table: 'room_amenities', columns: 'name, icon', seed: 'iron/safe defaults' },
+      { path: '/settings/integration', title: 'Integration Settings', table: 'integrations', columns: 'name, api_key_encrypted, base_url, is_active', seed: 'stripe/sendgrid placeholders' },
+      { path: '/settings/users-roles', title: 'Users & Roles', table: 'users + roles + permissions', columns: 'spatie role/permission setup', seed: 'Admin/Front Desk/Housekeeping' },
+      { path: '/settings/document', title: 'Document Settings', table: 'document_templates', columns: 'name, content, type', seed: 'invoice & contract templates' },
+      { path: '/settings/notifications', title: 'Notifications', table: 'notification_templates', columns: 'event, subject, body', seed: 'booking_confirmed sample' },
+      { path: '/settings/finance', title: 'Finance Settings', table: 'tax_rates + payment_methods', columns: 'tax_rates(name, percentage, is_default), payment_methods(name, code)', seed: 'VAT + card/cash defaults' },
+      { path: '/settings/activity-logs', title: 'Activity Logs', table: 'activity_log', columns: 'native spatie columns', seed: 'generated by activity events' },
+      { path: '/settings/ledger-numbers', title: 'Ledger Numbers', table: 'ledger_sequences', columns: 'type, prefix, next_number', seed: 'folio/invoice prefixes' },
+      { path: '/settings/reservation-resource', title: 'Reservation Resource Settings', table: 'resource_categories', columns: 'name', seed: 'crib/rollaway defaults' },
+      { path: '/settings/customer-groups', title: 'Customer Groups Settings', table: 'profile_groups', columns: 'name, discount_percent, description', seed: 'VIP/corporate groups' },
+      { path: '/settings/website', title: 'Website Settings', table: 'website_pages', columns: 'slug, title, content', seed: 'home/about pages' },
+      { path: '/settings/rating', title: 'Rating Settings', table: 'rating_questions', columns: 'question_text, type', seed: 'post-stay questions' },
+      { path: '/settings/services-included', title: 'Services Included In The Price', table: 'included_services', columns: 'name, description', seed: 'breakfast, wifi defaults' },
+      { path: '/settings/maintenance', title: 'Maintenance Settings', table: 'maintenance_categories', columns: 'name', seed: 'plumbing/electrical' },
+    ],
+  },
+];
