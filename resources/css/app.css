@@ -14,21 +14,21 @@
 
 body { 
   font-family: 'Inter', sans-serif;
-  @apply bg-[#f8fafc] text-[#2a273c] antialiased;
+  @apply bg-[#f2f0eb] text-[#2a273c] antialiased;
 }
 
 /* Corporate Card Style */
 .card { 
-  @apply bg-white rounded-[2.5rem] border border-slate-100 shadow-sm transition-all duration-300;
+  @apply bg-[#f2f0eb] rounded-[2.5rem] border border-[#8f9793] shadow-sm transition-all duration-300;
 }
 
 .card:hover {
-  @apply shadow-xl -translate-y-1;
+  @apply shadow-md -translate-y-1;
 }
 
 /* Corporate Inputs */
 .input { 
-  @apply w-full rounded-xl border-2 border-[#f2f0eb] bg-white px-4 py-3 text-sm font-medium transition-all outline-none;
+  @apply w-full rounded-xl border-2 border-[#8f9793] bg-[#f2f0eb] px-4 py-3 text-sm font-medium transition-all outline-none;
 }
 
 .input:focus {
@@ -37,15 +37,15 @@ body {
 
 /* Premium Buttons */
 .btn-primary { 
-  @apply bg-gradient-to-r from-[#e95a54] to-[#f43f5e] text-white px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-[#e95a54]/20 hover:scale-[1.02] active:scale-[0.98] transition-all;
+  @apply bg-[#e95a54] text-[#f2f0eb] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all;
 }
 
 .btn-secondary { 
-  @apply bg-[#2a273c] text-white px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest shadow-lg shadow-black/10 hover:bg-[#1f1d2e] transition-all;
+  @apply bg-[#2a273c] text-[#f2f0eb] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:opacity-90 transition-all;
 }
 
 .btn-outline { 
-  @apply border-2 border-[#f2f0eb] bg-white text-[#2a273c] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-[#f2f0eb] transition-all;
+  @apply border-2 border-[#8f9793] bg-[#f2f0eb] text-[#2a273c] px-6 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-[#fbcdab] transition-all;
 }
 
 /* Modern Headings */
@@ -66,12 +66,12 @@ h1, h2, h3 {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f2f0eb;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #8f9793;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #e95a54;
 }
