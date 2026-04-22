@@ -6,7 +6,7 @@ const api = axios.create({baseURL:'/api'});
 api.interceptors.request.use(
   config => {
     // Get the token from localStorage or sessionStorage where you store the Sanctum token
-    const token = localStorage.getItem('sanctum_token');
+    const token = localStorage.getItem('sanctum_token') || localStorage.getItem('auth_fandaqah');
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -34,6 +34,7 @@ api.interceptors.response.use(
       // Store the token if user needs to re-authenticate
       localStorage.removeItem('sanctum_token');
       localStorage.removeItem('auth_fandaqah');
+      localStorage.removeItem('permissions');
       // Redirect to login if unauthorized
       window.location.href = '/login';
     }

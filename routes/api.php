@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\UnitHousingController;
 use App\Http\Controllers\Api\ReservationWorkflowController;
 use App\Http\Controllers\Api\FinancialManagementController;
+use App\Http\Controllers\Api\ModuleDataController;
 use App\Http\Controllers\Api\UserGroupingController;
 use App\Http\Controllers\Api\PosController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,7 @@ Route::get('/dashboard/unit-status', [DashboardController::class, 'unitStatus'])
 Route::get('/notifications', [DashboardController::class, 'notifications']);
 Route::get('/settings/{category}', [\App\Http\Controllers\Api\SettingsController::class, 'index']);
 Route::post('/settings/global', [\App\Http\Controllers\Api\SettingsController::class, 'updateGlobal']);
+Route::get('/module-data', [ModuleDataController::class, 'show']);
 
 // Add Login Route
 Route::post('/login', [\App\Http\Controllers\Api\Auth\LoginController::class, 'login']);

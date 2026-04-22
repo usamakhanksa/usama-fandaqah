@@ -4,10 +4,12 @@ export const useDashboardStore = defineStore('dash',{
   state:()=>({summary:null,reservations:{data:[]},notifications:[]}),
   actions:{
     async load(){
-      const [summary,res,notifications]=await Promise.all([
+      const [summary,res,notifications]=await Promise.allSettled([
         api.get('/dashboard/summary'),api.get('/reservations'),api.get('/notifications')
       ]);
-      this.summary=summary.data; this.reservations=res.data; this.notifications=notifications.data;
+      this.summary = summary.status === 'fulfilled' ? summary.value.data : { stats: {}, recent_status: {} };
+      this.reservations = res.status === 'fulfilled' ? res.value.data : { data: [] };
+      this.notifications = notifications.status === 'fulfilled' ? notifications.value.data : [];
     }
   }
 });

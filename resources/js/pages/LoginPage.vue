@@ -50,8 +50,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../services/api';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const errorMsg = ref('');
@@ -70,8 +72,7 @@ const login = async () => {
     const response = await api.post('/login', { email: email.value, password: password.value });
     const token = response.data?.data?.token || response.data?.token || 'mock_token_for_dev';
     
-    localStorage.setItem('sanctum_token', token);
-    localStorage.setItem('auth_fandaqah', 'true');
+    authStore.login(token, response.data?.data?.permissions || ['*']);
     router.push('/dashboard');
   } catch (error) {
     errorMsg.value = error.response?.data?.message || 'Login failed. Please check credentials.';
@@ -79,8 +80,7 @@ const login = async () => {
     
     // For local dev, allow bypass if API is not fully set up
     if (email.value === 'admin@hotel.test') {
-      localStorage.setItem('sanctum_token', 'dev_token');
-      localStorage.setItem('auth_fandaqah', 'true');
+      authStore.login('dev_token', ['*']);
       router.push('/dashboard');
     }
   } finally {
