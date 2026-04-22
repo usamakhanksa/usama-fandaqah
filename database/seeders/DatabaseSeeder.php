@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Foundation\FoundationSeeder;
+
 use App\Models\CompanyProfile;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +13,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call([FoundationSeeder::class]);
         $roles = ['super-admin', 'manager', 'receptionist', 'accountant', 'service-staff'];
         foreach ($roles as $r) {
             DB::table('roles')->insert(['name' => ucwords(str_replace('-', ' ', $r)), 'slug' => $r, 'created_at' => now(), 'updated_at' => now()]);

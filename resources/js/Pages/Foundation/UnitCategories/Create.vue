@@ -1,0 +1,5 @@
+<script setup>
+import { useForm, Link } from '@inertiajs/vue3'; import FoundationLayout from '@/Layouts/FoundationLayout.vue';
+const form = useForm({name_en:'',name_ar:'',code:'',default_capacity:2,base_rate_sar:0,active:true});
+</script>
+<template><FoundationLayout><form @submit.prevent="form.post('/foundation/unit-categories')" class="space-y-3 bg-beige p-6 rounded-xl border border-peach"><h2 class="text-xl font-bold">Create Unit Category</h2><input v-model="form.name_en" class="w-full border border-peach rounded p-2 bg-beige" placeholder="Name EN"/><input v-model="form.name_ar" class="w-full border border-peach rounded p-2 bg-beige" placeholder="Name AR"/><input v-model="form.code" class="w-full border border-peach rounded p-2 bg-beige" placeholder="Code"/><input v-model="form.default_capacity" type="number" class="w-full border border-peach rounded p-2 bg-beige"/><input v-model="form.base_rate_sar" type="number" class="w-full border border-peach rounded p-2 bg-beige"/><button class="bg-coral text-beige px-4 py-2 rounded">Save</button> <Link :href="'/foundation/unit-categories'" class="text-navy">Cancel</Link></form></FoundationLayout></template>

@@ -14,7 +14,8 @@
         "pktharindu/nova-permissions": "^3.1",
         "predis/predis": "^3.4",
         "spatie/laravel-activitylog": "^4.12",
-        "watson/rememberable": "^7.1"
+        "watson/rememberable": "^7.1",
+        "inertiajs/inertia-laravel": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
