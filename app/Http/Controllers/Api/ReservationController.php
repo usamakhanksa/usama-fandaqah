@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
-use App\Models\Reservation;
+use App\Reservation;
 use Illuminate\Http\Request;
 class ReservationController extends Controller {
   public function index(Request $request){

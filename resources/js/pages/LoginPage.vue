@@ -18,7 +18,7 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Email Address</label>
-          <input v-model="email" type="email" placeholder="aya@hotel.test" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" />
+          <input v-model="email" type="email" placeholder="admin@fandaqah.pms" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Password</label>
@@ -79,7 +79,7 @@ const login = async () => {
     console.error('Login error:', error);
     
     // For local dev, allow bypass if API is not fully set up
-    if (email.value === 'admin@hotel.test') {
+    if (email.value === 'admin@fandaqah.pms') {
       authStore.login('dev_token', ['*']);
       router.push('/dashboard');
     }

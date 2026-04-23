@@ -16,12 +16,21 @@ class DatabaseSeeder extends Seeder
         $this->call([FoundationSeeder::class]);
         $roles = ['super-admin', 'manager', 'receptionist', 'accountant', 'service-staff'];
         foreach ($roles as $r) {
-            DB::table('roles')->insert(['name' => ucwords(str_replace('-', ' ', $r)), 'slug' => $r, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('roles')->updateOrInsert(
+                ['slug' => $r],
+                ['name' => ucwords(str_replace('-', ' ', $r)), 'created_at' => now(), 'updated_at' => now()]
+            );
         }
 
-        DB::table('users')->insert(['role_id' => 1, 'name' => 'Aya Ahmed Abdullah', 'email' => 'aya@hotel.test', 'password' => Hash::make('password'), 'avatar' => '/assets/avatars/admin.svg', 'last_seen_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
-        for ($u = 2; $u <= 22; $u++) {
-            DB::table('users')->insert(['role_id' => rand(1, 5), 'name' => fake()->name(), 'email' => "user{$u}@hotel.test", 'password' => Hash::make('password'), 'avatar' => '/assets/avatars/guest'.(($u % 8) + 1).'.svg', 'last_seen_at' => now()->subHours(rand(0, 30)), 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('users')->updateOrInsert(
+            ['email' => 'aya@hotel.test'],
+            ['role_id' => 1, 'name' => 'Aya Ahmed Abdullah', 'password' => Hash::make('password'), 'avatar' => '/assets/avatars/admin.svg', 'last_seen_at' => now(), 'created_at' => now(), 'updated_at' => now()]
+        );
+
+        if (DB::table('users')->count() <= 1) {
+            for ($u = 2; $u <= 22; $u++) {
+                DB::table('users')->insert(['role_id' => rand(1, 5), 'name' => fake()->name(), 'email' => "user{$u}@hotel.test", 'password' => Hash::make('password'), 'avatar' => '/assets/avatars/guest'.(($u % 8) + 1).'.svg', 'last_seen_at' => now()->subHours(rand(0, 30)), 'created_at' => now(), 'updated_at' => now()]);
+            }
         }
 
 
@@ -47,13 +56,15 @@ class DatabaseSeeder extends Seeder
             'Audit Logs',
             'Managerial Reports',
         ] as $permissionName) {
-            DB::table('permissions')->insert([
-                'name' => $permissionName,
-                'slug' => str($permissionName)->slug(),
-                'group' => 'operations',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            DB::table('permissions')->updateOrInsert(
+                ['slug' => str($permissionName)->slug()],
+                [
+                    'name' => $permissionName,
+                    'group' => 'operations',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
 
         $roleNames = ['Super Admin','Manager','Receptionist','Accountant','Service Staff','Fandaqah Manager','Hotel Manager','Parking Man','Porter','Concierge','Spa Manager','Housekeeper','Cleaning Manager','Maintenance Supervisor','Event Planner','Hotel Receptionist'];
@@ -98,24 +109,32 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Egypt', 'iso2' => 'EG', 'phone_code' => '+20'],
         ];
         foreach ($countryData as $country) {
-            DB::table('countries')->insert([...$country, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('countries')->updateOrInsert(['iso2' => $country['iso2']], [...$country, 'created_at' => now(), 'updated_at' => now()]);
         }
 
         $cities = ['Riyadh', 'Jeddah', 'Dammam', 'Dubai', 'Abu Dhabi', 'Cairo', 'Alexandria'];
-        foreach ($cities as $idx => $city) {
-            DB::table('cities')->insert(['country_id' => $idx < 3 ? 1 : ($idx < 5 ? 2 : 3), 'name' => $city, 'created_at' => now(), 'updated_at' => now()]);
+        if (DB::table('cities')->count() === 0) {
+            foreach ($cities as $idx => $city) {
+                DB::table('cities')->insert(['country_id' => idx < 3 ? 1 : ($idx < 5 ? 2 : 3), 'name' => $city, 'created_at' => now(), 'updated_at' => now()]);
+            }
         }
 
-        for ($f = 1; $f <= 6; $f++) {
-            DB::table('room_floors')->insert(['name' => "Floor {$f}", 'level' => $f, 'created_at' => now(), 'updated_at' => now()]);
+        if (DB::table('room_floors')->count() === 0) {
+            for ($f = 1; $f <= 6; $f++) {
+                DB::table('room_floors')->insert(['name' => "Floor {$f}", 'level' => $f, 'created_at' => now(), 'updated_at' => now()]);
+            }
         }
-        for ($i = 1; $i <= 6; $i++) {
-            DB::table('room_types')->insert(['name' => ['Twin Room', 'Deluxe', 'Suite', 'Family', 'Studio', 'Executive'][$i - 1], 'base_price' => rand(80, 350), 'created_at' => now(), 'updated_at' => now()]);
+        if (DB::table('room_types')->count() === 0) {
+            for ($i = 1; $i <= 6; $i++) {
+                DB::table('room_types')->insert(['name' => ['Twin Room', 'Deluxe', 'Suite', 'Family', 'Studio', 'Executive'][$i - 1], 'base_price' => rand(80, 350), 'created_at' => now(), 'updated_at' => now()]);
+            }
         }
 
 
-        foreach ([['Suite'], ['Deluxe'], ['Studio'], ['Family']] as $type) {
-            DB::table('unit_types')->insert(['name' => $type[0], 'created_at' => now(), 'updated_at' => now()]);
+        if (DB::table('unit_types')->count() === 0) {
+            foreach ([['Suite'], ['Deluxe'], ['Studio'], ['Family']] as $type) {
+                DB::table('unit_types')->insert(['name' => $type[0], 'created_at' => now(), 'updated_at' => now()]);
+            }
         }
 
         foreach ([
@@ -125,7 +144,7 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Housekeeping', 'slug' => 'housekeeping', 'color' => '#f97316'],
             ['name' => 'Maintenance', 'slug' => 'maintenance', 'color' => '#9ca3af'],
         ] as $status) {
-            DB::table('unit_statuses')->insert([...$status, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('unit_statuses')->updateOrInsert(['slug' => $status['slug']], [...$status, 'created_at' => now(), 'updated_at' => now()]);
         }
 
         $statuses = ['available', 'occupied', 'reserved', 'maintenance', 'cleaning', 'not_ready'];
@@ -189,7 +208,7 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach (['Pending', 'Confirmed', 'Checked In', 'Checked Out', 'Cancelled'] as $s) {
-            DB::table('reservation_statuses')->insert(['name' => $s, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('reservation_statuses')->updateOrInsert(['name' => $s], ['created_at' => now(), 'updated_at' => now()]);
         }
 
         for ($i = 1; $i <= 260; $i++) {
@@ -549,6 +568,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             HotelModuleScaffoldSeeder::class,
             ReservationUnitDemoSeeder::class,
+            BookingSeeder::class,
         ]);
     }
 }

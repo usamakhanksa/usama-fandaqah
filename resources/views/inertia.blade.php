@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @inertiaHead
+    <title>Fandaqah PMS</title>
+    @vite(['resources/css/app.css', 'resources/js/main.js'])
 </head>
 <body class="bg-beige text-navy">
-@inertia
+    <div id="app"></div>
 </body>
 </html>

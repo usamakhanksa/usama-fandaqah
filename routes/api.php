@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\PosController;
 use Illuminate\Support\Facades\Route;
 
 
+Route::get('/dashboard', [DashboardController::class, 'index']);
 Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 Route::get('/dashboard/customer-analytics', [DashboardController::class, 'customerAnalytics']);
 Route::get('/dashboard/revenue-metrics', [DashboardController::class, 'revenueMetrics']);
@@ -106,6 +107,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pos/products', [PosController::class, 'products']);
     Route::get('/pos/services', [PosController::class, 'services']);
     Route::post('/pos/services', [PosController::class, 'createService']);
+    Route::get('dashboard/kpis', [DashboardController::class, 'index']);
+    Route::apiResource('dashboard-notices', DashboardNoticeController::class);
     Route::get('/pos/transactions', [PosController::class, 'transactions']);
     Route::get('/pos/cart', [PosController::class, 'cart']);
     Route::post('/pos/cart/items', [PosController::class, 'updateCart']);

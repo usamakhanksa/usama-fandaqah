@@ -1,15 +1,30 @@
 import { defineStore } from 'pinia';
 import api from '../services/api';
-export const useDashboardStore = defineStore('dash',{
-  state:()=>({summary:null,reservations:{data:[]},notifications:[]}),
-  actions:{
-    async load(){
-      const [summary,res,notifications]=await Promise.allSettled([
-        api.get('/dashboard/summary'),api.get('/reservations'),api.get('/notifications')
-      ]);
-      this.summary = summary.status === 'fulfilled' ? summary.value.data : { stats: {}, recent_status: {} };
-      this.reservations = res.status === 'fulfilled' ? res.value.data : { data: [] };
-      this.notifications = notifications.status === 'fulfilled' ? notifications.value.data : [];
+
+export const useDashboardStore = defineStore('dashboard', {
+  state: () => ({
+    kpis: [],
+    quickStats: [],
+    recentActivities: [],
+    dailyRevenue: [],
+    loading: false,
+    error: null
+  }),
+  actions: {
+    async load() {
+      this.loading = true;
+      try {
+        const { data } = await api.get('/dashboard');
+        this.kpis = data.kpis || [];
+        this.quickStats = data.quickStats || [];
+        this.recentActivities = data.recentActivities || [];
+        this.dailyRevenue = data.dailyRevenue || [];
+      } catch (err) {
+        console.error('Dashboard load failed:', err);
+        this.error = 'Failed to load dashboard data';
+      } finally {
+        this.loading = false;
+      }
     }
   }
 });

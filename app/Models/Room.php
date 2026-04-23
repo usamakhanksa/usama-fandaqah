@@ -2,28 +2,33 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Room extends Model
-{
-    protected $guarded = [];
+class Room extends Model {
+    use HasFactory, SoftDeletes;
 
+    protected $fillable = ['room_number', 'room_type_id', 'type', 'floor', 'capacity', 'base_price', 'status', 'features'];
     protected $casts = [
-        'price_per_day' => 'float',
+        'base_price' => 'decimal:2',
+        'features' => 'array',
     ];
 
-    public function reservations()
-    {
-        return $this->hasMany(Reservation::class);
+    public function housekeepingTasks() {
+        return $this->hasMany(HousekeepingTask::class);
     }
 
-    public function roomType()
-    {
+    public function roomType() {
         return $this->belongsTo(RoomType::class);
     }
 
-    public function roomFloor()
-    {
-        return $this->belongsTo(RoomFloor::class);
+    public function restrictions() {
+        return $this->hasMany(RoomRestriction::class);
+    }
+
+    public function scopeSearch($query, $search) {
+        return $query->where('room_number', 'like', "%{$search}%")
+                     ->orWhere('type', 'like', "%{$search}%");
     }
 }

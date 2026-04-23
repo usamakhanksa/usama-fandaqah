@@ -32,6 +32,12 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedBigInteger('current_team_id')->nullable()->after('id');
         });
+
+        Schema::table('reservations', function (Blueprint $table) {
+            if (!Schema::hasColumn('reservations', 'team_id')) {
+                $table->foreignId('team_id')->nullable()->after('id')->constrained('teams')->nullOnDelete();
+            }
+        });
     }
 
     /**

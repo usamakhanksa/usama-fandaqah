@@ -9,7 +9,6 @@ use Laravel\Spark\CanJoinTeams;
 use Laravel\Spark\Contracts\Interactions\Settings\Teams\AddTeamMember as AddTeamMemberContract;
 use Laravel\Spark\Spark;
 use Laravel\Spark\User as SparkUser;
-use Laravelista\Comments\Commenter;
 use Pktharindu\NovaPermissions\Traits\HasRoles;
 use App\Traits\LogsActivity;
 use Watson\Rememberable\Rememberable;
@@ -18,7 +17,6 @@ class User extends SparkUser
 {
     use Rememberable;
     use HasRoles;
-    use Commenter;
     use CanJoinTeams;
     use Notifiable;
     use LogsActivity;

@@ -1,10 +1,47 @@
 <?php
+
 namespace App\Nova;
-use Laravel\Nova\Resource;
+
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
-class RoomType extends Resource {
-  public static string $model = \App\Models${r}::class;
-  public static $title = 'id';
-  public static $search = ['id'];
-  public function fields(\Laravel\Nova\Http\Requests\NovaRequest $request): array { return [ID::make()->sortable()]; }
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Currency;
+use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Http\Requests\NovaRequest;
+
+class RoomType extends Resource
+{
+    public static $model = \App\Models\RoomType::class;
+
+    public static $title = 'name';
+
+    public static $search = [
+        'id', 'name', 'code',
+    ];
+
+    public function fields(NovaRequest $request): array
+    {
+        return [
+            ID::make()->sortable(),
+
+            Text::make('Name')
+                ->sortable()
+                ->rules('required', 'max:255'),
+
+            Text::make('Code')
+                ->sortable()
+                ->rules('required', 'max:50'),
+
+            Currency::make('Base Price')
+                ->sortable()
+                ->rules('required'),
+
+            Number::make('Max Occupancy')
+                ->sortable()
+                ->rules('required', 'min:1'),
+
+            HasMany::make('Rooms', 'rooms', Room::class),
+        ];
+    }
 }

@@ -16,7 +16,6 @@ use App\Interfaces\WalletFloat;
 use Illuminate\Support\Facades\DB;
 use App\Events\ReservationCanceled;
 use Vinkla\Hashids\Facades\Hashids;
-use Laravelista\Comments\Commentable;
 use Watson\Rememberable\Rememberable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +27,7 @@ use Illuminate\Support\Facades\Log;
 
 class Reservation extends Model implements  Wallet, WalletFloat
 {
-    use Rememberable, Commentable, SoftDeletes, HasWalletFloat, HasTeam, LogsActivity;
+    use Rememberable, SoftDeletes, HasWalletFloat, HasTeam, LogsActivity;
 
     /**
      * reservation statuses
@@ -119,13 +118,6 @@ class Reservation extends Model implements  Wallet, WalletFloat
         //}
     }
 
-    /**
-     * Returns all comments for this model.
-     */
-    public function comments()
-    {
-        return $this->morphMany(config('comments.model'), 'commentable')->orderBy('created_at','desc');
-    }
 
     public function promissory()
     {

@@ -4,82 +4,61 @@ namespace App\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class HousekeepingTask extends Resource
 {
-    /**
-     * The model the resource corresponds to.
-     *
-     * @var class-string<\App\Models\HousekeepingTask>
-     */
     public static $model = \App\Models\HousekeepingTask::class;
 
-    /**
-     * The single value that should be used to represent the resource when being displayed.
-     *
-     * @var string
-     */
     public static $title = 'id';
 
-    /**
-     * The columns that should be searched.
-     *
-     * @var array
-     */
     public static $search = [
-        'id',
+        'id', 'assigned_to',
     ];
 
-    /**
-     * Get the fields displayed by the resource.
-     *
-     * @return array<int, \Laravel\Nova\Fields\Field>
-     */
     public function fields(NovaRequest $request): array
     {
         return [
             ID::make()->sortable(),
+
+            BelongsTo::make('Room', 'room', Room::class),
+
+            Text::make('Assigned To')
+                ->sortable()
+                ->rules('nullable', 'max:255'),
+
+            Select::make('Task Type')
+                ->options([
+                    'daily_refresh' => 'Daily Refresh',
+                    'deep_clean' => 'Deep Clean',
+                    'inspection' => 'Inspection',
+                    'maintenance' => 'Maintenance',
+                ])
+                ->rules('required'),
+
+            Select::make('Status')
+                ->options([
+                    'pending' => 'Pending',
+                    'in_progress' => 'In Progress',
+                    'completed' => 'Completed',
+                ])
+                ->default('pending')
+                ->rules('required'),
+
+            Textarea::make('Notes')
+                ->nullable(),
+
+            DateTime::make('Scheduled At')
+                ->sortable(),
+
+            DateTime::make('Completed At')
+                ->sortable()
+                ->exceptOnForms(),
         ];
-    }
-
-    /**
-     * Get the cards available for the resource.
-     *
-     * @return array<int, \Laravel\Nova\Card>
-     */
-    public function cards(NovaRequest $request): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the filters available for the resource.
-     *
-     * @return array<int, \Laravel\Nova\Filters\Filter>
-     */
-    public function filters(NovaRequest $request): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the lenses available for the resource.
-     *
-     * @return array<int, \Laravel\Nova\Lenses\Lens>
-     */
-    public function lenses(NovaRequest $request): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the actions available for the resource.
-     *
-     * @return array<int, \Laravel\Nova\Actions\Action>
-     */
-    public function actions(NovaRequest $request): array
-    {
-        return [];
     }
 }

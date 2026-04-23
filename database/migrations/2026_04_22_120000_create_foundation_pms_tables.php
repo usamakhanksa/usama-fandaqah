@@ -78,7 +78,7 @@ return new class extends Migration
                 $table->text('special_requests')->nullable();
                 $table->softDeletes();
                 $table->timestamps();
-                $table->index(['unit_id', 'status', 'check_in_date', 'check_out_date']);
+                $table->index(['unit_id', 'status', 'check_in_date', 'check_out_date'], 'pms_res_unit_status_dates_idx');
             });
         }
     }
