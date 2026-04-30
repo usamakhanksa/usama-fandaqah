@@ -360,7 +360,7 @@
 </template>
 
 <script setup>
-import Layout from '@/Layouts/AuthenticatedLayout.vue';
+import Layout from '@/Layouts/AppLayout.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref, reactive } from 'vue';
 
