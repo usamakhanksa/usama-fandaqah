@@ -7,6 +7,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class UserGroupingController extends Controller
@@ -47,17 +48,6 @@ class UserGroupingController extends Controller
             'slug' => $data['slug'] ?? Str::slug($data['name']),
         ]);
 
-        Permission::query()->get()->each(function (Permission $permission) use ($role) {
-            $role->permissions()->attach($permission->id, [
-                'enabled' => false,
-                'anyone' => false,
-                'can_create' => false,
-                'can_edit' => false,
-                'can_view' => false,
-                'can_remove' => false,
-            ]);
-        });
-
         return response()->json(['data' => $role], 201);
     }
 
@@ -95,19 +85,14 @@ class UserGroupingController extends Controller
             'slug' => Str::slug($role->name . ' copy ' . now()->timestamp),
         ]);
 
-        $pivotData = [];
-        foreach ($role->permissions as $permission) {
-            $pivotData[$permission->id] = [
-                'enabled' => (bool) $permission->pivot->enabled,
-                'anyone' => (bool) $permission->pivot->anyone,
-                'can_create' => (bool) $permission->pivot->can_create,
-                'can_edit' => (bool) $permission->pivot->can_edit,
-                'can_view' => (bool) $permission->pivot->can_view,
-                'can_remove' => (bool) $permission->pivot->can_remove,
-            ];
-        }
+        $slugs = DB::table('role_permission')
+            ->where('role_id', $role->id)
+            ->pluck('permission_slug')
+            ->toArray();
 
-        $copy->permissions()->sync($pivotData);
+        DB::table('role_permission')->insert(
+            array_map(fn($slug) => ['role_id' => $copy->id, 'permission_slug' => $slug], $slugs)
+        );
 
         return response()->json(['data' => $copy], 201);
     }
@@ -135,46 +120,58 @@ class UserGroupingController extends Controller
 
     public function matrix(Role $role)
     {
-        $permissions = Permission::query()->orderBy('name')->get()->map(function (Permission $permission) use ($role) {
-            $pivot = $role->permissions()->where('permission_id', $permission->id)->first()?->pivot;
+        $granted = DB::table('role_permission')
+            ->where('role_id', $role->id)
+            ->pluck('permission_slug')
+            ->flip();
 
-            return [
-                'id' => $permission->id,
-                'name' => $permission->name,
-                'enabled' => (bool) ($pivot->enabled ?? false),
-                'anyone' => (bool) ($pivot->anyone ?? false),
-                'create' => (bool) ($pivot->can_create ?? false),
-                'edit' => (bool) ($pivot->can_edit ?? false),
-                'view' => (bool) ($pivot->can_view ?? false),
-                'remove' => (bool) ($pivot->can_remove ?? false),
-            ];
-        });
+        $permissions = Permission::query()->orderBy('group')->orderBy('name')->get()
+            ->map(fn(Permission $p) => [
+                'id'      => $p->id,
+                'name'    => $p->name,
+                'slug'    => $p->slug,
+                'group'   => $p->group,
+                'enabled' => isset($granted[$p->slug]),
+            ]);
 
         return response()->json(['data' => $permissions]);
     }
 
     public function updatePermission(Request $request, Role $role, Permission $permission)
     {
-        $data = $request->validate([
-            'enabled' => ['required', 'boolean'],
-            'anyone' => ['required', 'boolean'],
-            'create' => ['required', 'boolean'],
-            'edit' => ['required', 'boolean'],
-            'view' => ['required', 'boolean'],
-            'remove' => ['required', 'boolean'],
-        ]);
+        $data = $request->validate(['enabled' => ['required', 'boolean']]);
 
-        $role->permissions()->syncWithoutDetaching([
-            $permission->id => [
-                'enabled' => $data['enabled'],
-                'anyone' => $data['anyone'],
-                'can_create' => $data['create'],
-                'can_edit' => $data['edit'],
-                'can_view' => $data['view'],
-                'can_remove' => $data['remove'],
-            ],
-        ]);
+        if ($data['enabled']) {
+            DB::table('role_permission')->updateOrInsert(
+                ['role_id' => $role->id, 'permission_slug' => $permission->slug],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        } else {
+            DB::table('role_permission')
+                ->where('role_id', $role->id)
+                ->where('permission_slug', $permission->slug)
+                ->delete();
+        }
 
         return response()->json(['status' => 'ok']);
+    }
+
+    public function teams()
+    {
+        try {
+            return response()->json([
+                'data' => \App\Models\Team::query()
+                    ->select('id', 'name')
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get()
+                    ->map(fn($team) => [
+                        'id' => $team->id,
+                        'name' => $team->name,
+                    ])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['data' => []], 200);
+        }
     }
 }

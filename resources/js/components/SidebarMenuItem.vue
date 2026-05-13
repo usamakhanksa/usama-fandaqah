@@ -2,7 +2,7 @@
   <RouterLink 
     :to="to" 
     class="sidebar-item group" 
-    :class="{ 'active': $route.path === to }"
+    :class="{ 'active': active || $route.path === to }"
   >
     <div class="item-icon">
        <slot name="icon">
@@ -10,7 +10,7 @@
        </slot>
     </div>
     <span class="item-label">{{ label }}</span>
-    <div v-if="$route.path === to" class="active-indicator"></div>
+    <div v-if="active || $route.path === to" class="active-indicator"></div>
   </RouterLink>
 </template>
 
@@ -18,7 +18,8 @@
 defineProps({ 
   to: { type: String, required: true }, 
   icon: String, 
-  label: { type: String, required: true }
+  label: { type: String, required: true },
+  active: Boolean
 });
 </script>
 

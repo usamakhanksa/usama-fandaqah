@@ -26,6 +26,12 @@ use Illuminate\Support\Facades\Storage;
 
 class UnitController extends Controller
 {
+    protected $statusService;
+
+    public function __construct(\App\Services\RoomStatusService $statusService)
+    {
+        $this->statusService = $statusService;
+    }
 	/**
 	* check Unit
     *
@@ -179,7 +185,7 @@ class UnitController extends Controller
         $cleaning->save();
 
         $unit = Unit::withoutGlobalScopes()->find($cleaning->unit_id);
-        $unit->status = Unit::STATUS_ENABLED;
+        $this->statusService->logStatusChange($unit, 'available', 'Cleaning completed', $cleaning);
         $unit->save();
 
         event(new UnitUpdated($unit));
@@ -199,8 +205,9 @@ class UnitController extends Controller
         $maintenance->completed_by = auth()->user()->id;
         $maintenance->save();
 
-        $maintenance->unit->status = 1;
-        $maintenance->unit->save();
+        $unit = $maintenance->unit;
+        $this->statusService->logStatusChange($unit, 'available', 'Maintenance completed', $maintenance);
+        $unit->save();
 
         return new MaintenanceResource($maintenance);
     }
@@ -293,14 +300,14 @@ class UnitController extends Controller
         switch ($request->get('type')) {
             case 'cleaning':
                 if($unit->status != Unit::STATUS_UNDER_CLEANING){
-                    $unit->status = Unit::STATUS_UNDER_CLEANING;
-                    UnitCleaning::create(['unit_id' =>  $unit->id, 'start_at'=>    new \DateTime()]);
+                    $cleaning = UnitCleaning::create(['unit_id' =>  $unit->id, 'start_at'=>    new \DateTime()]);
+                    $this->statusService->logStatusChange($unit, 'dirty', 'Cleaning started', $cleaning);
                 }
                 break;
             case 'maintenance':
                 if($unit->status != Unit::STATUS_UNDER_MAINTENANCE){
-                    $unit->status = Unit::STATUS_UNDER_MAINTENANCE;
-                    UnitMaintenance::create(['unit_id' =>  $unit->id, 'start_at'=>    new \DateTime()]);
+                    $maintenance = UnitMaintenance::create(['unit_id' =>  $unit->id, 'start_at'=>    new \DateTime()]);
+                    $this->statusService->logStatusChange($unit, 'maintenance', 'Maintenance started', $maintenance);
                 }
                 break;
             case 'enabled':
@@ -318,7 +325,7 @@ class UnitController extends Controller
                         ]);
                         break;
                 }
-                $unit->status = Unit::STATUS_ENABLED;
+                $this->statusService->logStatusChange($unit, 'available', 'Room enabled');
                 break;
         }
         $unit->save();

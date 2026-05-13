@@ -4,6 +4,7 @@ import router from './router';
 import App from './App.vue';
 import VueApexCharts from 'vue3-apexcharts';
 import i18n from './i18n';
+import 'primeicons/primeicons.css';
 
 const app = createApp(App);
 

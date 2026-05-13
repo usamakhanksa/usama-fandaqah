@@ -11,17 +11,28 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class GroupReservation extends Model
 {
     use SoftDeletes;
-    protected $fillable = [];
+    protected $fillable = ['team_id', 'company_id', 'balance', 'data'];
 
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
+        'balance' => 'decimal:2'
     ];
 
-    protected $appends = ['hash_id'];
+    protected $appends = ['hash_id', 'name', 'status'];
 
     public function getHashIdAttribute()
     {
         return Hashids::encode($this->id);
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->data['name'] ?? 'Group #' . $this->id;
+    }
+
+    public function getStatusAttribute()
+    {
+        return $this->data['status'] ?? 'pending';
     }
 
     public function reservations()

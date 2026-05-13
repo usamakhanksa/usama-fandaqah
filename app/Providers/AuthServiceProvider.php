@@ -23,6 +23,9 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        // Grant all permissions to Super Admin role
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            return $user->isSuperAdmin() ? true : null;
+        });
     }
 }

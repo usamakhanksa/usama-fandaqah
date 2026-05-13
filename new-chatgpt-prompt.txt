@@ -1,0 +1,1489 @@
+Source basis: uploaded PMS API/system analysis and uploaded enhanced AI-agent prompt guide.  
+
+## PROMPT 01 — Master Corporate PMS Enhancement Plan
+
+```text
+You are a senior Laravel 10 + Vue 3 + Inertia.js + Tailwind + Laravel Sanctum architect.
+
+Project: Usama Fandaqah Hotel Management System / Fandaqah Hotel PMS.
+
+Goal:
+Deeply enhance the existing PMS into a complete corporate-grade hotel management platform.
+
+Before coding:
+1. Inspect existing routes, controllers, models, migrations, seeders, Vue pages, sidebar logic, middleware, policies, and permission logic.
+2. Do not duplicate existing tables or controllers.
+3. Reuse current architecture wherever possible.
+4. If a feature is partially implemented, complete it instead of replacing it.
+5. Do not remove existing working functionality.
+6. Do not leave TODO-only pages.
+7. Every new feature must have:
+   - migration if database changes are needed
+   - model relationships
+   - controller
+   - routes
+   - request validation
+   - policies or permission checks
+   - Vue pages
+   - sidebar entry
+   - seed data
+   - tests or manual verification notes
+
+Corporate UI rules:
+- Use a clean enterprise dashboard style.
+- Every module page must include breadcrumbs, page title, summary cards, filter/search bar, data table, action buttons, pagination, loading state, empty state, and error state.
+- Use consistent badges for status.
+- Use confirmation dialogs for delete/destructive actions.
+- Use toast notifications for create/update/delete success and failure.
+- Use responsive layout for desktop, tablet, and mobile.
+- Sidebar must group modules clearly.
+
+Required output after implementation:
+1. List changed files.
+2. List new migrations.
+3. List new seeders.
+4. List new routes.
+5. List new sidebar items.
+6. List new permissions.
+7. Show how to run:
+   - composer install
+   - npm install
+   - php artisan migrate
+   - php artisan db:seed
+   - php artisan test
+   - npm run build
+8. Provide final pass/fail checklist.
+
+Do not stop until the system is runnable, seeded, permission-protected, and visually consistent.
+```
+
+## PROMPT 02 — RBAC CRUD Permissions + Super Admin Bypass
+
+```text
+Implement complete CRUD permission management across the PMS.
+
+Important rule:
+The Super Admin role must NOT need any permission assignment.
+Super Admin must automatically bypass all permission checks.
+Do not store individual permissions for Super Admin unless the existing architecture absolutely requires it.
+If the role slug/name is super_admin or Super Admin, allow all actions automatically.
+
+Required CRUD permission actions:
+- view
+- add
+- edit
+- delete
+
+Permission naming convention:
+Use this format:
+{module}.{action}
+
+Examples:
+reservations.view
+reservations.add
+reservations.edit
+reservations.delete
+
+rooms.view
+rooms.add
+rooms.edit
+rooms.delete
+
+finance.invoices.view
+finance.invoices.add
+finance.invoices.edit
+finance.invoices.delete
+
+Required modules:
+- dashboard
+- reservations
+- rooms
+- housekeeping
+- maintenance
+- front_desk
+- pos
+- guests
+- companies
+- finance
+- reports
+- settings
+- users
+- roles
+- permissions
+- night_audit
+- marketing
+- integrations
+- website
+- system.activity_logs
+- system.failed_jobs
+
+Backend requirements:
+1. Inspect existing role and permission tables first.
+2. If existing tables are usable, extend them.
+3. If missing, create migrations for:
+   - roles
+   - permissions
+   - permission_role pivot
+   - role_user pivot or user role field, depending on current structure
+4. Create idempotent PermissionSeeder.
+5. Create RoleSeeder with:
+   - Super Admin
+   - Admin
+   - Manager
+   - Front Desk
+   - Housekeeping
+   - Accountant
+   - POS Cashier
+   - Reports Viewer
+6. Implement Gate::before or equivalent middleware:
+   - If authenticated user has Super Admin role, return true.
+   - Otherwise check explicit permission.
+7. Protect routes:
+   - index/show/export = view
+   - create/store = add
+   - edit/update = edit
+   - destroy/delete/restore = delete or dedicated restore permission if existing pattern requires it
+8. Protect API and web routes.
+9. Protect Vue action buttons:
+   - hide Add button if no add permission
+   - hide Edit button if no edit permission
+   - hide Delete button if no delete permission
+   - hide page/menu if no view permission
+10. Super Admin sees all menus and all action buttons.
+
+UI requirements:
+Create or complete:
+- Roles list
+- Create role
+- Edit role
+- Duplicate role
+- Delete role
+- Permission matrix page
+- Assign users to role
+- User-role management
+- Permission grouped by module
+- View/Add/Edit/Delete checkboxes per module
+- “Super Admin has full access automatically” notice
+- Disable permission matrix editing for Super Admin
+
+Acceptance checks:
+- Super Admin can access every route without assigned permissions.
+- Normal Admin only accesses assigned permissions.
+- User without view permission cannot access module page.
+- User without add permission cannot create.
+- User without edit permission cannot update.
+- User without delete permission cannot delete.
+- Sidebar updates based on permission.
+```
+
+## PROMPT 03 — Permission Migration + Seeder Sample
+
+```text
+Create proper migrations and seeders for CRUD permission management.
+
+Before coding:
+Inspect the existing database structure. If roles/permissions already exist, do not duplicate them. Adapt this structure safely.
+
+If missing, create these migrations:
+
+1. roles table:
+- id
+- name
+- slug unique
+- description nullable
+- is_system boolean default false
+- created_at
+- updated_at
+
+2. permissions table:
+- id
+- module
+- action
+- name
+- slug unique
+- description nullable
+- created_at
+- updated_at
+
+3. permission_role pivot:
+- id
+- role_id foreign key cascade
+- permission_id foreign key cascade
+- unique(role_id, permission_id)
+
+4. role_user pivot if needed:
+- id
+- user_id foreign key cascade
+- role_id foreign key cascade
+- unique(user_id, role_id)
+
+Seeder requirements:
+Create PermissionSeeder that is idempotent.
+
+Seed actions:
+- view
+- add
+- edit
+- delete
+
+Seed modules:
+dashboard
+reservations
+rooms
+housekeeping
+maintenance
+front_desk
+pos
+guests
+companies
+finance.transactions
+finance.receipts
+finance.payments
+finance.invoices
+finance.credit_notes
+finance.promissories
+finance.cashier_shifts
+finance.banks
+finance.senders
+finance.qoyod_sync
+reports
+settings.users
+settings.roles
+settings.permissions
+night_audit
+marketing.offers
+marketing.special_prices
+marketing.promo_codes
+marketing.vouchers
+integrations
+website.pages
+website.gallery
+system.activity_logs
+system.failed_jobs
+
+Role seed rules:
+- Create Super Admin role with is_system = true.
+- Do not assign permissions to Super Admin.
+- Create Admin role and assign all permissions except system-only restrictions if applicable.
+- Create operational roles with relevant permissions.
+
+Sample seeder logic:
+- Use updateOrCreate for every role and permission.
+- Never create duplicates.
+- Never delete custom permissions.
+- Never overwrite custom role names except seeded system roles.
+
+Required verification:
+Run:
+php artisan migrate
+php artisan db:seed --class=PermissionSeeder
+php artisan db:seed --class=RoleSeeder
+
+Then verify:
+- permissions count equals modules × actions
+- Super Admin has zero assigned permissions but full access
+- Admin has assigned permissions
+- sidebar respects role permissions
+```
+
+## PROMPT 04 — Sidebar Update for All New Features
+
+```text
+Update the PMS sidebar to include all completed and newly added features.
+
+Existing behavior:
+There is an authenticated sidebar endpoint. Preserve it and improve it.
+
+Goal:
+Make the sidebar corporate, permission-aware, grouped, searchable, and complete.
+
+Required sidebar groups:
+
+1. Dashboard
+- Overview
+- Front Desk Dashboard
+- Occupancy
+- Housekeeping
+- Finance
+- Night Audit
+- Revenue
+- AR
+- Cashier
+- Commissions
+- Integration Health
+- Metabase
+
+2. Reservations
+- All Reservations
+- Calendar
+- Arrivals
+- Departures
+- In-House
+- Online Reservations
+- OTA Reservations
+- Group Reservations
+- Transfers
+- Extensions
+- Cancellations
+- Messages
+- Contracts
+- Digital Signatures
+- Ratings
+- Audit Locks
+
+3. Rooms & Housekeeping
+- Units
+- Unit Categories
+- Room Types
+- Floors
+- Availability Board
+- Status Board
+- Housekeeping Board
+- Cleaning Tasks
+- Maintenance Requests
+- Features
+- Options
+- Category Services
+- Status Logs
+- Media
+
+4. Front Desk
+- Arrivals
+- Check-In
+- Departures
+- Check-Out
+- Folio
+- Walk-In
+- Registration Cards
+- Room Assignment
+- Room Swap
+- Early Check-In
+- Late Check-Out
+- No-Show
+- Wake-Up Calls
+- IPTV Needs
+- Balance Transfer
+
+5. POS & Services
+- POS Dashboard
+- Sale
+- Services
+- Service Categories
+- Service Logs
+- Quick Payments
+- POS Transactions
+- Refunds
+- Voids
+- Qoyod Mappings
+
+6. Guests & Companies
+- Guests
+- Customers
+- Companies
+- Company Groups
+- Customer Notes
+- Company Notes
+- Blocked Guests
+- Turnaway Logs
+- Turnaway Reasons
+- Comments
+- Highlights
+
+7. Finance
+- Transactions
+- Receipts
+- Payments
+- Invoices
+- Reservation Invoices
+- Credit Notes
+- Invoice Transfers
+- ZATCA E-Invoices
+- Promissory Notes
+- Promissory Collections
+- Cashier Shifts
+- Checkout Balance Transfers
+- Banks
+- Senders
+- Commission Payments
+- Payment Corrections
+- Qoyod Sync
+- Trial Balance
+- Paid-Outs
+
+8. Reports
+- Daily Report
+- Monthly Report
+- Occupancy Report
+- Revenue Report
+- ADR & RevPAR
+- Deposits
+- Withdrawals
+- Safe Movement
+- Customer Movement
+- Services
+- Units Movement
+- Cleaning
+- Maintenance
+- Transfers
+- Resources
+- Contracts
+- Invoices
+- Custom Reports
+- Report Schedules
+- Metabase Reports
+
+9. Marketing
+- Sources
+- Offers
+- Special Prices
+- Promo Codes
+- Vouchers
+- Pricing Preview
+
+10. Integrations
+- Integrations
+- Integration Settings
+- Integration Logs
+- Form Integrations
+- Public API Consumers
+- API Tokens
+
+11. Website
+- Website Settings
+- Pages
+- Gallery
+- Public Leads
+
+12. System
+- Users
+- Teams
+- Roles
+- Permissions
+- Settings
+- Activity Logs
+- Failed Jobs
+- Uploads
+
+Permission behavior:
+- Super Admin sees every sidebar item.
+- Other users only see items where they have {module}.view permission.
+- If a group has no visible children, hide the group.
+- If a feature is not implemented yet, either hide it or mark it as “Coming Soon” only if requested by product owner.
+- Do not show broken links.
+
+UI behavior:
+- Sidebar must support collapsed mode.
+- Active route must be highlighted.
+- Use clear enterprise icons.
+- Show nested groups.
+- Add search/filter if sidebar is large.
+- Persist collapsed state locally.
+
+Acceptance:
+- All implemented features are reachable.
+- No dead links.
+- Normal users see only permitted modules.
+- Super Admin sees everything.
+```
+
+## PROMPT 05 — Finance Module Complete Implementation
+
+```text
+Complete the Finance module as a corporate-grade hotel finance system.
+
+Do not duplicate existing finance code. Inspect current finance routes, controllers, models, migrations, and Vue pages first.
+
+Required features:
+
+1. Transactions
+- list
+- show
+- running balance computation
+- filters by date, type, account, reservation, customer
+- export
+
+2. Receipts
+- CRUD
+- print receipt
+- link to reservation/customer/company
+- payment method
+- status
+- audit log
+
+3. Payments
+- CRUD
+- create transaction row
+- reverse payment
+- correction workflow
+- payment method
+- cashier shift linkage
+
+4. Invoices
+- CRUD
+- invoice number generation
+- PDF download
+- ZATCA-ready fields
+- send to ZATCA placeholder/service interface
+- status tracking
+
+5. Reservation Invoices
+- generate from reservation folio
+- include room charges, services, taxes, adjustments
+- PDF download
+
+6. Credit Notes
+- CRUD
+- link to invoice
+- reason
+- approval status
+- accounting impact
+
+7. Invoice Transfers
+- transfer invoice to AR/city ledger
+- export
+- approval trail
+
+8. ZATCA E-Invoices
+- list
+- status
+- XML download
+- send/retry action
+- error log
+
+9. Promissory Notes
+- web routes and pages
+- collections
+- collection log
+- apply payment
+- reverse payment
+
+10. Cashier Shifts
+- open shift
+- close shift
+- approve shift
+- shift report
+- transaction reconciliation
+
+11. Checkout Balance Transfers
+- transfer balance between reservations
+- validation
+- audit log
+
+12. Banks
+- CRUD
+- active/inactive
+
+13. Senders
+- CRUD
+- used for money transfer/payment sender references
+
+14. Commission Payments
+- approve
+- pay
+- cancel
+- export
+
+15. Payment Corrections/Reversals
+- list
+- create correction
+- approve correction
+- reverse transaction
+- audit log
+
+16. Qoyod Sync
+- endpoint
+- status page
+- retry failed sync
+- logs
+
+17. Reports
+- Trial Balance
+- Paid-Outs
+- export
+
+Permissions:
+For each finance submodule, implement:
+- view
+- add
+- edit
+- delete
+
+Examples:
+finance.invoices.view
+finance.invoices.add
+finance.invoices.edit
+finance.invoices.delete
+
+Super Admin:
+- must access everything without assigned permissions.
+
+UI:
+- Corporate finance dashboard
+- Stats cards: total revenue, paid, unpaid, overdue, refunds, corrections
+- Date filters
+- Export buttons
+- Status badges
+- Print/download actions
+- Confirmation dialogs
+- Audit trail section
+
+Seeds:
+Create sample data for:
+- banks
+- senders
+- invoices
+- receipts
+- payments
+- credit notes
+- promissory notes
+- cashier shifts
+- paid-outs
+- commission payments
+
+Acceptance:
+- All finance pages load.
+- CRUD works.
+- Permissions hide/show buttons.
+- API routes are protected.
+- Running balance is correct.
+- Seeded finance data appears.
+- Sidebar finance group is complete.
+```
+
+## PROMPT 06 — Reports Module Complete Implementation
+
+```text
+Build the complete Reports module.
+
+Goal:
+Every report route must have a real Vue page, filters, export option, permission check, and corporate layout.
+
+Required report pages:
+- Daily Report
+- Monthly Report
+- Occupancy Report
+- Revenue Report
+- ADR & RevPAR Report
+- Deposits Report
+- Withdrawals Report
+- Safe Movement Report
+- Customer Movement Report
+- Services Report
+- Units Movement Report
+- Cleaning Report
+- Maintenance Report
+- Transfers Report
+- Resources Report
+- Contracts Report
+- Invoices Report
+- No-Show Report
+- Cancellation Report
+- Commission Report
+- Paid-Outs Report
+- Trial Balance Report
+- Housekeeping Discrepancy Report
+- Turnaway Report
+- Source Performance Report
+- Company AR Report
+- Custom Reports CRUD
+- Report Schedules CRUD
+- Run scheduled report now
+- Enable/disable schedule
+
+Each report page must include:
+- title
+- description
+- breadcrumbs
+- date range filter
+- relevant module filters
+- summary cards
+- results table
+- export CSV/PDF button where applicable
+- empty state
+- loading state
+- error state
+
+Permissions:
+reports.view
+reports.add
+reports.edit
+reports.delete
+
+For custom reports:
+- view = list/run reports
+- add = create report
+- edit = edit report/schedule
+- delete = delete report/schedule
+
+Super Admin:
+Access all reports automatically.
+
+Seeder:
+Seed sample saved reports:
+- Daily Revenue Summary
+- Occupancy by Room Type
+- Monthly Trial Balance
+- Housekeeping Discrepancy Report
+- Company AR Aging
+
+Sidebar:
+Add all reports under Reports group.
+Hide reports if user lacks reports.view.
+
+Acceptance:
+- Reports folder is no longer empty.
+- ReportsAnalytics folder has working pages.
+- InventoryAndRooms report pages work.
+- Export endpoints work or return clear valid placeholder export until full export is implemented.
+- No broken sidebar links.
+```
+
+## PROMPT 07 — Settings, Users, Teams, Roles, Permissions
+
+```text
+Complete the Settings module.
+
+Required features:
+1. Users CRUD
+- list
+- create
+- view
+- edit
+- deactivate
+- delete if safe
+- assign role
+- reset password flow or admin password set
+- status active/inactive
+
+2. Teams CRUD
+- list
+- create
+- view
+- edit
+- delete
+- assign users
+
+3. Roles CRUD
+- list
+- create
+- view
+- edit
+- duplicate
+- delete
+- system role protection
+
+4. Permissions management
+- matrix by role
+- grouped modules
+- view/add/edit/delete actions
+- bulk select by module
+- bulk select all
+- save changes
+- clear role permissions
+- Super Admin notice and disabled matrix
+
+5. Settings CRUD
+- global settings
+- hotel settings
+- finance settings
+- reservation settings
+- notification settings
+- integration settings
+
+Permission mapping:
+settings.users.view/add/edit/delete
+settings.teams.view/add/edit/delete
+settings.roles.view/add/edit/delete
+settings.permissions.view/add/edit/delete
+settings.global.view/add/edit/delete
+
+System role protections:
+- Super Admin cannot be deleted.
+- Super Admin permissions cannot be manually edited.
+- At least one Super Admin user must always remain.
+- System roles should require confirmation before editing.
+
+Seeder:
+Seed:
+- Super Admin role
+- Admin role
+- Manager role
+- Front Desk role
+- Housekeeping role
+- Accountant role
+- POS Cashier role
+- Reports Viewer role
+- sample users for each role
+
+Sidebar:
+Add Settings group with:
+- Users
+- Teams
+- Roles
+- Permissions
+- Global Settings
+
+Acceptance:
+- Admin can manage non-system roles.
+- Super Admin bypass works.
+- Permissions update immediately affects sidebar and route access.
+- Normal users cannot access settings without permission.
+```
+
+## PROMPT 08 — POS & Services Complete CRUD
+
+```text
+Complete the POS & Services module.
+
+Required features:
+1. Services CRUD
+- list
+- create
+- view
+- edit
+- delete
+- category assignment
+- price
+- tax
+- active/inactive
+
+2. Service Categories CRUD
+- list
+- create
+- edit
+- delete
+
+3. Service Logs
+- list
+- view
+- add notes
+- reservation link
+- user/cashier link
+
+4. POS Transactions
+- list
+- view
+- void
+- refund
+- export
+- status badges
+
+5. Quick Payments
+- list
+- create payment
+- link to customer/reservation
+- cashier shift link
+
+6. Qoyod Mappings
+- CRUD
+- service-to-account mapping
+- sync status
+
+Permissions:
+pos.view
+pos.add
+pos.edit
+pos.delete
+
+For submodules, use:
+pos.services.view/add/edit/delete
+pos.transactions.view/add/edit/delete
+pos.quick_payments.view/add/edit/delete
+pos.qoyod.view/add/edit/delete
+
+Super Admin:
+Bypass all POS permissions.
+
+UI:
+- POS dashboard with KPIs
+- Category/service table
+- Transaction table
+- Refund/void confirmation
+- Filters by date, cashier, status
+- Corporate cards and tables
+
+Seeder:
+Seed:
+- restaurant services
+- laundry services
+- transport services
+- spa services
+- demo POS transactions
+- quick payments
+- Qoyod mappings
+
+Sidebar:
+Add POS & Services group with all pages.
+
+Acceptance:
+- POS sale flow works.
+- Service CRUD works.
+- Void/refund protected by permission.
+- Seed data visible.
+```
+
+## PROMPT 09 — Guests & Companies Complete CRUD
+
+```text
+Complete the Guests & Companies module.
+
+Required features:
+1. Guests
+- list
+- view
+- edit
+- delete
+- Shomoos verification status display if existing
+- reservation history
+
+2. Customers
+- CRUD
+- merge duplicates
+- restore soft-deleted customer
+- notes
+- history
+
+3. Companies
+- CRUD
+- notes
+- statement
+- AR exposure
+
+4. Company Groups
+- CRUD
+- link/unlink companies
+- exposure report
+
+5. Blocked Guests
+- list
+- block guest
+- unblock guest
+- reason
+- audit log
+
+6. Turnaway Logs
+- CRUD
+- turnaway reason
+- source
+- date
+- notes
+
+7. Turnaway Reasons
+- CRUD
+
+8. Comments
+- CRUD
+
+9. Highlights
+- CRUD
+
+Permissions:
+guests.view/add/edit/delete
+customers.view/add/edit/delete
+companies.view/add/edit/delete
+company_groups.view/add/edit/delete
+blocked_guests.view/add/edit/delete
+turnaway.view/add/edit/delete
+
+Super Admin:
+Bypass all permissions.
+
+UI:
+- Corporate directory pages
+- Profile detail pages
+- Notes timeline
+- History tabs
+- Status badges
+- Merge customer modal
+- Block/unblock confirmation
+
+Seeder:
+Seed:
+- guests
+- customers
+- companies
+- company groups
+- notes
+- blocked guest
+- turnaway reasons
+- turnaway logs
+- highlights
+
+Sidebar:
+Complete Guests & Companies group.
+
+Acceptance:
+- All pages load.
+- CRUD works.
+- Permissions hide/show actions.
+- Sidebar links are complete.
+```
+
+## PROMPT 10 — Rooms, Housekeeping, Maintenance
+
+```text
+Complete Rooms & Housekeeping missing sub-features.
+
+Required features:
+1. Housekeeping routes/controllers/pages
+- board
+- task list
+- assign task
+- start cleaning
+- complete cleaning
+- status updates
+
+2. Maintenance routes/controllers/pages
+- request list
+- create request
+- assign staff
+- update status
+- complete request
+- priority
+- cost
+- notes
+
+3. Room Floors CRUD
+- list
+- create
+- edit
+- delete
+
+4. Room Types CRUD
+- list
+- create
+- edit
+- delete
+
+5. Room Status Logs web pages
+- list
+- timeline by unit
+- filters
+
+6. Unit Media
+- list media
+- upload media if upload system exists
+- delete media
+- fallback to image URL if upload not ready
+
+Permissions:
+rooms.view/add/edit/delete
+housekeeping.view/add/edit/delete
+maintenance.view/add/edit/delete
+room_floors.view/add/edit/delete
+room_types.view/add/edit/delete
+room_status_logs.view
+
+Super Admin:
+Bypass all permissions.
+
+UI:
+- Availability board
+- Status board
+- Housekeeping board
+- Maintenance kanban/list
+- Room/unit detail page with tabs
+- Corporate status colors
+
+Seeder:
+Seed:
+- floors
+- room types
+- unit categories
+- units
+- housekeeping tasks
+- maintenance requests
+- status logs
+- unit media placeholders
+
+Sidebar:
+Update Rooms & Housekeeping group.
+
+Acceptance:
+- Room boards work.
+- Housekeeping and maintenance flows work.
+- CRUD permissions applied.
+- Seed data visible.
+```
+
+## PROMPT 11 — Marketing Module
+
+```text
+Complete the Marketing module.
+
+Required features:
+1. Sources CRUD
+- existing source management must remain working
+
+2. Offers CRUD
+- title
+- description
+- start date
+- end date
+- discount type
+- discount value
+- active/inactive
+- applicable room/category/service
+
+3. Special Prices CRUD
+- room/category
+- date range
+- price
+- source/channel
+- priority
+
+4. Promo Codes CRUD
+- code
+- discount type
+- discount value
+- usage limit
+- used count
+- valid from/to
+- active/inactive
+
+5. Vouchers CRUD
+- voucher number
+- customer
+- value
+- balance
+- expiry
+- status
+
+6. Pricing Preview
+- calculate price based on date, room, promo, special price, source
+- show breakdown
+
+Permissions:
+marketing.sources.view/add/edit/delete
+marketing.offers.view/add/edit/delete
+marketing.special_prices.view/add/edit/delete
+marketing.promo_codes.view/add/edit/delete
+marketing.vouchers.view/add/edit/delete
+
+Super Admin:
+Bypass all permissions.
+
+UI:
+- Marketing dashboard
+- Offer calendar/list
+- Promo code table
+- Voucher table
+- Pricing preview form
+
+Seeder:
+Seed:
+- travel sources
+- offers
+- special prices
+- promo codes
+- vouchers
+
+Sidebar:
+Add Marketing group.
+
+Acceptance:
+- Marketing pages are not commented out.
+- CRUD works.
+- Pricing preview returns valid breakdown.
+```
+
+## PROMPT 12 — Integrations Module
+
+```text
+Build the complete Integrations module.
+
+Required features:
+1. Integrations CRUD
+- name
+- provider
+- type
+- status
+- credentials placeholder/encrypted config
+- test connection action
+- sync action
+
+2. Integration Settings CRUD
+- key
+- value
+- provider
+- environment
+
+3. Integration Logs
+- list
+- show
+- status
+- request/response summary
+- error message
+- retry action if applicable
+
+4. Form Integrations
+- list
+- create
+- approve
+- reject
+- map fields
+
+5. Public API Consumers
+- CRUD
+- name
+- contact
+- status
+- allowed scopes
+
+6. API Tokens
+- create
+- revoke
+- rotate
+- last used at
+- scopes
+
+Permissions:
+integrations.view/add/edit/delete
+integrations.logs.view
+integrations.tokens.view/add/edit/delete
+
+Super Admin:
+Bypass all permissions.
+
+Security:
+- Never expose raw secrets in UI.
+- Mask tokens after creation.
+- Store sensitive config encrypted if possible.
+- Log integration actions.
+
+Seeder:
+Seed:
+- Booking.com placeholder
+- Expedia placeholder
+- Qoyod placeholder
+- Shomoos placeholder
+- Metabase placeholder
+- demo API consumer
+
+Sidebar:
+Add Integrations group.
+
+Acceptance:
+- Integration list works.
+- Test/sync actions return controlled responses.
+- Logs page works.
+- Tokens are secure.
+```
+
+## PROMPT 13 — Website Module
+
+```text
+Create the Website module for public-facing hotel content management.
+
+Required features:
+1. Website Settings
+- hotel name
+- logo URL
+- contact email
+- phone
+- address
+- social links
+- booking CTA text
+- SEO title
+- SEO description
+
+2. Pages CRUD
+- title
+- slug
+- content
+- status draft/published
+- SEO fields
+- published at
+
+3. Gallery CRUD
+- title
+- image URL or upload
+- category
+- sort order
+- active/inactive
+
+4. Public Leads
+- list submitted leads
+- view lead
+- update status
+- delete lead
+
+Permissions:
+website.settings.view/add/edit/delete
+website.pages.view/add/edit/delete
+website.gallery.view/add/edit/delete
+website.leads.view/edit/delete
+
+Super Admin:
+Bypass all permissions.
+
+UI:
+- Corporate CMS layout
+- Content editor area
+- Gallery grid
+- Lead management table
+
+Seeder:
+Seed:
+- homepage content
+- about page
+- gallery items
+- website settings
+- demo leads
+
+Sidebar:
+Add Website group.
+
+Acceptance:
+- Website module pages work.
+- Public lead form still works.
+- Admin can manage content.
+```
+
+## PROMPT 14 — System Monitoring: Activity Logs + Failed Jobs
+
+```text
+Build System Monitoring pages.
+
+Required features:
+1. Activity Logs
+- list
+- view detail
+- filter by user
+- filter by action
+- filter by entity
+- filter by date
+- export
+- show metadata safely
+
+2. Failed Jobs
+- list
+- view failed job
+- retry job
+- delete failed job
+- clear old failed jobs with confirmation
+
+Permissions:
+system.activity_logs.view
+system.failed_jobs.view
+system.failed_jobs.edit
+system.failed_jobs.delete
+
+Super Admin:
+Bypass all permissions.
+
+Security:
+- Do not expose secrets from payloads.
+- Mask tokens/passwords/API keys.
+- Failed job retry/delete must require permission.
+
+UI:
+- Corporate admin table
+- Detail drawer/page
+- Filters
+- Status badges
+- Retry confirmation
+
+Seeder:
+If safe, seed sample activity log records.
+Do not seed failed jobs unless using fake safe records.
+
+Sidebar:
+Add System group:
+- Activity Logs
+- Failed Jobs
+
+Acceptance:
+- Activity logs show real system actions.
+- Failed jobs page works safely.
+- Permissions enforced.
+```
+
+## PROMPT 15 — Final QA, Build, Seed, Migration, and Audit
+
+```text
+Perform a full final audit of the PMS enhancement.
+
+Run and verify:
+
+Backend:
+- composer install
+- php artisan optimize:clear
+- php artisan migrate
+- php artisan db:seed
+- php artisan route:list
+- php artisan test
+
+Frontend:
+- npm install
+- npm run build
+
+Database:
+- migrations run without error
+- seeders are idempotent
+- no duplicate permissions
+- no duplicate roles
+- Super Admin has no assigned permissions but full access
+- normal roles have correct assigned permissions
+
+Permissions:
+Test with:
+1. Super Admin
+2. Admin
+3. Manager
+4. Front Desk
+5. Accountant
+6. Housekeeping
+7. POS Cashier
+8. Reports Viewer
+
+Verify:
+- Super Admin sees all sidebar items.
+- Super Admin can perform all actions.
+- User without view permission cannot open module.
+- User without add permission cannot create.
+- User without edit permission cannot update.
+- User without delete permission cannot delete.
+- Sidebar hides unauthorized modules.
+- Backend blocks unauthorized direct API calls.
+
+Feature checks:
+- Finance pages load.
+- Reports pages load.
+- Settings pages load.
+- POS pages load.
+- Guests pages load.
+- Rooms pages load.
+- Marketing pages load.
+- Integrations pages load.
+- Website pages load.
+- System pages load.
+
+Corporate UI checks:
+- consistent sidebar
+- consistent cards
+- consistent tables
+- consistent buttons
+- consistent badges
+- loading states
+- empty states
+- errors handled
+- responsive layout
+
+Final report must include:
+1. Completed features.
+2. Remaining known limitations, if any.
+3. Changed files.
+4. New migrations.
+5. New seeders.
+6. New routes.
+7. New sidebar items.
+8. New permissions.
+9. Demo login accounts.
+10. Commands to run locally.
+11. Pass/fail checklist.
+12. Fixes applied after failed checks.
+
+Definition of done:
+The system is complete only when it is runnable, migrated, seeded, permission-protected, sidebar-updated, corporate-looking, and all major modules have working pages instead of placeholders.
+```

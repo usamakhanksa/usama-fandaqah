@@ -35,6 +35,63 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
+            
+            // Modular route files
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/dashboard.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/reservations.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/frontdesk.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/rooms.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/guests.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/finance.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/nightaudit.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/reports.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/marketing.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/website.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/settings.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/pos.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/integrations.php'));
+            
+            Route::middleware(['web', 'auth', 'team.scope'])
+                ->namespace($this->namespace)
+                ->group(base_path('routes/system.php'));
         });
     }
 

@@ -11,18 +11,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->register(\App\Providers\ReservationModuleServiceProvider::class);
     }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
-        $this->app->singleton(\Laravel\Fortify\Contracts\LoginViewResponse::class, function () {
-            return new class implements \Laravel\Fortify\Contracts\LoginViewResponse {
-                public function toResponse($request)
-                {
-                    return view('app');
-                }
-            };
-        });
+        //
     }
 }

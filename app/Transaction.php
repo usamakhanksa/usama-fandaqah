@@ -13,6 +13,7 @@ use Vinkla\Hashids\Facades\Hashids;
 use Watson\Rememberable\Rememberable;
 use Illuminate\Support\Facades\DB;
 use app\Team;
+use App\Models\CashierShift;
 use function config;
 
 class Transaction extends Model
@@ -42,7 +43,8 @@ class Transaction extends Model
         'confirmed',
         'meta',
         'bill_payload',
-        'unit_category_id'
+        'unit_category_id',
+        'cashier_shift_id'
     ];
     protected $appends = ['payment_method' , 'hash_id' , 'service_log_number'] ;
 
@@ -170,6 +172,11 @@ class Transaction extends Model
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(config('wallet.wallet.model'));
+    }
+
+    public function cashierShift(): BelongsTo
+    {
+        return $this->belongsTo(CashierShift::class);
     }
 
 

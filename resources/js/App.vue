@@ -1,8 +1,8 @@
 <template>
   <div :dir="currentDir" :class="['min-h-screen flex bg-slate-100 font-[\'Outfit\']', isArabic ? 'font-arabic' : '']">
-    <SidebarNav v-if="route.path !== '/login'" />
+    <SidebarNav v-if="route.name !== 'login' && !route.path.startsWith('/login')" />
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      <HeaderBar v-if="route.path !== '/login'" />
+      <HeaderBar v-if="route.name !== 'login' && !route.path.startsWith('/login')" />
       <main class="flex-1 overflow-y-auto">
         <router-view />
       </main>

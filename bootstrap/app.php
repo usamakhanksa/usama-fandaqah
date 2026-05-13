@@ -9,6 +9,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         // Only keep known working providers
         App\Providers\AppServiceProvider::class,
+        App\Providers\FortifyServiceProvider::class,
         R64\NovaFields\FieldServiceProvider::class,
 
         // Commented old/abandoned providers

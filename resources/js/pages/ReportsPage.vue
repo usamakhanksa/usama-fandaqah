@@ -6,13 +6,13 @@
   </div>
   
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-    <button v-for="sc in reports" :key="sc.slug" @click="selected=sc" class="card p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95 group">
+    <button v-for="sc in reports" :key="sc.slug" @click="openReport(sc)" class="card p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95 group">
       <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl group-hover:bg-rose-50 transition-colors">{{ sc.icon }}</div>
       <span class="font-semibold text-center text-sm leading-tight">{{ sc.title }}</span>
     </button>
   </div>
 
-  <BaseModal v-if="selected" @close="selected=null" :title="selected.title" class="max-w-4xl">
+  <BaseModal v-if="selected" :modelValue="true" @close="closeModal" :title="selected.title" class="max-w-4xl">
     <div class="space-y-4">
       <div class="flex justify-between items-center">
         <div class="flex gap-2">
@@ -20,10 +20,13 @@
           <input type="date" class="input py-1" v-model="filters.to">
           <button @click="load" class="btn-primary py-1 px-4">Filter</button>
         </div>
-        <button class="btn-outline py-1 px-4">Export CSV</button>
+        <button @click="exportCSV" class="btn-outline py-1 px-4">Export CSV</button>
       </div>
 
-      <div v-if="loading" class="text-center py-10">Loading report data...</div>
+      <div v-if="loading" class="text-center py-10">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+        <p class="mt-2 text-slate-500">Loading report data...</p>
+      </div>
       <div v-else class="overflow-x-auto border rounded-xl">
         <table class="w-full text-sm text-left">
           <thead class="bg-slate-50 border-b">
@@ -33,7 +36,7 @@
           </thead>
           <tbody>
             <tr v-for="row in data" :key="row.id" class="border-b hover:bg-slate-50">
-              <td v-for="k in keys" :key="k" class="p-3">{{ row[k] }}</td>
+              <td v-for="k in keys" :key="k" class="p-3">{{ formatValue(row[k]) }}</td>
             </tr>
             <tr v-if="!data.length">
               <td :colspan="headers.length" class="p-10 text-center text-slate-400">No data found for this period.</td>
@@ -78,18 +81,50 @@ const reports = [
 const headers = computed(() => ['ID', 'Reference', 'Date', 'Amount', 'Status']);
 const keys = computed(() => ['id', 'reference_number', 'date', 'amount', 'status']);
 
+const openReport = (report) => {
+  selected.value = report;
+  load();
+};
+
+const closeModal = () => {
+  selected.value = null;
+  data.value = [];
+};
+
 const load = async () => {
   if (!selected.value) return;
   loading.value = true;
   try {
     const res = await api.get(`/reports/${selected.value.slug}`, { params: filters.value });
-    data.value = res.data.data || res.data;
+    data.value = res.data.data || res.data || [];
   } catch (e) {
+    console.error('Error loading report:', e);
     data.value = [];
   }
   loading.value = false;
 };
 
-watch(selected, load);
+const formatValue = (value) => {
+  if (typeof value === 'number') {
+    return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return value;
+};
 
+const exportCSV = () => {
+  if (!data.value.length) return;
+  
+  const csv = [
+    headers.value.join(','),
+    ...data.value.map(row => keys.value.map(k => row[k]).join(','))
+  ].join('\n');
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${selected.value.slug}-report.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
 </script>

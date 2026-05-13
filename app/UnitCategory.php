@@ -4,31 +4,32 @@ namespace App;
 
 use App\Traits\HasTeam;
 use Carbon\CarbonPeriod;
-use Spatie\MediaLibrary\Models\Media;
+// use Spatie\MediaLibrary\Models\Media;
+// use Spatie\MediaLibrary\HasMedia\HasMedia;
+// use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Watson\Rememberable\Rememberable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
 use App\Jobs\STAAH\UnitCategoryHandlerJob;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Jobs\RefreshFeaturedCategoriesOnCustomerWebsite;
 use App\Scopes\TeamScope;
 
-class UnitCategory extends Model implements HasMedia
+class UnitCategory extends Model // implements HasMedia
 {
     use Rememberable;
     use SoftDeletes;
     use HasTranslations;
     use HasTeam;
-    use LogsActivity;
+    // use LogsActivity;
 
-    use HasMediaTrait {
-        HasMediaTrait::addMedia as parentAddMedia;
-    }
+    // Temporarily removing media trait to avoid dependency issues
+    // use HasMediaTrait {
+    //     HasMediaTrait::addMedia as parentAddMedia;
+    // }
 
     public $translatable = ['name', 'description', 'short_description'];
 
@@ -62,6 +63,8 @@ class UnitCategory extends Model implements HasMedia
         });
     }
 
+    // Temporarily removing media functions to avoid dependency issues
+    /*
     public function registerMediaConversions(Media $media = null)
     {
         $this->addMediaConversion('thumb')
@@ -75,6 +78,7 @@ class UnitCategory extends Model implements HasMedia
         $this->addMediaCollection('main')->singleFile();
         $this->addMediaCollection('images');
     }
+    */
 
     public static function types()
     {

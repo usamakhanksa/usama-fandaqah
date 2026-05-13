@@ -25,6 +25,11 @@ class User extends SparkUser
     use HasApiTokens;
     use SoftDeletes;
 
+    public function currentTeam()
+    {
+        return $this->belongsTo(\App\Models\Team::class, 'current_team_id');
+    }
+
     public function role()
     {
         return $this->belongsTo(\App\Models\Role::class, 'role_id');
@@ -32,7 +37,7 @@ class User extends SparkUser
 
     public function roles()
     {
-        return $this->belongsToMany(\App\Models\Role::class, 'role_user');
+        return $this->belongsToMany(\Pktharindu\NovaPermissions\Role::class, 'role_user');
     }
 
     public function teams()
@@ -124,6 +129,11 @@ class User extends SparkUser
      */
     public function isSuperAdmin()
     {
+        foreach ($this->roles as $role) {
+            if ($role->slug === 'super-admin' || (strpos($role->slug, 'super-admin-') === 0)) {
+                return true;
+            }
+        }
         return $this->hasRole('super-admin');
     }
     

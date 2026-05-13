@@ -11,10 +11,22 @@ use App\Models\RoomFloor;
 use App\Models\Unit;
 use App\Models\UnitStatus;
 use App\Models\UnitType;
+use App\Models\FinancialRecord;
+use App\Services\StayChargeService;
 use Illuminate\Http\Request;
 
 class UnitHousingController extends Controller
 {
+    protected $service;
+    protected $balanceService;
+    protected $statusService;
+
+    public function __construct(StayChargeService $service, \App\Services\CheckoutBalanceService $balanceService, \App\Services\RoomStatusService $statusService)
+    {
+        $this->service = $service;
+        $this->balanceService = $balanceService;
+        $this->statusService = $statusService;
+    }
     public function filters()
     {
         return response()->json([
@@ -104,6 +116,13 @@ class UnitHousingController extends Controller
         ]);
     }
 
+    public function getBalance(Reservation $reservation)
+    {
+        return response()->json([
+            'balance' => $this->balanceService->getBalance($reservation)
+        ]);
+    }
+
     public function checkIn(Request $request)
     {
         $data = $request->validate([
@@ -112,10 +131,41 @@ class UnitHousingController extends Controller
             'date' => ['required', 'date'],
             'time' => ['required', 'string'],
             'note' => ['nullable', 'string', 'max:2000'],
+            'override_amount' => ['nullable', 'numeric', 'min:0'],
+            'override_reason' => ['required_with:override_amount', 'nullable', 'string'],
         ]);
 
+        $reservation = Reservation::with(['unit', 'booking'])->findOrFail($data['reservation_id']);
+        $calculatedAmount = $this->service->calculateCharge($reservation, $data['time'], 'early_checkin');
+        
+        $finalAmount = $calculatedAmount;
+        if (isset($data['override_amount'])) {
+            if (!$request->user()->can('checkin.override_early_charge')) {
+                return response()->json(['message' => 'You do not have permission to override early check-in charges.'], 403);
+            }
+            $finalAmount = $data['override_amount'];
+            $this->service->logOverride([
+                 'team_id' => $reservation->team_id,
+                 'reservation_id' => $reservation->id,
+                 'charge_type' => 'early_checkin',
+                 'original_amount' => $calculatedAmount,
+                 'overridden_amount' => $finalAmount,
+                 'reason' => $data['override_reason']
+            ]);
+        }
+
+        // Post financial record if amount > 0
+        if ($finalAmount > 0) {
+            FinancialRecord::create([
+                'team_id' => $reservation->team_id,
+                'booking_id' => $reservation->booking?->id,
+                'label' => 'Early Check-in Charge',
+                'amount' => $finalAmount,
+                'type' => 'charge'
+            ]);
+        }
+
         $record = CheckInRecord::query()->create($data);
-        $reservation = Reservation::findOrFail($data['reservation_id']);
         $reservation->update(['stay_type' => 'checkin']);
 
         $checkedInStatus = UnitStatus::query()->where('slug', 'booked')->first();
@@ -124,7 +174,7 @@ class UnitHousingController extends Controller
         ActivityLog::query()->create([
             'user_id' => $request->user()?->id,
             'action' => 'check_in',
-            'meta' => $data,
+            'meta' => array_merge($data, ['calculated_charge' => $calculatedAmount, 'final_charge' => $finalAmount]),
         ]);
 
         return response()->json($record, 201);
@@ -139,23 +189,99 @@ class UnitHousingController extends Controller
             'time' => ['required', 'string'],
             'note' => ['nullable', 'string', 'max:2000'],
             'final_charges' => ['nullable', 'numeric', 'min:0'],
+            'override_amount' => ['nullable', 'numeric', 'min:0'],
+            'override_reason' => ['required_with:override_amount', 'nullable', 'string'],
+            // Resolution fields
+            'resolution_type' => ['nullable', 'string', 'in:collect_now,signed_promissory,unsigned_promissory,waived_promissory,corporate_transfer,refund_now,credit_note'],
+            'resolution_amount' => ['nullable', 'numeric'],
+            'resolution_notes' => ['nullable', 'string'],
+            'promissory_due_date' => ['nullable', 'date'],
+            'unsigned_reason' => ['required_if:resolution_type,unsigned_promissory', 'nullable', 'string'],
         ]);
+
+        $reservation = Reservation::with(['unit', 'booking'])->findOrFail($data['reservation_id']);
+        $calculatedAmount = $this->service->calculateCharge($reservation, $data['time'], 'late_checkout');
+        
+        $finalAmount = $calculatedAmount;
+        if (isset($data['override_amount'])) {
+            if (!$request->user()->can('checkout.override_late_charge')) {
+                return response()->json(['message' => 'You do not have permission to override late check-out charges.'], 403);
+            }
+            $finalAmount = $data['override_amount'];
+            $this->service->logOverride([
+                 'team_id' => $reservation->team_id,
+                 'reservation_id' => $reservation->id,
+                 'charge_type' => 'late_checkout',
+                 'original_amount' => $calculatedAmount,
+                 'overridden_amount' => $finalAmount,
+                 'reason' => $data['override_reason']
+            ]);
+        }
+
+        // Post financial record if amount > 0
+        if ($finalAmount > 0) {
+            FinancialRecord::create([
+                'team_id' => $reservation->team_id,
+                'booking_id' => $reservation->booking?->id,
+                'label' => 'Late Check-out Charge',
+                'amount' => $finalAmount,
+                'type' => 'charge'
+            ]);
+        }
+
+        // Add additional final charges if any
+        if (isset($data['final_charges']) && $data['final_charges'] > 0) {
+            FinancialRecord::create([
+                'team_id' => $reservation->team_id,
+                'booking_id' => $reservation->booking?->id,
+                'label' => 'Additional Checkout Charges',
+                'amount' => $data['final_charges'],
+                'type' => 'charge'
+            ]);
+        }
+
+        // Check balance AFTER adding checkout charges
+        $balance = $this->balanceService->getBalance($reservation);
+
+        if ($balance != 0) {
+            if (!isset($data['resolution_type'])) {
+                return response()->json([
+                    'message' => 'Unresolved balance of ' . $balance . ' SAR. Please provide a resolution method.',
+                    'balance' => $balance,
+                    'requires_resolution' => true
+                ], 422);
+            }
+
+            // Resolve balance
+            $this->balanceService->resolveBalance($reservation, [
+                'resolution_type' => $data['resolution_type'],
+                'amount' => $data['resolution_amount'] ?? abs($balance),
+                'notes' => $data['resolution_notes'] ?? null,
+                'due_date' => $data['promissory_due_date'] ?? null,
+                'unsigned_reason' => $data['unsigned_reason'] ?? null,
+            ]);
+            
+            // Re-check balance
+            $balance = $this->balanceService->getBalance($reservation);
+            if ($balance != 0) {
+                return response()->json(['message' => 'Balance still unresolved after processing: ' . $balance . ' SAR'], 422);
+            }
+        }
 
         $record = CheckOutRecord::query()->create([
             ...$data,
-            'final_charges' => $data['final_charges'] ?? 0,
+            'final_charges' => ($data['final_charges'] ?? 0) + $finalAmount,
         ]);
 
-        $reservation = Reservation::findOrFail($data['reservation_id']);
         $reservation->update(['stay_type' => 'checkout']);
 
-        $availableStatus = UnitStatus::query()->where('slug', 'available')->first();
-        Unit::whereKey($data['unit_id'])->update(['unit_status_id' => $availableStatus?->id]);
+        $unit = Unit::findOrFail($data['unit_id']);
+        $this->statusService->logStatusChange($unit, 'dirty', 'Checkout completed', $record);
 
         ActivityLog::query()->create([
             'user_id' => $request->user()?->id,
             'action' => 'check_out',
-            'meta' => $data,
+            'meta' => array_merge($data, ['calculated_charge' => $calculatedAmount, 'final_charge' => $finalAmount, 'balance_resolved' => true]),
         ]);
 
         return response()->json($record, 201);
@@ -167,7 +293,8 @@ class UnitHousingController extends Controller
             'status_id' => ['required', 'exists:unit_statuses,id'],
         ]);
 
-        $unit->update(['unit_status_id' => $data['status_id']]);
+        $status = UnitStatus::findOrFail($data['status_id']);
+        $this->statusService->logStatusChange($unit, $status->slug, 'Manual management update');
 
         return response()->json(['message' => 'Status updated successfully']);
     }

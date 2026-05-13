@@ -66,7 +66,7 @@ class SparkServiceProvider extends ServiceProvider
     public function register()
     {
         Spark::prefixTeamsAs('hotel');
-        Spark::ensureEmailIsVerified();
+        // Spark::ensureEmailIsVerified();
 
     }
 }

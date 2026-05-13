@@ -14,22 +14,16 @@ use Watson\Rememberable\Rememberable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Builder;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\ValidationException;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 use Surelab\Settings\ValueObjects\SettingRegister;
 use App\Scopes\TeamScope;
 
-class Unit extends Model implements HasMedia
+class Unit extends Model
 {
 
     use Rememberable;
     use HasTranslations, LogsActivity, SoftDeletes;
-
-    use HasMediaTrait {
-        HasMediaTrait::addMedia as parentAddMedia;
-    }
 
     public $translatable = ['name', 'description', 'short_description'];
 
@@ -1086,12 +1080,6 @@ class Unit extends Model implements HasMedia
         return $formatted ? number_format($tourismTaxToPay, 2) : $tourismTaxToPay;
     }
 
-    public function addMedia($file)
-    {
-        return $this->parentAddMedia($file)
-            ->usingFileName($file->hashName());
-
-    }
 
     public static function statusList()
     {

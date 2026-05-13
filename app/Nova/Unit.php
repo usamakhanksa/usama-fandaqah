@@ -1,10 +1,24 @@
 <?php
+
 namespace App\Nova;
-use Laravel\Nova\Resource;
+
+use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
-class Unit extends Resource {
-  public static string $model = \App\Models${r}::class;
-  public static $title = 'id';
-  public static $search = ['id'];
-  public function fields(\Laravel\Nova\Http\Requests\NovaRequest $request): array { return [ID::make()->sortable()]; }
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Resource;
+
+class Unit extends Resource
+{
+    public static $model = '\App\Models\Unit';
+    public static $title = 'name';
+    public static $search = ['id', 'name', 'number'];
+
+    public function fields(Request $request): array
+    {
+        return [
+            ID::make()->sortable(),
+            Text::make('Name'),
+            Text::make('Number'),
+        ];
+    }
 }

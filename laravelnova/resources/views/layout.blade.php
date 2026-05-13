@@ -7,6 +7,11 @@
     <meta name="viewport" content="width=device-width"/>
     <meta name="locale" content="{{ $locale }}"/>
     <meta name="robots" content="noindex">
+    
+    <!-- Pass locale to JavaScript -->
+    <script>
+        window.__locale = '{{ $locale = \Laravel\Nova\Nova::resolveUserLocale(request()) }}';
+    </script>
 
     @include('nova::partials.meta')
 
@@ -25,6 +30,11 @@
             document.documentElement.classList.add('dark')
         } else {
             document.documentElement.classList.remove('dark')
+        }
+        
+        // Set locale in localStorage from HTML lang attribute
+        if (document.documentElement.lang) {
+            localStorage.setItem('lang', document.documentElement.lang);
         }
     </script>
 </head>

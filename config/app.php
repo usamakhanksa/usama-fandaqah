@@ -216,7 +216,7 @@ return [
 
         //        SMartins\PassportMultiauth\Providers\MultiauthServiceProvider::class,
         //        Laravel\Passport\PassportServiceProvider::class,
-        // Aghanem\Jawaly\SmsServiceProvider::class // TODO: install aghanem/jawaly
+        // Aghanem\Jawaly\SmsServiceProvider::class, // TODO: install aghanem/jawaly
     ],
 
     /*

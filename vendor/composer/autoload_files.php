@@ -127,6 +127,8 @@ return array(
     '6a47392539ca2329373e0d33e1dba053' => $vendorDir . '/symfony/polyfill-intl-icu/bootstrap.php',
     '5897ea0ac4cccf14d323035e65887801' => $vendorDir . '/symfony/polyfill-php82/bootstrap.php',
     '9d2b9fc6db0f153a0a149fefb182415e' => $vendorDir . '/symfony/polyfill-php84/bootstrap.php',
+    'c72349b1fe8d0deeedd3a52e8aa814d8' => $vendorDir . '/mockery/mockery/library/helpers.php',
+    'ce9671a430e4846b44e1c68c7611f9f5' => $vendorDir . '/mockery/mockery/library/Mockery.php',
     'ec07570ca5a812141189b1fa81503674' => $vendorDir . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
     '72b1e3f4a2af9b30b3f137b3ec2057fc' => $vendorDir . '/spatie/laravel-activitylog/src/helpers.php',
     'a38ad7182d68dafb0f0846c87eb3c586' => $baseDir . '/app/helpers.php',

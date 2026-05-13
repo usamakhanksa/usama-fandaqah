@@ -18,15 +18,24 @@ class ServiceLog extends Model
     use SoftDeletes, LogsActivity;
 
 
-    protected $casts = [
-        'meta' => 'json',
+    protected $fillable = [
+        'team_id',
+        'transaction_id',
+        'unit_id',
+        'service_id',
+        'number',
+        'amount',
+        'meta',
+        'is_freezed',
+        'business_date',
+        'user_id'
     ];
 
-    protected static $logAttributes = ['number', 'amount', 'created_at', 'updated_at'];
-    protected static $logOnlyDirty = true;
-    protected static $submitEmptyLogs = false;
-
-    protected $guraded = [];
+    protected $casts = [
+        'meta' => 'json',
+        'is_freezed' => 'boolean',
+        'business_date' => 'date'
+    ];
 
     protected static function boot()
     {

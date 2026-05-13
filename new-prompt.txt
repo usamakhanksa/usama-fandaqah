@@ -1,0 +1,2017 @@
+# Enhanced Task-Based Prompt: Complete Sidebar + All Screens + Full CRUD Implementation
+
+```text
+You are a senior Laravel + Vue/React/Inertia architect implementing the Fandaqah Hotel PMS. Your task is to build a COMPLETE, WORKING sidebar system where EVERY menu item links to a FUNCTIONAL screen with FULL CRUD operations. No placeholders. No dead links. No incomplete screens.
+
+## CORE REQUIREMENT
+Every sidebar menu item MUST:
+1. Have a corresponding route that exists and works
+2. Have a controller method that handles the request
+3. Have a service class with business logic
+4. Have a view/component that renders the screen
+5. Have proper CRUD operations (list/create/view/edit/delete minimum)
+6. Have proper permissions that control visibility
+7. Have seed data so screens show realistic content
+8. Have tests proving the screen works
+
+## SIDEBAR IMPLEMENTATION STRATEGY
+
+### Phase 1: Database Structure for Sidebar
+Create migration for `sidebar_items` table if not exists:
+
+```php
+Schema::create('sidebar_items', function (Blueprint $table) {
+    $table->increments('id');
+    $table->string('key')->unique();
+    $table->string('label_en');
+    $table->string('label_ar');
+    $table->string('icon')->nullable();
+    $table->string('route_name')->nullable();
+    $table->string('url')->nullable();
+    $table->string('permission')->nullable();
+    $table->string('module');
+    $table->integer('parent_id')->nullable()->unsigned();
+    $table->integer('order')->default(0);
+    $table->boolean('is_visible')->default(true);
+    $table->boolean('is_beta')->default(false);
+    $table->boolean('is_external')->default(false);
+    $table->string('device_visibility')->default('desktop,tablet,mobile');
+    $table->string('badge_count_query')->nullable();
+    $table->text('active_route_patterns')->nullable();
+    $table->timestamps();
+    
+    $table->foreign('parent_id')->references('id')->on('sidebar_items')->onDelete('set null');
+    $table->index(['module', 'order']);
+    $table->index('permission');
+    $table->index('is_visible');
+});
+```
+
+### Phase 2: Sidebar Service Class
+Create `app/Services/SidebarService.php`:
+
+```php
+class SidebarService
+{
+    public function getMenuForUser($user)
+    {
+        $userPermissions = $user->getAllPermissions()->pluck('name')->toArray();
+        
+        return SidebarItem::with('children')
+            ->whereNull('parent_id')
+            ->where('is_visible', true)
+            ->orderBy('order')
+            ->get()
+            ->filter(function ($item) use ($userPermissions) {
+                if (empty($item->permission)) return true;
+                return in_array($item->permission, $userPermissions) || 
+                       $user->hasRole(['Super Admin', 'Hotel Owner']);
+            })
+            ->map(function ($item) use ($userPermissions) {
+                $item->children = $item->children
+                    ->where('is_visible', true)
+                    ->filter(function ($child) use ($userPermissions) {
+                        if (empty($child->permission)) return true;
+                        return in_array($child->permission, $userPermissions) || 
+                               $user->hasRole(['Super Admin', 'Hotel Owner']);
+                    })
+                    ->values();
+                return $item;
+            });
+    }
+    
+    public function getBadgeCount($item, $teamId)
+    {
+        if (empty($item->badge_count_query)) return null;
+        // Execute badge count query with team scope
+        return DB::table(explode('.', $item->badge_count_query)[0])
+            ->where('team_id', $teamId)
+            ->count();
+    }
+}
+```
+
+### Phase 3: Complete Sidebar Structure with CRUD Requirements
+
+Below is EVERY sidebar item with EXACT CRUD requirements for each screen:
+
+---
+
+## 1. DASHBOARD MODULE
+
+### 1.1 Main Dashboard
+- **Route**: `GET /dashboard`
+- **Route Name**: `dashboard.index`
+- **Permission**: `dashboard.view`
+- **CRUD Operations**: VIEW ONLY (no create/edit/delete)
+- **Screen Requirements**:
+  - KPI cards: occupancy %, available rooms, arrivals today, departures today, in-house guests, revenue today, MTD revenue
+  - Mini charts: occupancy trend (7 days), revenue trend (7 days)
+  - Quick links: check-in, check-out, new reservation, night audit
+  - Recent activity feed (last 20 actions)
+  - Alerts: pending check-ins, pending check-outs, unpaid balances, failed night audit
+- **Data Sources**: 
+  - units table (occupancy)
+  - reservations table (arrivals/departures/in-house)
+  - transactions table (revenue)
+  - activity_log table (recent activity)
+- **Filters**: Date range, hotel/team selector
+- **Export**: PDF, Excel
+- **Tests**: Dashboard renders, KPIs calculate correctly, filters work
+
+### 1.2 Occupancy Dashboard
+- **Route**: `GET /dashboard/occupancy`
+- **Route Name**: `dashboard.occupancy`
+- **Permission**: `dashboard.occupancy`
+- **CRUD Operations**: VIEW ONLY
+- **Screen Requirements**:
+  - Occupancy % gauge
+  - Available vs occupied vs out-of-order pie chart
+  - Occupancy by room type bar chart
+  - Occupancy trend line chart (30 days)
+  - Room status grid (visual floor plan if possible)
+- **Data Sources**: units, unit_categories, reservations
+- **Filters**: Date, room type, floor
+- **Export**: PDF, Excel
+
+### 1.3 Revenue Dashboard
+- **Route**: `GET /dashboard/revenue`
+- **Route Name**: `dashboard.revenue`
+- **Permission**: `dashboard.revenue`
+- **CRUD Operations**: VIEW ONLY
+- **Screen Requirements**:
+  - Today's revenue card
+  - MTD revenue card
+  - YTD revenue card
+  - Revenue by source pie chart
+  - Revenue trend line chart (30 days)
+  - ADR and RevPAR cards
+  - Top revenue rooms table
+- **Data Sources**: transactions, reservations, sources
+- **Filters**: Date range, source, room type
+- **Export**: PDF, Excel
+
+### 1.4 Front Desk Dashboard
+- **Route**: `GET /dashboard/front-desk`
+- **Route Name**: `dashboard.front-desk`
+- **Permission**: `dashboard.front-desk`
+- **CRUD Operations**: VIEW ONLY
+- **Screen Requirements**:
+  - Arrivals count card with link to arrivals list
+  - Departures count card with link to departures list
+  - In-house guests count card
+  - Pending check-ins list (table)
+  - Pending check-outs list (table)
+  - No-show candidates list
+  - Unpaid balances list
+- **Data Sources**: reservations, transactions, service_logs
+- **Filters**: Date, status
+- **Export**: PDF, Excel
+
+### 1.5 Housekeeping Dashboard
+- **Route**: `GET /dashboard/housekeeping`
+- **Route Name**: `dashboard.housekeeping`
+- **Permission**: `dashboard.housekeeping`
+- **CRUD Operations**: VIEW ONLY
+- **Screen Requirements**:
+  - Dirty rooms count card
+  - Clean rooms count card
+  - Inspection pending count card
+  - Maintenance rooms count card
+  - Overdue cleaning tasks list
+  - Room status board (visual grid)
+- **Data Sources**: units, unit_cleanings, unit_maintenances
+- **Filters**: Floor, room type, status
+- **Export**: PDF, Excel
+
+### 1.6 Finance Dashboard
+- **Route**: `GET /dashboard/finance`
+- **Route Name**: `dashboard.finance`
+- **Permission**: `dashboard.finance`
+- **CRUD Operations**: VIEW ONLY
+- **Screen Requirements**:
+  - Today's collections card (cash/card/bank breakdown)
+  - Open cashier shifts card
+  - Promissory outstanding card
+  - Invoices pending ZATCA card
+  - Credit notes issued today card
+  - Payment method breakdown pie chart
+- **Data Sources**: transactions, cashier_shifts, promissories, invoices
+- **Filters**: Date range, payment method
+- **Export**: PDF, Excel
+
+### 1.7 Night Audit Status
+- **Route**: `GET /dashboard/night-audit`
+- **Route Name**: `dashboard.night-audit`
+- **Permission**: `night-audit.view`
+- **CRUD Operations**: VIEW ONLY
+- **Screen Requirements**:
+  - Current business date card
+  - Last run time card
+  - Next scheduled run card
+  - Run status indicator (success/failed/pending)
+  - Failed steps details (if any)
+  - Quick actions: Run Now, View History
+- **Data Sources**: teams (business_date), night_audit_logs
+- **Filters**: None
+- **Export**: None
+
+### 1.8 Integration Health
+- **Route**: `GET /dashboard/integration-health`
+- **Route Name**: `dashboard.integration-health`
+- **Permission**: `integrations.view`
+- **CRUD Operations**: VIEW ONLY
+- **Screen Requirements**:
+  - Integration status cards (ZATCA, Qoyod, STA AH, Jawaly, IPTV, Let Link)
+  - Each card shows: status (connected/disconnected), last sync time, failed syncs count
+  - Recent integration errors list
+  - Quick action: Test Connection, Retry Failed
+- **Data Sources**: integrations, integration_logs
+- **Filters**: Integration type, date range
+- **Export**: None
+
+---
+
+## 2. RESERVATIONS MODULE
+
+### 2.1 All Reservations
+- **Route**: `GET /reservations`
+- **Route Name**: `reservations.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT
+- **Screen Requirements**:
+  - Search: reservation number, guest name, phone, email
+  - Filters: status (confirmed/checked-in/checked-out/cancelled/no-show), date in, date out, source, room type, company
+  - Sort: date created, date in, date out, guest name, total amount
+  - Pagination: 25/50/100 per page
+  - Columns: reservation #, guest name, room(s), date in, date out, nights, source, status, balance, actions
+  - Actions: View, Edit, Cancel, Check-in, Check-out, Print, Export
+  - Bulk actions: Export selected, Print selected
+- **Create Screen** (`GET /reservations/create`, `POST /reservations`):
+  - Guest selection (search existing or create new)
+  - Dates: check-in, check-out (date picker with availability check)
+  - Room selection (available rooms grid/list)
+  - Room type and rate selection
+  - Source/channel selection
+  - Company selection (for corporate)
+  - Special requests textarea
+  - Internal notes textarea
+  - Offers/special prices application
+  - Promo code field
+  - Estimated total calculation
+  - Save / Save and New / Cancel buttons
+- **View Screen** (`GET /reservations/{reservation}`):
+  - Summary card: reservation #, status, guest info, dates, room, source
+  - Tabs: Details, Guests, Rooms, Services, Invoices, Transactions, Promissories, Activity Log, Notes
+  - Actions: Edit, Cancel, Check-in, Check-out, Transfer Room, Extend Stay, Print Contract, Generate Invoice
+- **Edit Screen** (`GET /reservations/{reservation}/edit`, `PUT /reservations/{reservation}`):
+  - Same fields as create
+  - Validation: cannot edit if checked-in/checked-out without special permission
+  - Audit trail for changes
+- **Delete**: Soft delete with reason
+- **Export**: CSV, Excel, PDF
+- **Tests**: CRUD operations, permission checks, availability validation
+
+### 2.2 Create Reservation (Quick)
+- **Route**: `GET /reservations/quick-create`
+- **Route Name**: `reservations.quick-create`
+- **Permission**: `reservations.create`
+- **CRUD Operations**: CREATE only
+- **Screen Requirements**:
+  - Simplified form: guest name, phone, dates, room type, source
+  - Auto-assign first available room
+  - Quick save button
+- **Tests**: Quick reservation creates successfully
+
+### 2.3 Calendar / Availability Grid
+- **Route**: `GET /reservations/calendar`
+- **Route Name**: `reservations.calendar`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: VIEW, CREATE (click to book)
+- **Screen Requirements**:
+  - Full calendar view (month/week/day)
+  - Rooms on Y-axis, dates on X-axis
+  - Color-coded blocks: confirmed (blue), checked-in (green), checked-out (gray), cancelled (red)
+  - Click empty cell to create reservation
+  - Click existing block to view reservation
+  - Legend
+- **Filters**: Room type, floor, source
+- **Tests**: Calendar renders, clicking creates/opens reservation
+
+### 2.4 Arrivals
+- **Route**: `GET /reservations/arrivals`
+- **Route Name**: `reservations.arrivals`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Today's arrivals table
+  - Filters: date, source, room type, VIP
+  - Columns: time, reservation #, guest name, room, source, special requests, actions
+  - Actions: View, Check-in, Print Registration Card
+  - Quick check-in button
+- **Tests**: Arrivals list shows correct reservations
+
+### 2.5 Departures
+- **Route**: `GET /reservations/departures`
+- **Route Name**: `reservations.departures`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Today's departures table
+  - Filters: date, source, room type
+  - Columns: time, reservation #, guest name, room, balance, actions
+  - Actions: View, Check-out, Print Invoice
+  - Quick check-out button
+- **Tests**: Departures list shows correct reservations
+
+### 2.6 In-House Guests
+- **Route**: `GET /reservations/in-house`
+- **Route Name**: `reservations.in-house`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Current in-house guests table
+  - Filters: room type, floor, source
+  - Columns: room, guest name, check-in date, expected checkout, balance, actions
+  - Actions: View, Check-out, Add Service, Collect Payment
+- **Tests**: In-house list shows correct reservations
+
+### 2.7 Online Reservations
+- **Route**: `GET /reservations/online`
+- **Route Name**: `reservations.online`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW, EDIT, DELETE
+- **Screen Requirements**:
+  - Reservations from website/booking engine
+  - Filters: date, status
+  - Columns: reservation #, guest name, dates, room, status, actions
+  - Actions: View, Confirm, Reject, Edit, Delete
+- **Tests**: Online reservations list filters correctly
+
+### 2.8 OTA / Channel Reservations
+- **Route**: `GET /reservations/ota`
+- **Route Name**: `reservations.ota`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Reservations from OTA channels (Booking.com, Expedia, etc.)
+  - Filters: channel, date, status
+  - Columns: reservation #, channel, guest name, dates, room, status, actions
+  - Actions: View, Sync Status
+- **Tests**: OTA reservations list shows correct data
+
+### 2.9 Group Reservations
+- **Route**: `GET /reservations/groups`
+- **Route Name**: `reservations.groups`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - Group reservations with multiple rooms
+  - Filters: date, company, status
+  - Columns: group name, company, rooms count, dates, status, actions
+  - Actions: View, Edit, Cancel
+- **Create Screen**:
+  - Group name
+  - Company selection
+  - Dates
+  - Room block (select multiple rooms)
+  - Group rate
+  - Special instructions
+- **Tests**: Group reservation CRUD works
+
+### 2.10 Reservation Guests
+- **Route**: `GET /reservations/{reservation}/guests`
+- **Route Name**: `reservation-guests.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - Guests linked to a reservation
+  - Columns: name, ID type, ID number, is primary, actions
+  - Actions: Add Guest, Edit, Remove
+- **Tests**: Guest CRUD works
+
+### 2.11 Reserved Rooms
+- **Route**: `GET /reservations/{reservation}/rooms`
+- **Route Name**: `reservation-rooms.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, CREATE, DELETE
+- **Screen Requirements**:
+  - Rooms assigned to reservation
+  - Columns: room number, room type, guest, check-in, check-out, rate, actions
+  - Actions: Add Room, Remove Room
+- **Tests**: Room assignment works
+
+### 2.12 Reservation Transfers
+- **Route**: `GET /reservations/transfers`
+- **Route Name**: `reservation-transfers.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - History of room transfers
+  - Filters: date, reservation, room
+  - Columns: date, reservation #, guest, from room, to room, reason, actions
+  - Actions: View details
+- **Tests**: Transfer history displays correctly
+
+### 2.13 Reservation Extensions
+- **Route**: `GET /reservations/extensions`
+- **Route Name**: `reservation-extensions.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - History of stay extensions
+  - Filters: date, reservation
+  - Columns: date, reservation #, guest, original checkout, new checkout, reason, actions
+  - Actions: View details
+- **Tests**: Extension history displays correctly
+
+### 2.14 Digital Contracts
+- **Route**: `GET /reservations/contracts`
+- **Route Name**: `reservation-contracts.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW, CREATE
+- **Screen Requirements**:
+  - Contracts generated for reservations
+  - Filters: date, status (draft/signed/pending)
+  - Columns: reservation #, guest, contract #, status, generated at, signed at, actions
+  - Actions: View, Generate Contract, Download PDF
+- **Tests**: Contract generation works
+
+### 2.15 Digital Signatures
+- **Route**: `GET /reservations/signatures`
+- **Route Name**: `reservation-signatures.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Signature records
+  - Filters: date, type (contract/registration)
+  - Columns: reservation #, guest, type, signed at, IP address, actions
+  - Actions: View signature image
+- **Tests**: Signature records display
+
+### 2.16 Reservation Ratings
+- **Route**: `GET /reservations/ratings`
+- **Route Name**: `reservation-ratings.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Guest ratings/feedback
+  - Filters: date, rating score
+  - Columns: reservation #, guest, rating, feedback, date, actions
+  - Actions: View details
+- **Tests**: Ratings display correctly
+
+### 2.17 Cancellation / No-Show
+- **Route**: `GET /reservations/cancellations`
+- **Route Name**: `reservations.cancellations`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Cancelled and no-show reservations
+  - Filters: date, type (cancel/no-show), reason
+  - Columns: reservation #, guest, dates, type, reason, penalty charged, actions
+  - Actions: View details
+- **Tests**: Cancellation list displays
+
+### 2.18 Reservation Messages
+- **Route**: `GET /reservations/messages`
+- **Route Name**: `reservation-messages.index`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW, CREATE
+- **Screen Requirements**:
+  - Messages/communication with guests
+  - Filters: date, type (SMS/email/whatsapp), status
+  - Columns: reservation #, guest, type, subject, sent at, status, actions
+  - Actions: View, Send Message
+- **Tests**: Message history displays
+
+### 2.19 Reservation Audit Locks
+- **Route**: `GET /reservations/audit-locks`
+- **Route Name**: `reservations.audit-locks`
+- **Permission**: `reservations.view`
+- **CRUD Operations**: LIST, VIEW
+- **Screen Requirements**:
+  - Reservations locked by night audit
+  - Filters: date, lock reason
+  - Columns: reservation #, guest, locked at, locked by, reason, actions
+  - Actions: View details
+- **Tests**: Audit locks display
+
+---
+
+## 3. FRONT DESK MODULE
+
+### 3.1 Check-in
+- **Route**: `GET /front-desk/check-in`, `POST /front-desk/check-in/{reservation}`
+- **Route Name**: `front-desk.check-in`, `front-desk.check-in.store`
+- **Permission**: `reservations.checkin`
+- **CRUD Operations**: CREATE (check-in action)
+- **Screen Requirements**:
+  - Step 1: Select reservation (from arrivals list)
+  - Step 2: Verify guest ID (Shomoos fields)
+  - Step 3: Assign room (if not assigned)
+  - Step 4: Collect deposit/payment
+  - Step 5: Digital signature
+  - Step 6: Print registration card
+  - Step 7: Issue key/room number
+  - Progress indicator
+  - Back/Next buttons
+- **Tests**: Check-in workflow completes
+
+### 3.2 Check-out
+- **Route**: `GET /front-desk/check-out`, `POST /front-desk/check-out/{reservation}`
+- **Route Name**: `front-desk.check-out`, `front-desk.check-out.store`
+- **Permission**: `reservations.checkout`
+- **CRUD Operations**: CREATE (check-out action)
+- **Screen Requirements**:
+  - Step 1: Select reservation (from departures list)
+  - Step 2: Review folio (room charges, services, payments, balance)
+  - Step 3: Collect outstanding balance
+  - Step 4: Handle balance transfer (promissory/refund/waive)
+  - Step 5: Generate invoice
+  - Step 6: Print invoice
+  - Step 7: Collect key
+  - Progress indicator
+- **Tests**: Check-out workflow completes
+
+### 3.3 Walk-in Booking
+- **Route**: `GET /front-desk/walk-in`, `POST /front-desk/walk-in`
+- **Route Name**: `front-desk.walk-in`, `front-desk.walk-in.store`
+- **Permission**: `reservations.create`
+- **CRUD Operations**: CREATE
+- **Screen Requirements**:
+  - Quick guest registration form
+  - Available rooms display
+  - Rate selection
+  - Deposit collection
+  - Direct check-in option
+  - Save / Save and Check-in / Cancel buttons
+- **Tests**: Walk-in creates reservation
+
+### 3.4 Guest Registration
+- **Route**: `GET /front-desk/registration`, `POST /front-desk/registration`
+- **Route Name**: `front-desk.registration`, `front-desk.registration.store`
+- **Permission**: `reservations.update`
+- **CRUD Operations**: CREATE, UPDATE
+- **Screen Requirements**:
+  - Guest personal details form
+  - ID capture (national ID, passport, etc.)
+  - Shomoos verification fields
+  - Emergency contact
+  - Vehicle details (if applicable)
+  - Digital signature
+  - Photo capture option
+- **Tests**: Registration saves correctly
+
+### 3.5 Room Assignment
+- **Route**: `GET /front-desk/room-assignment`, `POST /front-desk/room-assignment`
+- **Route Name**: `front-desk.room-assignment`, `front-desk.room-assignment.store`
+- **Permission**: `reservations.update`
+- **CRUD Operations**: UPDATE
+- **Screen Requirements**:
+  - Unassigned reservations list
+  - Available rooms grid
+  - Drag-and-drop or click-to-assign
+  - Room preferences matching
+  - Assignment confirmation
+- **Tests**: Room assignment works
+
+### 3.6 Room Swap
+- **Route**: `POST /front-desk/room-swap`
+- **Route Name**: `front-desk.room-swap`
+- **Permission**: `reservations.transfer`
+- **CRUD Operations**: UPDATE
+- **Screen Requirements**:
+  - Current room display
+  - Available rooms for swap
+  - Reason for swap
+  - Rate difference calculation
+  - Confirmation modal
+- **Tests**: Room swap completes
+
+### 3.7 Early Check-in
+- **Route**: `GET /front-desk/early-check-in`, `POST /front-desk/early-check-in`
+- **Route Name**: `front-desk.early-check-in`, `front-desk.early-check-in.store`
+- **Permission**: `checkin.override_early_charge`
+- **CRUD Operations**: UPDATE
+- **Screen Requirements**:
+  - Early check-in charge calculation based on time
+  - Charge amount display
+  - Override option (with permission and mandatory reason)
+  - Accept charge / Override / Cancel buttons
+- **Tests**: Early check-in charge applies correctly
+
+### 3.8 Late Checkout
+- **Route**: `GET /front-desk/late-checkout`, `POST /front-desk/late-checkout`
+- **Route Name**: `front-desk.late-checkout`, `front-desk.late-checkout.store`
+- **Permission**: `checkout.override_late_charge`
+- **CRUD Operations**: UPDATE
+- **Screen Requirements**:
+  - Late checkout charge calculation based on time
+  - Charge amount display
+  - Override option (with permission and mandatory reason)
+  - Accept charge / Override / Cancel buttons
+- **Tests**: Late checkout charge applies correctly
+
+### 3.9 No-Show Handling
+- **Route**: `POST /front-desk/no-show/{reservation}`
+- **Route Name**: `front-desk.no-show`
+- **Permission**: `reservations.noshow`
+- **CRUD Operations**: UPDATE
+- **Screen Requirements**:
+  - No-show confirmation modal
+  - Charge calculation based on no-show rules
+  - Cancel reservation checkbox
+  - Reason field
+  - Confirm / Cancel buttons
+- **Tests**: No-show marks reservation correctly
+
+### 3.10 Wake-up Calls
+- **Route**: `GET /front-desk/wake-up-calls`, `POST /front-desk/wake-up-calls`
+- **Route Name**: `wake-up-calls.index`, `wake-up-calls.store`
+- **Permission**: `front-desk.wake-up-calls`
+- **CRUD Operations**: LIST, CREATE, UPDATE, DELETE
+- **Screen Requirements**:
+  - Wake-up calls table
+  - Filters: date, status (pending/completed/missed)
+  - Columns: time, room, guest, status, actions
+  - Actions: Add, Edit, Complete, Delete
+  - Create form: room, time, repeat (daily/once)
+- **Tests**: Wake-up call CRUD works
+
+### 3.11 IPTV Guest Needs
+- **Route**: `GET /front-desk/iptv-needs`, `POST /front-desk/iptv-needs`
+- **Route Name**: `iptv-needs.index`, `iptv-needs.store`
+- **Permission**: `front-desk.iptv`
+- **CRUD Operations**: LIST, CREATE, UPDATE, DELETE
+- **Screen Requirements**:
+  - Guest requests from IPTV system
+  - Filters: date, type, status
+  - Columns: time, room, guest, request type, status, actions
+  - Actions: View, Update Status, Delete
+- **Tests**: IPTV needs CRUD works
+
+### 3.12 Registration Cards
+- **Route**: `GET /front-desk/registration-cards`
+- **Route Name**: `front-desk.registration-cards`
+- **Permission**: `reservations.print`
+- **CRUD Operations**: VIEW, PRINT
+- **Screen Requirements**:
+  - List of registration cards
+  - Filters: date, guest
+  - Actions: View, Print, Download PDF
+  - Print template with hotel logo, guest details, terms
+- **Tests**: Registration card prints correctly
+
+### 3.13 Checkout Balance Transfer
+- **Route**: `POST /front-desk/balance-transfer`
+- **Route Name**: `front-desk.balance-transfer`
+- **Permission**: `finance.balance_transfer`
+- **CRUD Operations**: CREATE
+- **Screen Requirements**:
+  - Balance amount display
+  - Transfer options: Promissory, Refund, Waive, Credit Note
+  - Promissory option: company selection, signature status
+  - Refund option: payment method, amount
+  - Waive option: reason (requires permission)
+  - Credit note option: reason
+  - Confirmation modal
+- **Tests**: Balance transfer creates correct record
+
+---
+
+## 4. ROOMS & HOUSEKEEPING MODULE
+
+### 4.1 Rooms / Units
+- **Route**: `GET /units`, `POST /units`, `GET /units/create`, `GET /units/{unit}/edit`, `PUT /units/{unit}`, `DELETE /units/{unit}`
+- **Route Name**: `units.index`, `units.store`, `units.create`, `units.edit`, `units.update`, `units.destroy`
+- **Permission**: `units.view`, `units.create`, `units.update`, `units.delete`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT
+- **Screen Requirements**:
+  - **List**: Search (room number, floor), filters (status, category, floor), sort, pagination, columns: room #, category, floor, status, current guest, actions
+  - **Create**: Room number, category, floor, description, features, options, amenities, IPTV MAC, QR code, status
+  - **View**: Summary card, tabs (Details, Media, Features, Maintenance History, Status Log)
+  - **Edit**: Same as create with audit trail
+  - **Delete**: Soft delete with reason
+  - **Export**: CSV, Excel, PDF
+- **Tests**: Full CRUD works, permissions enforced
+
+### 4.2 Room Types / Unit Categories
+- **Route**: `GET /unit-categories`, `POST /unit-categories`, `GET /unit-categories/create`, `GET /unit-categories/{category}/edit`, `PUT /unit-categories/{category}`, `DELETE /unit-categories/{category}`
+- **Route Name**: `unit-categories.index`, `unit-categories.store`, `unit-categories.create`, `unit-categories.edit`, `unit-categories.update`, `unit-categories.destroy`
+- **Permission**: `unit-categories.view`, `unit-categories.create`, `unit-categories.update`, `unit-categories.delete`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT
+- **Screen Requirements**:
+  - **List**: Search, filters (status), columns: name, name_ar, base price, max guests, bed count, room count, status, actions
+  - **Create**: Name (en/ar), description, base price, weekday prices, hourly/monthly prices, max guests, max adults, max children, bed type, bed count, amenities, photos, status
+  - **View**: Summary, tabs (Details, Pricing, Rooms, Services, Media)
+  - **Edit**: Same as create
+  - **Export**: CSV, Excel
+- **Tests**: Full CRUD works
+
+### 4.3 Availability Board
+- **Route**: `GET /units/availability`
+- **Route Name**: `units.availability`
+- **Permission**: `units.view`
+- **CRUD Operations**: VIEW
+- **Screen Requirements**:
+  - Visual room availability grid
+  - Dates on X-axis, rooms on Y-axis
+  - Color coding: available (green), occupied (red), maintenance (gray), out-of-order (black)
+  - Click to create reservation
+  - Filters: date range, room type, floor
+- **Tests**: Availability board renders correctly
+
+### 4.4 Room Status Board
+- **Route**: `GET /units/status-board`
+- **Route Name**: `units.status-board`
+- **Permission**: `units.view`
+- **CRUD Operations**: VIEW, UPDATE (status change)
+- **Screen Requirements**:
+  - Visual room status grid
+  - Color coding: available (green), occupied (blue), dirty (yellow), cleaning (orange), maintenance (red), out-of-order (gray)
+  - Click to change status
+  - Real-time updates
+  - Filters: floor, room type
+- **Tests**: Status board renders, status changes work
+
+### 4.5 Housekeeping Board
+- **Route**: `GET /housekeeping/board`
+- **Route Name**: `housekeeping.board`
+- **Permission**: `housekeeping.view`
+- **CRUD Operations**: VIEW
+- **Screen Requirements**:
+  - Visual housekeeping task board
+  - Columns: Pending, In Progress, Inspection, Completed
+  - Task cards with room number, priority, assigned to, time
+  - Drag-and-drop to change status
+  - Filters: floor, room type, priority
+- **Tests**: Housekeeping board renders
+
+### 4.6 Unit Cleanings
+- **Route**: `GET /unit-cleanings`, `POST /unit-cleanings/{cleaning}/start`, `POST /unit-cleanings/{cleaning}/complete`
+- **Route Name**: `unit-cleanings.index`, `unit-cleanings.start`, `unit-cleanings.complete`
+- **Permission**: `housekeeping.view`, `housekeeping.update`
+- **CRUD Operations**: LIST, VIEW, UPDATE (start/complete)
+- **Screen Requirements**:
+  - **List**: Filters (status, assigned to, priority, date), columns: room, status, assigned to, priority, started at, completed at, actions
+  - **Actions**: Start Cleaning, Complete Cleaning, Add Notes, Upload Photo
+  - **Complete form**: Notes, before photo, after photo, inspection notes
+- **Tests**: Cleaning workflow completes
+
+### 4.7 Maintenance Requests
+- **Route**: `GET /unit-maintenances`, `POST /unit-maintenances`, `POST /unit-maintenances/{maintenance}/assign`, `POST /unit-maintenances/{maintenance}/complete`
+- **Route Name**: `unit-maintenances.index`, `unit-maintenances.store`, `unit-maintenances.assign`, `unit-maintenances.complete`
+- **Permission**: `maintenance.view`, `maintenance.create`, `maintenance.update`
+- **CRUD Operations**: LIST, VIEW, CREATE, UPDATE (assign/complete)
+- **Screen Requirements**:
+  - **List**: Filters (status, priority, type, date), columns: room, type, description, priority, status, assigned to, actions
+  - **Create**: Room, type (plumbing/electrical/furniture/etc.), description, priority, expected completion
+  - **Actions**: Assign, Start, Complete, Upload Photo
+  - **Complete form**: Completion notes, photo, parts used, cost
+- **Tests**: Maintenance workflow completes
+
+### 4.8 Room Status Log
+- **Route**: `GET /room-status-log`
+- **Route Name**: `room-status-log.index`
+- **Permission**: `units.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT (read-only)
+- **Screen Requirements**:
+  - Filters: room, date range, status, changed by
+  - Columns: room, from status, to status, changed by, reason, date time, reference
+  - Actions: View details, Export
+  - Timeline view per room
+- **Tests**: Status log displays correctly
+
+### 4.9 Unit Media
+- **Route**: `GET /units/{unit}/media`, `POST /units/{unit}/media`, `DELETE /units/{unit}/media/{media}`
+- **Route Name**: `unit-media.index`, `unit-media.store`, `unit-media.destroy`
+- **Permission**: `units.update`
+- **CRUD Operations**: LIST, CREATE, DELETE
+- **Screen Requirements**:
+  - Media gallery (photos/videos)
+  - Upload button (drag-and-drop)
+  - Delete confirmation
+  - Set as primary photo
+  - Caption/description
+- **Tests**: Media upload/delete works
+
+### 4.10 Unit Features
+- **Route**: `GET /unit-features`, `POST /unit-features`, `GET /unit-features/create`, `GET /unit-features/{feature}/edit`, `PUT /unit-features/{feature}`, `DELETE /unit-features/{feature}`
+- **Route Name**: `unit-features.index`, `unit-features.store`, `unit-features.create`, `unit-features.edit`, `unit-features.update`, `unit-features.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: name (en/ar), icon, type (general/special), status, actions
+  - Create: name, icon upload, type, status
+- **Tests**: Feature CRUD works
+
+### 4.11 Unit Options
+- **Route**: `GET /unit-options`, `POST /unit-options`, `GET /unit-options/create`, `GET /unit-options/{option}/edit`, `PUT /unit-options/{option}`, `DELETE /unit-options/{option}`
+- **Route Name**: `unit-options.index`, `unit-options.store`, `unit-options.create`, `unit-options.edit`, `unit-options.update`, `unit-options.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: name (en/ar), type, values, status, actions
+  - Create: name, type (select/checkbox/radio), values, status
+- **Tests**: Option CRUD works
+
+### 4.12 Unit Category Services
+- **Route**: `GET /unit-category-services`, `POST /unit-category-services`, `DELETE /unit-category-services/{mapping}`
+- **Route Name**: `unit-category-services.index`, `unit-category-services.store`, `unit-category-services.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, DELETE
+- **Screen Requirements**:
+  - Mapping table: category, service, is included, price override, status
+  - Create: category select, service select, is included, price override
+  - Bulk assign option
+- **Tests**: Category-service mapping works
+
+---
+
+## 5. GUESTS & COMPANIES MODULE
+
+### 5.1 Guest Directory
+- **Route**: `GET /guests`
+- **Route Name**: `guests.index`
+- **Permission**: `guests.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Filters: name, nationality, VIP, visit count
+  - Columns: name, nationality, phone, email, last visit, total visits, total revenue, actions
+  - Actions: View Profile, View Reservations, View Transactions
+  - Export: CSV, Excel, PDF
+- **Tests**: Guest directory displays
+
+### 5.2 Customer Profiles
+- **Route**: `GET /customers`, `POST /customers`, `GET /customers/create`, `GET /customers/{customer}/edit`, `PUT /customers/{customer}`, `DELETE /customers/{customer}`
+- **Route Name**: `customers.index`, `customers.store`, `customers.create`, `customers.edit`, `customers.update`, `customers.destroy`
+- **Permission**: `customers.view`, `customers.create`, `customers.update`, `customers.delete`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT, IMPORT
+- **Screen Requirements**:
+  - **List**: Search (name, phone, email, ID), filters (nationality, VIP, created date), columns: name, phone, email, nationality, ID type, VIP, total stays, actions
+  - **Create**: First/last name, phone, email, nationality, ID type, ID number, ID expiry, address, city, country, VIP flag, notes, photo
+  - **View**: Summary card, tabs (Details, Reservations, Transactions, Notes, Activity)
+  - **Edit**: Same as create with audit trail
+  - **Import**: Template download, upload, preview, import
+- **Tests**: Full CRUD works, import works
+
+### 5.3 Companies
+- **Route**: `GET /companies`, `POST /companies`, `GET /companies/create`, `GET /companies/{company}/edit`, `PUT /companies/{company}`, `DELETE /companies/{company}`
+- **Route Name**: `companies.index`, `companies.store`, `companies.create`, `companies.edit`, `companies.update`, `companies.destroy`
+- **Permission**: `companies.view`, `companies.create`, `companies.update`, `companies.delete`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT
+- **Screen Requirements**:
+  - **List**: Search (name, tax number), filters (group, status), columns: name, tax number, group, credit limit, terms, balance, actions
+  - **Create**: Name (en/ar), tax number, email, phone, address, city, country, group, credit limit, payment terms, contact persons, notes
+  - **View**: Summary, tabs (Details, Contact Persons, Reservations, AR Balance, Invoices, Promissories, Activity)
+  - **Edit**: Same as create
+- **Tests**: Full CRUD works
+
+### 5.4 Company Groups
+- **Route**: `GET /company-groups`, `POST /company-groups`, `GET /company-groups/create`, `GET /company-groups/{group}/edit`, `PUT /company-groups/{group}`, `DELETE /company-groups/{group}`
+- **Route Name**: `company-groups.index`, `company-groups.store`, `company-groups.create`, `company-groups.edit`, `company-groups.update`, `company-groups.destroy`
+- **Permission**: `ar.company_groups.view`, `ar.company_groups.create`, `ar.company_groups.update`, `ar.company_groups.delete`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT
+- **Screen Requirements**:
+  - **List**: Search, columns: name (en/ar), tax number, companies count, total exposure, total credit limit, actions
+  - **Create**: Name (en/ar), tax number, email, phone, address, credit limit, payment terms
+  - **View**: Summary, tabs (Details, Companies, Exposure Dashboard)
+  - **Exposure Dashboard**: Total exposure, by hotel, aging breakdown, credit utilization
+- **Tests**: Full CRUD works, exposure calculates
+
+### 5.5 Company Notes
+- **Route**: `GET /companies/{company}/notes`, `POST /companies/{company}/notes`, `DELETE /companies/{company}/notes/{note}`
+- **Route Name**: `company-notes.index`, `company-notes.store`, `company-notes.destroy`
+- **Permission**: `companies.update`
+- **CRUD Operations**: LIST, CREATE, DELETE
+- **Screen Requirements**:
+  - Notes list with date, content, added by
+  - Add note form
+  - Delete confirmation
+- **Tests**: Notes CRUD works
+
+### 5.6 Blocked Guests
+- **Route**: `GET /blocked-guests`, `POST /blocked-guests`, `DELETE /blocked-guests/{blocked}`
+- **Route Name**: `blocked-guests.index`, `blocked-guests.store`, `blocked-guests.destroy`
+- **Permission**: `guests.block`
+- **CRUD Operations**: LIST, CREATE, DELETE
+- **Screen Requirements**:
+  - List: guest name, ID, reason, blocked at, blocked by, actions
+  - Create: guest selection, reason, block type (permanent/temporary), end date (if temporary)
+  - Unblock button
+- **Tests**: Block/unblock works
+
+### 5.7 Turnaway Logs
+- **Route**: `GET /turnaway-logs`, `POST /turnaway-logs`
+- **Route Name**: `turnaway-logs.index`, `turnaway-logs.store`
+- **Permission**: `guests.view`, `guests.create`
+- **CRUD Operations**: LIST, CREATE, EXPORT
+- **Screen Requirements**:
+  - List: date, guest name, reason, room type requested, notes, actions
+  - Create: date, guest name, phone, reason, room type, notes
+  - Export: CSV, Excel
+- **Tests**: Turnaway log creates
+
+### 5.8 Turnaway Reasons
+- **Route**: `GET /turnaway-reasons`, `POST /turnaway-reasons`, `GET /turnaway-reasons/create`, `GET /turnaway-reasons/{reason}/edit`, `PUT /turnaway-reasons/{reason}`, `DELETE /turnaway-reasons/{reason}`
+- **Route Name**: `turnaway-reasons.index`, `turnaway-reasons.store`, `turnaway-reasons.create`, `turnaway-reasons.edit`, `turnaway-reasons.update`, `turnaway-reasons.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: name (en/ar), status, usage count, actions
+  - Create: name (en/ar), status
+- **Tests**: Reason CRUD works
+
+### 5.9 Guest Notes
+- **Route**: `GET /customers/{customer}/notes`, `POST /customers/{customer}/notes`, `DELETE /customers/{customer}/notes/{note}`
+- **Route Name**: `customer-notes.index`, `customer-notes.store`, `customer-notes.destroy`
+- **Permission**: `customers.update`
+- **CRUD Operations**: LIST, CREATE, DELETE
+- **Screen Requirements**:
+  - Notes list with date, content, added by, type (general/preference/complaint)
+  - Add note form with type selection
+  - Delete confirmation
+- **Tests**: Notes CRUD works
+
+### 5.10 Comments
+- **Route**: `GET /comments`, `POST /comments`, `DELETE /comments/{comment}`
+- **Route Name**: `comments.index`, `comments.store`, `comments.destroy`
+- **Permission**: `comments.view`, `comments.create`, `comments.delete`
+- **CRUD Operations**: LIST, CREATE, DELETE
+- **Screen Requirements**:
+  - Polymorphic comments list
+  - Filters: commentable type, date
+  - Create: commentable selection, content
+- **Tests**: Comments work
+
+### 5.11 Highlights
+- **Route**: `GET /highlights`, `POST /highlights`, `GET /highlights/create`, `GET /highlights/{highlight}/edit`, `PUT /highlights/{highlight}`, `DELETE /highlights/{highlight}`
+- **Route Name**: `highlights.index`, `highlights.store`, `highlights.create`, `highlights.edit`, `highlights.update`, `highlights.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: name, color, usage count, actions
+  - Create: name, color picker
+  - Assign to customer/reservation
+- **Tests**: Highlights CRUD works
+
+### 5.12 Duplicate Merge
+- **Route**: `POST /customers/merge`
+- **Route Name**: `customers.merge`
+- **Permission**: `customers.merge`
+- **CRUD Operations**: UPDATE (merge action)
+- **Screen Requirements**:
+  - Select primary customer
+  - Select duplicate customer(s)
+  - Field selection (which values to keep)
+  - Preview merge result
+  - Confirmation modal
+  - Merge log
+- **Tests**: Merge combines records correctly
+
+---
+
+## 6. POS & SERVICES MODULE
+
+### 6.1 POS Dashboard
+- **Route**: `GET /pos/dashboard`
+- **Route Name**: `pos.dashboard`
+- **Permission**: `pos.view`
+- **CRUD Operations**: VIEW
+- **Screen Requirements**:
+  - Today's sales card
+  - Top services card
+  - Sales by category pie chart
+  - Recent sales list
+  - Quick action: New Sale
+- **Tests**: POS dashboard renders
+
+### 6.2 Service Categories
+- **Route**: `GET /service-categories`, `POST /service-categories`, `GET /service-categories/create`, `GET /service-categories/{category}/edit`, `PUT /service-categories/{category}`, `DELETE /service-categories/{category}`
+- **Route Name**: `service-categories.index`, `service-categories.store`, `service-categories.create`, `service-categories.edit`, `service-categories.update`, `service-categories.destroy`
+- **Permission**: `service-categories.view`, `service-categories.create`, `service-categories.update`, `service-categories.delete`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT
+- **Screen Requirements**:
+  - **List**: Search, columns: name (en/ar), type, VAT %, service count, status, order, actions
+  - **Create**: Name (en/ar), type (room/pos/laundry/etc.), VAT %, parent category, order, status, icon
+  - **View**: Summary, tabs (Details, Services, Qoyod Mapping)
+  - **Edit**: Same as create
+- **Tests**: Full CRUD works
+
+### 6.3 Services
+- **Route**: `GET /services`, `POST /services`, `GET /services/create`, `GET /services/{service}/edit`, `PUT /services/{service}`, `DELETE /services/{service}`
+- **Route Name**: `services.index`, `services.store`, `services.create`, `services.edit`, `services.update`, `services.destroy`
+- **Permission**: `services.view`, `services.create`, `services.update`, `services.delete`
+- **CRUD Operations**: LIST, VIEW, CREATE, EDIT, DELETE, RESTORE, EXPORT
+- **Screen Requirements**:
+  - **List**: Search, filters (category, status), columns: name (en/ar), category, price, VAT %, status, actions
+  - **Create**: Name (en/ar), category, description, price, VAT %, unit (per room/per person/per item), status, image
+  - **View**: Summary, tabs (Details, Pricing, Qoyod Mapping)
+  - **Edit**: Same as create
+- **Tests**: Full CRUD works
+
+### 6.4 POS Sale
+- **Route**: `GET /pos/sale`, `POST /pos/sale`
+- **Route Name**: `pos.sale`, `pos.sale.store`
+- **Permission**: `pos.create`
+- **CRUD Operations**: CREATE
+- **Screen Requirements**:
+  - Step 1: Select reservation (optional) or direct sale
+  - Step 2: Add services (search, quantity, price)
+  - Step 3: Review order (subtotal, VAT, total)
+  - Step 4: Select payment method(s)
+  - Step 5: Collect payment
+  - Step 6: Print receipt / Generate invoice
+  - Progress indicator
+- **Tests**: POS sale completes
+
+### 6.5 Service Logs
+- **Route**: `GET /service-logs`, `GET /service-logs/{log}`
+- **Route Name**: `service-logs.index`, `service-logs.show`
+- **Permission**: `service-logs.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - **List**: Filters (date, category, service, reservation, payment status), columns: log #, date, service, reservation, quantity, amount, VAT, total, payment status, actions
+  - **View**: Summary, tabs (Details, Payments, Notes, Invoice)
+  - Export: CSV, Excel, PDF
+- **Tests**: Service logs display
+
+### 6.6 Service Log Notes
+- **Route**: `POST /service-logs/{log}/notes`
+- **Route Name**: `service-log-notes.store`
+- **Permission**: `service-logs.update`
+- **CRUD Operations**: CREATE
+- **Screen Requirements**:
+  - Add note form within service log view
+  - Notes list with date, content, added by
+- **Tests**: Note adds to service log
+
+### 6.7 Quick Payments
+- **Route**: `GET /quick-payments`, `POST /quick-payments`
+- **Route Name**: `quick-payments.index`, `quick-payments.store`
+- **Permission**: `pos.create`
+- **CRUD Operations**: LIST, CREATE, EXPORT
+- **Screen Requirements**:
+  - **List**: Filters (date, payment method, cashier), columns: date, amount, payment method, cashier, reference, actions
+  - **Create**: Amount, payment method, reference, notes
+  - Export: CSV, Excel
+- **Tests**: Quick payment creates
+
+### 6.8 POS Transactions
+- **Route**: `GET /pos-transactions`, `POST /pos-transactions/{transaction}/void`, `POST /pos-transactions/{transaction}/refund`
+- **Route Name**: `pos-transactions.index`, `pos-transactions.void`, `pos-transactions.refund`
+- **Permission**: `transactions.view`, `transactions.reverse`
+- **CRUD Operations**: LIST, VIEW, UPDATE (void/refund)
+- **Screen Requirements**:
+  - **List**: Filters (date, type, payment method, status), columns: transaction #, date, type, amount, payment method, status, actions
+  - **Actions**: View, Void, Refund
+  - **Void**: Confirmation modal, reason, creates reversal transaction
+  - **Refund**: Amount, reason, payment method, creates refund transaction
+- **Tests**: Void/refund creates correct transactions
+
+### 6.9 Reservation Services
+- **Route**: `GET /reservations/{reservation}/services`, `POST /reservations/{reservation}/services`
+- **Route Name**: `reservation-services.index`, `reservation-services.store`
+- **Permission**: `service-logs.create`
+- **CRUD Operations**: LIST, CREATE
+- **Screen Requirements**:
+  - Services added to reservation folio
+  - Columns: date, service, quantity, amount, status, actions
+  - Add service form
+- **Tests**: Service adds to reservation
+
+### 6.10 Qoyod Service Mapping
+- **Route**: `GET /service-qoyods`, `POST /service-qoyods`, `GET /service-qoyods/create`, `GET /service-qoyods/{mapping}/edit`, `PUT /service-qoyods/{mapping}`, `DELETE /service-qoyods/{mapping}`
+- **Route Name**: `service-qoyods.index`, `service-qoyods.store`, `service-qoyods.create`, `service-qoyods.edit`, `service-qoyods.update`, `service-qoyods.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - Mapping table: service, Qoyod account, Qoyod product
+  - Create: service select, Qoyod account, Qoyod product
+  - Test sync button
+- **Tests**: Mapping saves correctly
+
+---
+
+## 7. FINANCE & ACCOUNTING MODULE
+
+### 7.1 Transactions Ledger
+- **Route**: `GET /transactions`
+- **Route Name**: `transactions.index`
+- **Permission**: `transactions.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Filters: date range, type (payment/charge/adjustment), payment method, cashier, status
+  - Columns: transaction #, date, type, description, debit, credit, balance, payment method, cashier, status, actions
+  - Actions: View, Print Receipt
+  - Export: CSV, Excel, PDF
+  - Running balance column
+- **Tests**: Transactions list with correct balances
+
+### 7.2 Receipts
+- **Route**: `GET /receipts`
+- **Route Name**: `receipts.index`
+- **Permission**: `transactions.view`
+- **CRUD Operations**: LIST, VIEW, PRINT
+- **Screen Requirements**:
+  - Payment receipts only
+  - Filters: date, payment method, cashier
+  - Columns: receipt #, date, amount, payment method, cashier, actions
+  - Actions: View, Print Receipt
+- **Tests**: Receipts display correctly
+
+### 7.3 Payments
+- **Route**: `GET /payments`, `POST /payments`
+- **Route Name**: `payments.index`, `payments.store`
+- **Permission**: `transactions.create`
+- **CRUD Operations**: LIST, CREATE
+- **Screen Requirements**:
+  - **List**: Filters (date, payment method, cashier, reservation), columns: payment #, date, amount, method, cashier, reservation, actions
+  - **Create**: Reservation/guest, amount, payment method, bank/sender, reference, notes
+- **Tests**: Payment creates transaction
+
+### 7.4 Invoices
+- **Route**: `GET /invoices`, `GET /invoices/{invoice}`, `POST /invoices/{invoice}/send-zatca`
+- **Route Name**: `invoices.index`, `invoices.show`, `invoices.send-zatca`
+- **Permission**: `invoices.view`, `invoices.update`
+- **CRUD Operations**: LIST, VIEW, EXPORT, UPDATE (ZATCA)
+- **Screen Requirements**:
+  - **List**: Filters (date, type, status, ZATCA status), columns: invoice #, date, type, amount, VAT, total, status, ZATCA status, actions
+  - **View**: Summary, tabs (Details, Line Items, Payments, Credit Notes, ZATCA), Print button
+  - **Send to ZATCA**: Button, status update, error display
+  - Export: CSV, Excel, PDF
+- **Tests**: Invoice displays, ZATCA status updates
+
+### 7.5 Reservation Invoices
+- **Route**: `GET /reservations/{reservation}/invoices`, `POST /reservations/{reservation}/invoices`
+- **Route Name**: `reservation-invoices.index`, `reservation-invoices.store`
+- **Permission**: `invoices.create`
+- **CRUD Operations**: LIST, CREATE
+- **Screen Requirements**:
+  - Invoices for specific reservation
+  - Columns: invoice #, date, type, amount, status, actions
+  - Generate invoice button
+- **Tests**: Invoice generates for reservation
+
+### 7.6 Credit Notes
+- **Route**: `GET /credit-notes`, `POST /credit-notes`
+- **Route Name**: `credit-notes.index`, `credit-notes.store`
+- **Permission**: `invoices.create`
+- **CRUD Operations**: LIST, VIEW, CREATE
+- **Screen Requirements**:
+  - **List**: Filters (date, reason, status), columns: credit note #, date, original invoice, amount, reason, status, actions
+  - **Create**: Original invoice, reason, items to credit, amount
+  - **View**: Summary, line items, reference to original invoice
+- **Tests**: Credit note creates with invoice reference
+
+### 7.7 Invoice Transfers
+- **Route**: `GET /invoice-transfers`, `POST /invoice-transfers`
+- **Route Name**: `invoice-transfers.index`, `invoice-transfers.store`
+- **Permission**: `ar.invoice_transfer`
+- **CRUD Operations**: LIST, VIEW, CREATE
+- **Screen Requirements**:
+  - **List**: Filters (date, company, status), columns: transfer #, date, invoice, guest, company, amount, status, actions
+  - **Create**: Invoice selection, company, transfer amount, notes
+  - **View**: Transfer details, linked invoice, company
+- **Tests**: Invoice transfer creates correctly
+
+### 7.8 ZATCA Reporting
+- **Route**: `GET /zatca/e-invoices`
+- **Route Name**: `zatca.e-invoices`
+- **Permission**: `invoices.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - E-invoices with ZATCA status
+  - Filters: date, status (pending/reported/rejected), type
+  - Columns: invoice #, date, type, amount, ZATCA status, UUID, QR code, actions
+  - Actions: View, Retry, Download XML
+  - Export: CSV, Excel
+- **Tests**: ZATCA status displays
+
+### 7.9 Promissory Notes
+- **Route**: `GET /promissories`, `GET /promissories/{promissory}`, `POST /promissories/{promissory}/collect`
+- **Route Name**: `promissories.index`, `promissories.show`, `promissories.collect`
+- **Permission**: `promissories.view`, `promissories.update`
+- **CRUD Operations**: LIST, VIEW, EXPORT, UPDATE (collect)
+- **Screen Requirements**:
+  - **List**: Filters (date, company, status, signature status), columns: promissory #, date, guest, company, amount, collected, balance, status, signature, actions
+  - **View**: Summary, tabs (Details, Payment Log, Linked Invoice, Activity)
+  - **Collect**: Amount, payment method, bank/sender, reference
+  - Export: CSV, Excel
+- **Tests**: Promissory displays, collection updates balance
+
+### 7.10 Promissory Collections
+- **Route**: `GET /promissory-collections`
+- **Route Name**: `promissory-collections.index`
+- **Permission**: `promissories.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Payment log for all promissories
+  - Filters: date, promissory, payment method, status
+  - Columns: log #, date, promissory #, amount, method, reference, status, actions
+  - Export: CSV, Excel
+- **Tests**: Collection log displays
+
+### 7.11 Cashier Shifts
+- **Route**: `GET /cashier-shifts`, `POST /cashier-shifts/open`, `POST /cashier-shifts/{shift}/close`, `POST /cashier-shifts/{shift}/approve`
+- **Route Name**: `cashier-shifts.index`, `cashier-shifts.open`, `cashier-shifts.close`, `cashier-shifts.approve`
+- **Permission**: `cashier.view`, `cashier.open_shift`, `cashier.close_shift`, `cashier.approve_shift`
+- **CRUD Operations**: LIST, VIEW, CREATE (open), UPDATE (close/approve), EXPORT
+- **Screen Requirements**:
+  - **List**: Filters (date, cashier, status), columns: shift #, cashier, open time, close time, opening balance, closing balance, variance, status, actions
+  - **Open**: Opening balance, notes
+  - **Close**: Count cash, card total, bank total, system total, variance, notes
+  - **Approve**: View details, approve/reject, reason for rejection
+  - Export: CSV, Excel
+- **Tests**: Shift workflow completes
+
+### 7.12 Checkout Balance Transfers
+- **Route**: `GET /checkout-balance-transfers`
+- **Route Name**: `checkout-balance-transfers.index`
+- **Permission**: `finance.balance_transfer`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Balance transfer history
+  - Filters: date, type (promissory/refund/waive/credit), reservation
+  - Columns: transfer #, date, reservation, guest, type, amount, reference, actions
+  - Export: CSV, Excel
+- **Tests**: Transfer history displays
+
+### 7.13 Banks
+- **Route**: `GET /banks`, `POST /banks`, `GET /banks/create`, `GET /banks/{bank}/edit`, `PUT /banks/{bank}`, `DELETE /banks/{bank}`
+- **Route Name**: `banks.index`, `banks.store`, `banks.create`, `banks.edit`, `banks.update`, `banks.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: name, account number, branch, status, actions
+  - Create: name, account number, IBAN, branch, swift code, status
+- **Tests**: Bank CRUD works
+
+### 7.14 Senders / Payment Receivers
+- **Route**: `GET /senders`, `POST /senders`, `GET /senders/create`, `GET /senders/{sender}/edit`, `PUT /senders/{sender}`, `DELETE /senders/{sender}`
+- **Route Name**: `senders.index`, `senders.store`, `senders.create`, `senders.edit`, `senders.update`, `senders.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: name, type, bank, account, status, actions
+  - Create: name, type (company/person), bank, account number, ID, phone, status
+- **Tests**: Sender CRUD works
+
+### 7.15 Commission Payments
+- **Route**: `GET /commission-payments`, `POST /commission-payments`, `POST /commission-payments/{commission}/approve`, `POST /commission-payments/{commission}/pay`
+- **Route Name**: `commission-payments.index`, `commission-payments.store`, `commission-payments.approve`, `commission-payments.pay`
+- **Permission**: `commission.manage`
+- **CRUD Operations**: LIST, VIEW, CREATE, UPDATE (approve/pay), EXPORT
+- **Screen Requirements**:
+  - **List**: Filters (date, source/travel agent, status), columns: commission #, source, period, revenue base, rate, amount, status, actions
+  - **Create**: Source, period, calculate commission
+  - **Approve**: View details, approve/reject
+  - **Pay**: Amount, payment method, reference
+  - Export: CSV, Excel
+- **Tests**: Commission workflow completes
+
+### 7.16 Corrections / Reversals
+- **Route**: `GET /corrections`, `POST /corrections`
+- **Route Name**: `corrections.index`, `corrections.store`
+- **Permission**: `finance.payment_correction`, `revenue.adjustment`
+- **CRUD Operations**: LIST, VIEW, CREATE
+- **Screen Requirements**:
+  - **List**: Filters (date, type, status), columns: correction #, date, original transaction, type, amount, reason, status, actions
+  - **Create**: Original transaction, correction type (payment method/amount/revenue), new values, reason
+  - **View**: Correction details, linked transactions
+- **Tests**: Correction creates linked transactions
+
+### 7.17 Qoyod Sync
+- **Route**: `POST /qoyod/sync/{type}/{id}`
+- **Route Name**: `qoyod.sync`
+- **Permission**: `integrations.sync`
+- **CRUD Operations**: UPDATE (sync action)
+- **Screen Requirements**:
+  - Sync button on invoices/transactions
+  - Sync status indicator
+  - Error display
+  - Retry option
+- **Tests**: Sync updates status
+
+### 7.18 Trial Balance
+- **Route**: `GET /reports/trial-balance`
+- **Route Name**: `reports.trial-balance`
+- **Permission**: `reports.trial_balance`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date selection
+  - Sections: Guest Ledger, Deposit Ledger, City Ledger, Totals
+  - Columns: account, debit, credit, balance
+  - Reconciliation check (should be zero)
+  - Export: CSV, Excel, PDF
+- **Tests**: Trial balance calculates correctly
+
+### 7.19 Paid-outs
+- **Route**: `GET /paid-outs`, `POST /paid-outs`
+- **Route Name**: `paid-outs.index`, `paid-outs.store`
+- **Permission**: `transactions.create`
+- **CRUD Operations**: LIST, VIEW, CREATE, EXPORT
+- **Screen Requirements**:
+  - **List**: Filters (date, type, cashier), columns: paid-out #, date, type, amount, payee, cashier, actions
+  - **Create**: Type, amount, payee, reason, payment method
+  - Export: CSV, Excel
+- **Tests**: Paid-out creates transaction
+
+---
+
+## 8. NIGHT AUDIT MODULE
+
+### 8.1 Night Audit Dashboard
+- **Route**: `GET /night-audit`
+- **Route Name**: `night-audit.index`
+- **Permission**: `night-audit.view`
+- **CRUD Operations**: VIEW
+- **Screen Requirements**:
+  - Current business date card
+  - Last run status card
+  - Next scheduled run card
+  - Quick stats: transactions frozen, no-shows charged, occupancy snapshot
+  - Actions: Run Now, View History, View Snapshots
+- **Tests**: Dashboard renders
+
+### 8.2 Run Night Audit
+- **Route**: `POST /night-audit/run`
+- **Route Name**: `night-audit.run`
+- **Permission**: `night-audit.run`
+- **CRUD Operations**: CREATE (run action)
+- **Screen Requirements**:
+  - Pre-flight checks display
+  - Run confirmation modal
+  - Progress indicator with steps
+  - Real-time status updates
+  - Success/failure notification
+- **Tests**: Night audit runs successfully
+
+### 8.3 Audit History
+- **Route**: `GET /night-audit/history`
+- **Route Name**: `night-audit.history`
+- **Permission**: `night-audit.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Filters: date, status, run by
+  - Columns: run #, business date, start time, end time, duration, status, steps completed, actions
+  - View: Detailed step log, errors, warnings
+  - Actions: View, Rerun, Export
+  - Export: CSV, Excel
+- **Tests**: History displays
+
+### 8.4 Occupancy Snapshots
+- **Route**: `GET /night-audit/snapshots`
+- **Route Name**: `night-audit.snapshots`
+- **Permission**: `night-audit.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Filters: date range, run type (final/non-final)
+  - Columns: date, run #, total rooms, occupied, available, out-of-order, occupancy %, is final, actions
+  - View: Detailed snapshot by room type
+  - Export: CSV, Excel
+- **Tests**: Snapshots display
+
+### 8.5 No-Show Processing
+- **Route**: `GET /night-audit/no-shows`, `POST /night-audit/no-shows/process`
+- **Route Name**: `night-audit.no-shows`, `night-audit.no-shows.process`
+- **Permission**: `night-audit.view`, `night-audit.run`
+- **CRUD Operations**: LIST, VIEW, UPDATE (process)
+- **Screen Requirements**:
+  - List: reservation #, guest, room, arrival date, charge amount, status, actions
+  - Process: Confirm charges, cancel reservations
+  - Preview affected reservations before processing
+- **Tests**: No-show processing works
+
+### 8.6 No-Show Rules
+- **Route**: `GET /no-show-rules`, `POST /no-show-rules`, `GET /no-show-rules/create`, `GET /no-show-rules/{rule}/edit`, `PUT /no-show-rules/{rule}`, `DELETE /no-show-rules/{rule}`
+- **Route Name**: `no-show-rules.index`, `no-show-rules.store`, `no-show-rules.create`, `no-show-rules.edit`, `no-show-rules.update`, `no-show-rules.destroy`
+- **Permission**: `settings.view`, `settings.update`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: name, charge type, amount, applies to, date range, status, actions
+  - Create: name, charge type (fixed/percentage), amount, applies to (all/daily/monthly), date range, status
+  - Timeline view of rules
+  - Prevent overlapping date ranges
+- **Tests**: Rule CRUD works, overlap validation works
+
+### 8.7 Frozen Transactions
+- **Route**: `GET /night-audit/frozen-transactions`
+- **Route Name**: `night-audit.frozen-transactions`
+- **Permission**: `night-audit.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Read-only list of frozen transactions
+  - Filters: date, type, payment method
+  - Columns: transaction #, date, type, amount, frozen at, actions
+  - Actions: View, Export
+  - Warning: Cannot edit/delete frozen records
+- **Tests**: Frozen transactions display
+
+### 8.8 Business Date Transactions
+- **Route**: `GET /night-audit/business-date-transactions`
+- **Route Name**: `night-audit.business-date-transactions`
+- **Permission**: `night-audit.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Transactions created by night audit (no-show charges, etc.)
+  - Filters: date, type
+  - Columns: transaction #, date, type, description, amount, business date, actions
+  - Export: CSV, Excel
+- **Tests**: Business date transactions display
+
+### 8.9 Snapshot Queue
+- **Route**: `GET /night-audit/snapshot-queue`, `POST /night-audit/snapshot-queue/{item}/retry`
+- **Route Name**: `night-audit.snapshot-queue`, `night-audit.snapshot-queue.retry`
+- **Permission**: `night-audit.view`, `night-audit.run`
+- **CRUD Operations**: LIST, VIEW, UPDATE (retry)
+- **Screen Requirements**:
+  - Queue items for data warehouse sync
+  - Filters: date, status (pending/inprogress/done/failed)
+  - Columns: queue #, business date, type, status, attempts, error, actions
+  - Actions: View, Retry
+- **Tests**: Queue displays, retry works
+
+### 8.10 Re-run / Recovery
+- **Route**: `POST /night-audit/rerun/{run}`
+- **Route Name**: `night-audit.rerun`
+- **Permission**: `night-audit.rerun`, `night-audit.rerun_historical`
+- **CRUD Operations**: UPDATE (rerun action)
+- **Screen Requirements**:
+  - Select night audit run to rerun
+  - Warning based on how far back
+  - Reason field for historical reruns
+  - Confirmation modal
+  - Progress indicator
+- **Tests**: Rerun creates new snapshot
+
+---
+
+## 9. REPORTS & ANALYTICS MODULE
+
+### 9.1 Daily Reports
+- **Route**: `GET /reports/daily`
+- **Route Name**: `reports.daily`
+- **Permission**: `reports.daily`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date selection
+  - Sections: Occupancy, Revenue, Arrivals/Departures, Payments, Night Audit
+  - KPIs and details
+  - Export: PDF, Excel
+- **Tests**: Daily report generates
+
+### 9.2 Occupancy Report
+- **Route**: `GET /reports/occupancy`
+- **Route Name**: `reports.occupancy`
+- **Permission**: `reports.occupancy`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range selection
+  - Chart: Occupancy trend
+  - Table: Daily occupancy by room type
+  - Export: PDF, Excel
+- **Tests**: Occupancy report calculates
+
+### 9.3 Revenue Report
+- **Route**: `GET /reports/revenue`
+- **Route Name**: `reports.revenue`
+- **Permission**: `reports.revenue`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range, source, room type filters
+  - Chart: Revenue trend
+  - Table: Daily revenue breakdown
+  - Export: PDF, Excel
+- **Tests**: Revenue report calculates
+
+### 9.4 ADR / RevPAR
+- **Route**: `GET /reports/adr-revpar`
+- **Route Name**: `reports.adr-revpar`
+- **Permission**: `reports.revenue`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range selection
+  - Chart: ADR and RevPAR trend
+  - Table: Daily ADR, RevPAR, occupancy
+  - Export: PDF, Excel
+- **Tests**: ADR/RevPAR calculate correctly
+
+### 9.5 Forecast & History
+- **Route**: `GET /reports/forecast-history`
+- **Route Name**: `reports.forecast-history`
+- **Permission**: `reports.occupancy`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Uses stored procedure `get_aggregate_history_forecast` if exists
+  - Date range selection
+  - Chart: Actual vs forecast
+  - Table: Daily actual and forecast
+  - Export: PDF, Excel
+- **Tests**: Forecast displays
+
+### 9.6 No-Show Report
+- **Route**: `GET /reports/no-show`
+- **Route Name**: `reports.no-show`
+- **Permission**: `reports.no-show`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range, source filters
+  - Chart: No-show trend
+  - Table: No-show details with charges
+  - Export: PDF, Excel
+- **Tests**: No-show report generates
+
+### 9.7 Cancellation Report
+- **Route**: `GET /reports/cancellation`
+- **Route Name**: `reports.cancellation`
+- **Permission**: `reports.cancellation`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range, reason filters
+  - Chart: Cancellation trend
+  - Table: Cancellation details with penalties
+  - Export: PDF, Excel
+- **Tests**: Cancellation report generates
+
+### 9.8 Commission Report
+- **Route**: `GET /reports/commission`
+- **Route Name**: `reports.commission`
+- **Permission**: `reports.commission`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range, source filters
+  - Table: Commission by source/travel agent
+  - Totals and outstanding
+  - Export: PDF, Excel
+- **Tests**: Commission report calculates
+
+### 9.9 Paid-outs Report
+- **Route**: `GET /reports/paid-outs`
+- **Route Name**: `reports.paid-outs`
+- **Permission**: `reports.paid-outs`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range, type filters
+  - Table: Paid-out details
+  - Totals by type
+  - Export: PDF, Excel
+- **Tests**: Paid-outs report generates
+
+### 9.10 Housekeeping Discrepancy
+- **Route**: `GET /reports/housekeeping-discrepancy`
+- **Route Name**: `reports.housekeeping-discrepancy`
+- **Permission**: `reports.housekeeping`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range filters
+  - Table: Expected vs actual room status
+  - Discrepancies highlighted
+  - Export: PDF, Excel
+- **Tests**: Discrepancy report generates
+
+### 9.11 Turnaway Analysis
+- **Route**: `GET /reports/turnaway`
+- **Route Name**: `reports.turnaway`
+- **Permission**: `reports.turnaway`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range, reason filters
+  - Chart: Turnaway by reason
+  - Table: Turnaway details
+  - Export: PDF, Excel
+- **Tests**: Turnaway report generates
+
+### 9.12 Source Performance
+- **Route**: `GET /reports/source-performance`
+- **Route Name**: `reports.source-performance`
+- **Permission**: `reports.source`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range filters
+  - Table: Reservations, revenue, ADR by source
+  - Charts: Pie chart, bar chart
+  - Export: PDF, Excel
+- **Tests**: Source report calculates
+
+### 9.13 Company AR
+- **Route**: `GET /reports/company-ar`
+- **Route Name**: `reports.company-ar`
+- **Permission**: `reports.company_ar`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Company/group filters
+  - Table: Company, balance, aging (30/60/90+ days)
+  - Credit utilization
+  - Export: PDF, Excel
+- **Tests**: Company AR report calculates
+
+### 9.14 Guest Demographics
+- **Route**: `GET /reports/guest-demographics`
+- **Route Name**: `reports.guest-demographics`
+- **Permission**: `reports.guest`
+- **CRUD Operations**: VIEW, EXPORT
+- **Screen Requirements**:
+  - Date range filters
+  - Charts: Nationality pie, purpose of visit, guest type
+  - Tables: Demographic breakdowns
+  - Export: PDF, Excel
+- **Tests**: Demographics report generates
+
+### 9.15 Integration Logs
+- **Route**: `GET /reports/integration-logs`
+- **Route Name**: `reports.integration-logs`
+- **Permission**: `integrations.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Filters: integration, date, status
+  - Table: Log details, request/response, status
+  - Export: CSV, Excel
+- **Tests**: Integration logs display
+
+### 9.16 Activity Logs
+- **Route**: `GET /reports/activity-logs`
+- **Route Name**: `reports.activity-logs`
+- **Permission**: `activity-log.view`
+- **CRUD Operations**: LIST, VIEW, EXPORT
+- **Screen Requirements**:
+  - Filters: user, module, action, date
+  - Table: Log details, subject, changes
+  - Export: CSV, Excel
+- **Tests**: Activity logs display
+
+### 9.17 Custom Report Builder
+- **Route**: `GET /reports/custom`, `POST /reports/custom/generate`
+- **Route Name**: `reports.custom`, `reports.custom.generate`
+- **Permission**: `reports.custom`
+- **CRUD Operations**: VIEW, CREATE (generate)
+- **Screen Requirements**:
+  - Select data sources (tables)
+  - Select columns
+  - Add filters
+  - Add grouping
+  - Add sorting
+  - Preview results
+  - Export: CSV, Excel, PDF
+  - Save report template
+- **Tests**: Custom report generates
+
+### 9.18 Export Scheduler
+- **Route**: `GET /report-schedules`, `POST /report-schedules`, `GET /report-schedules/create`, `GET /report-schedules/{schedule}/edit`, `PUT /report-schedules/{schedule}`, `DELETE /report-schedules/{schedule}`
+- **Route Name**: `report-schedules.index`, `report-schedules.store`, `report-schedules.create`, `report-schedules.edit`, `report-schedules.update`, `report-schedules.destroy`
+- **Permission**: `reports.schedule`
+- **CRUD Operations**: LIST, CREATE, EDIT, DELETE
+- **Screen Requirements**:
+  - List: report name, schedule, last run, next run, status, actions
+  - Create: report, schedule (daily/weekly/monthly), format, recipients
+- **Tests**: Schedule CRUD works
+
+---
+
+## IMPLEMENTATION CHECKLIST
+
+For EVERY sidebar item above, you MUST create:
+
+### Backend Files:
+- [ ] Migration (if new table)
+- [ ] Model with relationships, casts, scopes
+- [ ] Policy with permission checks
+- [ ] FormRequest with validation rules
+- [ ] Resource/DTO for API responses
+- [ ] Service class with business logic
+- [ ] Controller with all actions
+- [ ] Routes (web/api)
+- [ ] Tests (feature, policy, validation)
+
+### Frontend Files:
+- [ ] List component/page
+- [ ] Create component/page/modal
+- [ ] Edit component/page/modal
+- [ ] View component/page/drawer
+- [ ] Delete confirmation modal
+- [ ] Restore button (if soft delete)
+- [ ] Export buttons
+- [ ] Filter component
+- [ ] Search component
+- [ ] Pagination component
+- [ ] Sort component
+- [ ] Loading state
+- [ ] Empty state
+- [ ] Error state
+- [ ] Toast notifications
+
+### Configuration:
+- [ ] Permission in config/novapermissions.php
+- [ ] Role-permission assignment in seeder
+- [ ] Sidebar item in seeder
+- [ ] Arabic translation in lang files
+- [ ] Route name in sidebar item
+
+### Tests:
+- [ ] List page renders with data
+- [ ] Create form validates and saves
+- [ ] Edit form loads and updates
+- [ ] View page displays details
+- [ ] Delete soft deletes with reason
+- [ ] Restore works
+- [ ] Export generates file
+- [ ] Filters work correctly
+- [ ] Search returns results
+- [ ] Pagination works
+- [ ] Sort changes order
+- [ ] Permission denied without access
+- [ ] Tenant isolation works
+
+## DELIVERY FORMAT
+
+After implementing each module, output:
+
+```markdown
+# Module: [Module Name]
+
+## Tables Covered
+- table1
+- table2
+
+## Files Created
+### Backend
+- database/migrations/xxxx_xx_xx_xxxxxx_create_xxx_table.php
+- app/Models/Xxx.php
+- app/Policies/XxxPolicy.php
+- app/Http/Requests/Xxx/CreateXxxRequest.php
+- app/Http/Requests/Xxx/UpdateXxxRequest.php
+- app/Http/Resources/XxxResource.php
+- app/Services/XxxService.php
+- app/Http/Controllers/XxxController.php
+- routes/web.php (added routes)
+- tests/Feature/XxxTest.php
+- tests/Unit/XxxServiceTest.php
+
+### Frontend
+- resources/js/views/xxx/Index.vue
+- resources/js/views/xxx/Create.vue
+- resources/js/views/xxx/Edit.vue
+- resources/js/views/xxx/Show.vue
+- resources/js/components/xxx/XxxFilter.vue
+
+### Configuration
+- config/novapermissions.php (updated)
+- database/seeds/XxxSeeder.php
+- resources/lang/en/xxx.php
+- resources/lang/ar/xxx.php
+
+## Routes Added
+- GET /xxx - xxx.index
+- GET /xxx/create - xxx.create
+- POST /xxx - xxx.store
+- GET /xxx/{id} - xxx.show
+- GET /xxx/{id}/edit - xxx.edit
+- PUT /xxx/{id} - xxx.update
+- DELETE /xxx/{id} - xxx.destroy
+
+## Permissions Added
+- xxx.view
+- xxx.create
+- xxx.update
+- xxx.delete
+- xxx.export
+- xxx.restore
+
+## Sidebar Items Added
+- [Module] > [Screen] - permission: xxx.view
+
+## Seed Data
+- Created X records for xxx table
+- Sample data includes: ...
+
+## Tests Created
+- Test list renders
+- Test create validates
+- Test edit updates
+- Test delete soft deletes
+- Test permission denied
+- Test tenant isolation
+
+## Status
+✅ COMPLETE - All CRUD operations working
+```
+
+## QUALITY BAR
+
+❌ UNACCEPTABLE:
+- Sidebar item without route
+- Route without controller method
+- Controller method without view/component
+- View without data
+- Form without validation
+- List without search/filter/pagination
+- Delete without confirmation
+- No permission checks
+- No Arabic translations
+- No seed data
+- No tests
+
+✅ REQUIRED:
+- Every sidebar item has working route
+- Every route has complete CRUD
+- Every form has validation
+- Every list has search/filter/pagination/sort
+- Every action has permission check
+- Every label has Arabic translation
+- Every table has seed data
+- Every feature has tests
+
+## COMMANDS TO RUN
+
+```bash
+# Run migrations
+php artisan migrate
+
+# Run seeders
+php artisan db:seed --class=XxxSeeder
+
+# Run tests
+php artisan test --filter=XxxTest
+
+# Clear cache
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+php artisan route:clear
+
+# Build frontend
+npm run dev
+# or
+npm run production
+```
+
+## START IMPLEMENTATION
+
+Begin with Module 1 (Dashboard) and proceed through all 9 modules. Do not skip any sidebar item. Do not leave any screen incomplete. Every menu item must link to a fully functional screen with complete CRUD operations.
+```
+
+This enhanced prompt provides:
+1. **Exact CRUD requirements** for every sidebar item
+2. **Screen specifications** with all required components
+3. **Backend file checklist** for each feature
+4. **Frontend component checklist** for each feature
+5. **Configuration requirements** (permissions, translations, seeders)
+6. **Test requirements** for each feature
+7. **Delivery format** to track completion
+8. **Quality bar** defining what's acceptable vs not
+9. **Commands to run** for verification
+
+Use this prompt to ensure every sidebar item has a complete, working screen with full CRUD operations.
+
+
+You are a senior Laravel 5.8 + Vue 2 (Options API) + Laravel Nova architect building the Fandaqah PMS.
+
+**IMMEDIATE PRIORITY: Fix "sidebar routes not working / screens not available" problem once and for all.**
+
+Create **ONE comprehensive, no-skip implementation** that delivers:
+- Fully functional, permission-aware, bilingual (EN/AR), RTL-ready sidebar
+- Every sidebar item must have a **working route + fully implemented screen**
+- Complete CRUD (or appropriate read-only/workflow) for **every module** listed in the master prompt
+- Beautiful, modern, attractive, eye-catching UI/UX across the entire system
+
+### 1. SCHEMA & EXISTING CODE AUDIT (MANDATORY FIRST STEP)
+Before writing any code:
+- Inspect current sidebar implementation (Vue components, config/service, routes, Nova modules)
+- Inspect all existing routes (web.php, api.php, nova-components/*/routes/api.php)
+- Inspect all existing Vue/Nova screens and Nova resources
+- Identify broken/missing routes and screens
+- Produce a short **Sidebar & Screen Gap Report** (markdown) showing:
+  - Existing sidebar groups/children
+  - Missing routes/screens
+  - Broken links
+  - Permission gaps
+
+### 2. COMPLETE PERMISSION-BASED SIDEBAR SYSTEM
+Build/extend a dynamic, config/service-based sidebar provider (extend existing pattern if present).
+
+**Sidebar groups (exact order):**
+1. **Dashboard**
+2. **Night Audit**
+3. **Finance**
+4. **AR Management**
+5. **Operations**
+6. **Reservations** (if not already covered)
+7. **Front Desk**
+8. **Rooms & Housekeeping**
+9. **Guests & Companies**
+10. **POS & Services**
+11. **Reports & Analytics**
+12. **Marketing & Revenue**
+13. **Settings**
+14. **System Admin**
+
+Each menu item must contain:
+- label_en / label_ar (use resources/lang/vendor/nova/ar.json)
+- icon (use existing icon library or Font Awesome / Heroicons)
+- route (full Laravel route name or Nova route)
+- permission_slug (e.g. `night-audit.view`, `ar.company-groups.view`)
+- order
+- children (sub-menu support)
+- badge_count (dynamic query where useful — e.g. pending night audit, open shifts, overdue AR)
+- active route matching (highlight correctly)
+- RTL support + direction from existing bundle
+
+**Rules:**
+- Only show items the current user has at least `.view` permission for (or specific feature permission)
+- Hide Add/Edit/Delete buttons on screens if user lacks permission
+- Backend API must also block unauthorized access (middleware + policies)
+- Sidebar must be collapsible, responsive, searchable, and mobile/tablet friendly
+
+### 3. ROUTES — ALL SCREENS MUST BE AVAILABLE
+- Add **all missing routes** in the correct place:
+  - Main app routes → `routes/web.php` or `routes/api.php` when appropriate
+  - Nova feature routes → inside relevant `nova-components/<Module>/routes/api.php`
+- Use consistent naming: `module.action` (e.g. `night-audit.run`, `no-show-rules.index`)
+- Protect every route with `auth`, `team.scope`, and permission middleware
+- Create resource routes + custom action routes for workflows (check-in, night-audit-run, payment-correction, etc.)
+
+### 4. FULL CRUD CONTRACT — EXPLAIN & IMPLEMENT FOR EVERY MODULE/SCREEN
+For **every** module and every screen linked from the sidebar, implement the **complete CRUD standard**:
+
+**Backend (Laravel 5.8 rules):**
+- Model (with TeamScope, fillable, casts, relationships, SoftDeletes where applicable)
+- Service layer (`app/Services/`) — all business logic here
+- FormRequest validation
+- Resource (API output)
+- Controller (thin — only call service)
+- Policy + permission checks
+- Migration only if column/table is missing (audit schema_fandaqah.sql first!)
+- Activity/audit logging where appropriate
+
+**Frontend (Vue 2 Options API + Nova):**
+- List page: search, advanced filters, sorting, pagination, column picker, export, empty state, loading skeletons
+- Create/Edit: modal or dedicated page, full validation (client + server), bilingual labels, RTL form styling
+- View/Detail: summary cards, tabs for related data, timeline/activity log, print buttons
+- Delete/Soft-delete + Restore
+- Permission-aware buttons (hidden if no permission)
+- Beautiful modern design: clean cards, color-coded badges (green=active, amber=warning, red=critical), status pills, icons, consistent spacing/typography, responsive grid
+
+**Beautiful & Eye-Catching Design Requirements (apply to ALL screens):**
+- Modern, attractive, premium hotel-PMS look (use soft blues/greens, clean whitespace, subtle shadows, rounded corners)
+- KPI/metric cards with icons, trend arrows, color coding
+- Charts (occupancy, revenue, AR aging) using existing charting library
+- Sticky filter bars
+- Polished data tables with hover effects, zebra striping, status badges
+- Loading skeletons + smooth transitions
+- Success/error toasts (beautiful animated)
+- Confirmation modals with icons
+- Empty states with helpful illustrations/guidance
+- RTL perfect (mirrored layout, Arabic fonts, proper text alignment)
+- Responsive on desktop, tablet, mobile
+- Consistent color palette, typography, and spacing throughout the entire system
+
+### 5. MODULES & SCREENS THAT MUST BE FULLY IMPLEMENTED
+Implement complete screens for **all** of these (no exceptions):
+
+- Night Audit Dashboard + Run/Rerun/Logs
+- No-Show Charge Rules (full CRUD + calendar preview)
+- Early/Late Check-in/Checkout Charge Configs (full CRUD + timeline visual)
+- Room Revenue Adjustments
+- Frozen Payment Correction
+- Checkout Balance Resolution (with promissory options)
+- Promissory Enhancements + Payment Log
+- AR Company Groups + City Ledger
+- Guest Ledger / Deposit Ledger / Trial Balance
+- Cashier Shifts (open/close/approve)
+- Room Status Log (timeline + table)
+- Travel Agent Commission
+- Invoice Transfer to AR
+- All Dashboard variants (Overview, Night Audit, Occupancy, Revenue, AR, Cashier, Commission)
+- All Reports & Analytics screens
+- Settings → Options & Master Data for all lookup tables
+- Full permission matrix screen
+
+### 6. DELIVERABLES (must output for every batch)
+After implementation:
+1. Updated `config/novapermissions.php` + seeder/migration for permissions
+2. Sidebar config/service + Vue rendering updates
+3. All new/updated routes (list them)
+4. All new/updated Vue components + Nova resources
+5. Schema audit gap report (if any new migrations)
+6. Arabic translations added to `resources/lang/vendor/nova/ar.json`
+7. Tests (PHPUnit + Selenium) proving routes work and permissions hide/show correctly
+8. Commands to run: `php artisan route:clear`, `php artisan cache:clear`, `npm run build` (if needed)
+
+**Quality Bar:**
+- No broken links
+- No missing screens
+- No placeholder "Coming Soon"
+- Every sidebar item leads to a fully functional, beautiful screen
+- Full CRUD + permission enforcement everywhere
+- Eye-catching, modern, professional UI that feels premium for a 5-star hotel PMS
+
+Start now:
+Step 1 → Run schema + existing sidebar/routes audit
+Step 2 → Update permissions
+Step 3 → Build complete sidebar
+Step 4 → Create/fix every missing route + screen with full beautiful CRUD
+Step 5 → Test everything works
+Step 6 → Report completion status
+
+Do not skip any module or screen. Make this the most beautiful and complete PMS sidebar + UI implementation possible.

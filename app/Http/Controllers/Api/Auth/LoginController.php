@@ -47,6 +47,24 @@ class LoginController extends Controller
 		return $request->user();
 	}
 
+    /**
+     * Handle user logout request
+     */
+    public function logout(Request $request): \Illuminate\Http\JsonResponse
+    {
+        // Get the current access token
+        $token = $request->user()->currentAccessToken();
+
+        // If a token exists, delete it
+        if ($token) {
+            $token->delete();
+        }
+
+        return response()->json([
+            'message' => 'Logged out successfully'
+        ]);
+    }
+
 
 	/**
 	*login api

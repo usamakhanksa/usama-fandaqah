@@ -1,22 +1,25 @@
 import axios from 'axios';
 
-const api = axios.create({baseURL:'/api'});
+const api = axios.create({baseURL: window.location.origin + '/api'});
 
 // Request interceptor to handle authentication
 api.interceptors.request.use(
   config => {
-    // Get the token from localStorage or sessionStorage where you store the Sanctum token
+    // Get the token from localStorage where you store the Sanctum token
     const token = localStorage.getItem('sanctum_token');
     
     if (token) {
+      // For Sanctum, we use Bearer token authentication
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Also include CSRF token as backup for non-sanctum routes
+    // Set content type
+    config.headers['Content-Type'] = 'application/json';
+    
+    // Include XSRF token for Laravel Sanctum
     const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.content;
     if (csrfToken) {
-      config.headers['X-CSRF-TOKEN'] = csrfToken;
-      config.headers['X-Requested-With'] = 'XMLHttpRequest';
+      config.headers['X-XSRF-TOKEN'] = csrfToken;
     }
     
     return config;
@@ -26,17 +29,19 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle authentication errors
+// Response interceptor to handle token expiration
 api.interceptors.response.use(
-  response => response,
+  response => {
+    return response;
+  },
   error => {
     if (error.response?.status === 401) {
-      // Store the token if user needs to re-authenticate
+      // Remove the token since it's no longer valid
       localStorage.removeItem('sanctum_token');
-      localStorage.removeItem('auth_fandaqah');
-      // Redirect to login if unauthorized
+      // Redirect to login page
       window.location.href = '/login';
     }
+
     return Promise.reject(error);
   }
 );

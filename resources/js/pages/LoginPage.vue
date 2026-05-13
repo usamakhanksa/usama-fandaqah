@@ -18,7 +18,7 @@
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Email Address</label>
-          <input v-model="email" type="email" placeholder="aya@hotel.test" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" />
+          <input v-model="email" type="email" placeholder="admin@hotel.test" class="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 focus:ring-2 ring-rose-300 transition-all outline-none text-slate-800 placeholder:text-slate-300 shadow-sm" />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Password</label>
@@ -34,8 +34,9 @@
         </div>
       </div>
 
-      <button @click="login" class="w-full bg-slate-900 hover:bg-rose-600 text-white font-bold py-5 rounded-2xl shadow-xl shadow-rose-200 transition-all active:scale-95 group flex items-center justify-center gap-2">
-        SIGN IN
+      <button @click="login" :disabled="loading" class="w-full bg-slate-900 hover:bg-rose-600 text-white font-bold py-5 rounded-2xl shadow-xl shadow-rose-200 transition-all active:scale-95 group flex items-center justify-center gap-2">
+        <span v-if="loading" class="mr-2 w-4 h-4 border-t-2 border-r-2 border-white rounded-full animate-spin inline-block"></span>
+        {{ loading ? 'SIGNING IN...' : 'SIGN IN' }}
         <span class="text-lg group-hover:translate-x-1 transition-transform">→</span>
       </button>
 
@@ -58,6 +59,8 @@ const errorMsg = ref('');
 const loading = ref(false);
 
 const login = async () => {
+  if (loading.value) return; // Prevent multiple clicks
+  
   if (!email.value || !password.value) {
     errorMsg.value = 'Please enter email and password';
     return;
@@ -67,19 +70,63 @@ const login = async () => {
   errorMsg.value = '';
   
   try {
-    const response = await api.post('/login', { email: email.value, password: password.value });
-    const token = response.data?.data?.token || response.data?.token || 'mock_token_for_dev';
+    const response = await api.post('/login', { 
+      email: email.value, 
+      password: password.value 
+    });
+    
+    // Handle different possible response structures
+    const token = response.data?.data?.token || 
+                  response.data?.token || 
+                  response.data?.access_token ||
+                  (response.data && typeof response.data === 'string' && response.data.length > 10 ? response.data : null);
+                  
+    if (!token) {
+      throw new Error('Token not received from server');
+    }
     
     localStorage.setItem('sanctum_token', token);
     localStorage.setItem('auth_fandaqah', 'true');
+    
+    // Try to get user data to verify the token is valid
+    try {
+      const userData = await api.get('/user');
+      console.log('User authenticated:', userData.data.name || userData.data.email);
+    } catch (userDataErr) {
+      console.warn('Could not fetch user data after login:', userDataErr);
+    }
+
     router.push('/dashboard');
   } catch (error) {
-    errorMsg.value = error.response?.data?.message || 'Login failed. Please check credentials.';
-    console.error('Login error:', error);
+    console.error('Login error details:', error);
     
-    // For local dev, allow bypass if API is not fully set up
-    if (email.value === 'admin@hotel.test') {
-      localStorage.setItem('sanctum_token', 'dev_token');
+    if (error.response) {
+      // Server responded with error status
+      const errorMessage = error.response.data?.message || 
+                          error.response.data?.error || 
+                          error.response.statusText || 
+                          'Login failed';
+      errorMsg.value = errorMessage;
+      
+      // Specifically check for 401 error
+      if (error.response.status === 401) {
+        errorMsg.value = 'Invalid email or password. Please try again.';
+      }
+    } else if (error.request) {
+      // Request was made but no response received
+      errorMsg.value = 'Network error. Please check your connection and try again.';
+    } else {
+      // Something else happened
+      errorMsg.value = error.message || 'An unexpected error occurred.';
+    }
+    
+    // For development, provide a fallback login if using default admin credentials
+    // Only enable this for local environments
+    const appEnv = process.env.NODE_ENV || 'development';
+    if (appEnv === 'development' && 
+        email.value === 'admin@hotel.test' && 
+        password.value === 'admin') {
+      localStorage.setItem('sanctum_token', 'dev_token_for_local_testing');
       localStorage.setItem('auth_fandaqah', 'true');
       router.push('/dashboard');
     }

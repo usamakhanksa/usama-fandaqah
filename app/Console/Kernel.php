@@ -51,10 +51,13 @@ class Kernel extends ConsoleKernel
         // $schedule->command('push:shms-failed-jobs')->everyMinute();
         // $schedule->command('supervisor:restart')->cron('0 */6 * * *');
 
-        //Freezing transactions for the business day
-        $schedule->command('check:business-day-freeze')->everyMinute()->withoutOverlapping();
+//Freezing transactions for the business day
+         $schedule->command('check:business-day-freeze')->everyMinute()->withoutOverlapping();
 
-    }
+         // Run scheduled reports
+         $schedule->command('reports:run-scheduled')->everyMinute()->withoutOverlapping();
+
+     }
 
     /**
      * Register the commands for the application.

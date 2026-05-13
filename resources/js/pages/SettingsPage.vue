@@ -11,7 +11,7 @@
     <button
       v-for="sc in categories"
       :key="sc.slug"
-      @click="selected = sc"
+      @click="openSetting(sc)"
       :class="[
         'card p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md transition-all active:scale-95 group',
         selected?.slug === sc.slug ? 'ring-2 ring-rose-400' : ''
@@ -25,31 +25,43 @@
   </div>
 
   <!-- ── Slider & Header inline panel ── -->
-  <Transition name="panel">
-    <div v-if="selected?.slug === 'header-slider'" class="card p-6">
+  <Transition name="panel" mode="out-in">
+    <div v-if="selected?.slug === 'header-slider'" key="slider" class="card p-6">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-bold">{{ selected.title }}</h2>
-        <button @click="selected = null" class="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+        <button @click="closePanel" class="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
       </div>
       <SliderSettingsPanel />
+    </div>
+    <div v-else-if="selected?.slug === 'stay-charges'" key="charges" class="card p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold">{{ selected.title }}</h2>
+        <button @click="closePanel" class="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+      </div>
+      <StayChargeSettingsPanel />
     </div>
   </Transition>
 
   <!-- ── Modal for all other categories ── -->
-  <BaseModal v-if="selected && selected.slug !== 'header-slider'" @close="selected = null" :title="selected.title">
+  <BaseModal v-if="selected && selected.slug !== 'header-slider' && selected.slug !== 'stay-charges'" :modelValue="true" @close="closeModal" :title="selected.title">
     <div class="space-y-4">
-      <div v-if="loading" class="text-center py-10">Loading settings…</div>
+      <div v-if="loading" class="text-center py-10">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500"></div>
+        <p class="mt-2 text-slate-500">Loading settings…</p>
+      </div>
       <div v-else class="space-y-2">
-        <label v-for="item in data" :key="item.id" class="p-3 border rounded-xl flex items-center justify-between">
-          <span>{{ item.name || item.code }}</span>
-          <span v-if="item.group" class="text-xs text-slate-400">{{ item.group }}</span>
-          <input type="checkbox" class="accent-rose-500" checked />
+        <label v-for="item in data" :key="item.id" class="p-3 border rounded-xl flex items-center justify-between hover:bg-slate-50 transition-colors">
+          <div class="flex-1">
+            <span class="font-medium">{{ item.name || item.code }}</span>
+            <span v-if="item.group" class="ml-2 text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{{ item.group }}</span>
+          </div>
+          <input type="checkbox" class="accent-rose-500 w-5 h-5" :checked="item.is_active !== false" @change="toggleSetting(item)" />
         </label>
         <div v-if="!data.length" class="text-slate-400 text-center py-4">No settings found in this category.</div>
       </div>
       <div class="flex gap-2 pt-4">
-        <button @click="selected = null" class="btn-outline flex-1">Reset</button>
-        <button @click="selected = null" class="btn-primary flex-1">Save Changes</button>
+        <button @click="resetSettings" class="btn-outline flex-1">Reset</button>
+        <button @click="saveSettings" class="btn-primary flex-1">Save Changes</button>
       </div>
     </div>
   </BaseModal>
@@ -61,6 +73,7 @@ import { ref, watch } from 'vue';
 import api from '../services/api';
 import BaseModal from '../components/BaseModal.vue';
 import SliderSettingsPanel from '../components/SliderSettingsPanel.vue';
+import StayChargeSettingsPanel from '../components/StayChargeSettingsPanel.vue';
 
 const selected = ref(null);
 const loading = ref(false);
@@ -84,20 +97,54 @@ const categories = [
   { title: 'Rating Settings', slug: 'rating', icon: '⭐' },
   { title: 'Services Included In The Price', slug: 'included-services', icon: '🛎️' },
   { title: 'Maintenance Settings', slug: 'maintenance-categories', icon: '🛠️' },
+  { title: 'Early Check-in / Late Checkout', slug: 'stay-charges', icon: '⏰' },
 ];
 
-watch(selected, async (val) => {
-  if (val && val.slug !== 'header-slider') {
-    loading.value = true;
-    try {
-      const res = await api.get(`/settings/${val.slug}`);
-      data.value = res.data;
-    } catch {
-      data.value = [];
-    }
-    loading.value = false;
+const openSetting = (setting) => {
+  selected.value = setting;
+  if (setting.slug !== 'header-slider' && setting.slug !== 'stay-charges') {
+    loadSettings();
   }
-});
+};
+
+const closePanel = () => {
+  selected.value = null;
+};
+
+const closeModal = () => {
+  selected.value = null;
+  data.value = [];
+};
+
+const loadSettings = async () => {
+  if (!selected.value) return;
+  loading.value = true;
+  try {
+    const res = await api.get(`/settings/${selected.value.slug}`);
+    data.value = res.data || [];
+  } catch (e) {
+    console.error('Error loading settings:', e);
+    data.value = [];
+  }
+  loading.value = false;
+};
+
+const toggleSetting = (item) => {
+  item.is_active = !item.is_active;
+};
+
+const resetSettings = () => {
+  loadSettings();
+};
+
+const saveSettings = async () => {
+  try {
+    await api.post('/settings/global', { category: selected.value.slug, data: data.value });
+    closeModal();
+  } catch (e) {
+    console.error('Error saving settings:', e);
+  }
+};
 </script>
 
 <style scoped>

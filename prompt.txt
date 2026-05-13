@@ -1,0 +1,4091 @@
+Below is a **copy-paste ready master prompt** plus **separate task-based prompts** for your developer or AI coding agent.
+
+I based it on your attached **Fandaqah PMS Developer Action Plan**, **CLAUDE project rules**, and **schema SQL dump**. The plan confirms 20 implementation phases covering migrations, Night Audit, AR, cashier shifts, room status, commissions, warehouse, ETL, Metabase, and go-live.  Your project rules require Laravel 5.8, PHP 7.2, Vue 2 Options API, TeamScope/multi-tenancy, service-layer business logic, FormRequests, Resources, Nova module routes, and `config/novapermissions.php` as the permission source of truth.  The SQL dump already includes many target structures such as `no_show_charge_rules`, `early_late_charge_configs`, `promissory_payment_log`, `night_audit_snapshot_queue`, and related Night Audit/AR tables, so the implementation must audit existing schema first and avoid duplicate migrations.    
+
+---
+
+# MASTER PROMPT — Fandaqah PMS Complete Migration + Dashboard + CRUD + Roles System
+
+You are a senior Laravel 5.8, PHP 7.2, Vue 2, Laravel Nova, MySQL, ETL, and hospitality PMS engineer.
+
+Deeply analyze the attached Fandaqah PMS repository, `CLAUDE.md`, `schema_fandaqah.sql`, and `fandaqah_dev_plan_v2.docx`. Build the complete system without skipping any feature. Follow all existing project architecture rules.
+
+## Core rules
+
+Use PHP 7.2 only. Do not use PHP 8 syntax. Use Laravel 5.8 APIs only. Use Vue 2 Options API only. Do not use Composition API or `<script setup>`.
+
+Preserve multi-tenancy. Every tenant-owned model must be scoped by `team_id` using the existing `HasTeam` / `TeamScope` pattern. Never bypass `TeamScope` unless the feature is explicitly cross-hotel admin or group reporting.
+
+Keep controllers thin. Business logic must live in `app/Services`. Validation must live in `app/Http/Requests`. API output must use `app/Http/Resources`.
+
+Do not modify old migrations. Create new migrations only. Before creating migrations, inspect `schema_fandaqah.sql` and the live repository to detect already-existing columns/tables. Do not duplicate fields already present.
+
+All new user-facing Vue/Nova text must support Arabic localization through `resources/lang/vendor/nova/ar.json`. RTL must use the existing RTL bundle pattern. Do not hardcode `direction`.
+
+All new permissions must be added to `config/novapermissions.php`, then assigned through a migration/seed using the existing role-permission pattern.
+
+All sidebar/menu links must be permission-aware. A user must not see a sidebar route unless they have at least `.view` permission for that module or the specific feature permission. Add, edit, delete buttons must be hidden and API-blocked based on permissions.
+
+Every CRUD module must support: list, view, create, edit, delete/soft-delete, restore when applicable, filters, search, pagination, sorting, loading state, empty state, confirmation modals, validation errors, success/error toast, Arabic labels, RTL layout, and audit/activity logging where appropriate.
+
+Design must be beautiful, modern, attractive, and eye-catching: clean dashboards, metric cards, charts, status badges, icons, color-coded states, responsive grid, sticky filters, polished tables, readable typography, and consistent spacing.
+
+## Required modules
+
+Build or complete these modules:
+
+1. Night Audit Dashboard
+2. Night Audit Run / Rerun / Logs
+3. No-Show Charge Rules
+4. Freeze Engine and Closed Business Date Enforcement
+5. Occupancy Snapshot and Revenue Snapshot
+6. Historical Backfill
+7. Room Revenue Adjustments
+8. Frozen Payment Correction
+9. Early Check-in / Late Checkout Charge Configs
+10. Checkout Balance Resolution
+11. Promissory Enhancements
+12. AR Company Groups
+13. City Ledger / AR Aging
+14. Guest Ledger
+15. Deposit Ledger
+16. Trial Balance
+17. Cashier Shifts
+18. Room Status Log
+19. Travel Agent Commission
+20. Invoice Transfer to AR
+21. Promissory Payment Log
+22. Data Warehouse Schema
+23. Airflow ETL DAGs
+24. Metabase Dashboards
+25. Role and Permission Matrix
+26. Permission-based Sidebar Menus
+27. Sample Seed Data
+28. PHPUnit and Selenium Tests
+29. Go-live checklist and validation
+
+## php artisan migrate       
+autoload ok
+bootstrap ok
+
+   INFO  Running migrations.
+
+  2026_04_30_144821_fix_night_audit_snapshot_indexes ................................................................................. 49.63ms FAIL
+
+In Connection.php line 820:
+                                                                                                                                                     
+  SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '1-2026-05-02-1' for key 'night_audit_occupancy_snapshot.uk_snapshot_run'    
+  (Connection: mysql, SQL: alter table `night_audit_occupancy_snapshot` add unique `uk_snapshot_run`(`team_id`, `business_date`, `run_number`))      
+                                                                                                                                                     
+
+In Connection.php line 571:
+                                                                                                                                                     
+  SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '1-2026-05-02-1' for key 'night_audit_occupancy_snapshot.uk_snapshot_run'    
+                                                                                                                                                     
+
+command handled: 1
+PS C:\laragon\www\usama-fandaqah> 
+
+---
+
+# SEPARATE TASK-BASED PROMPTS
+
+## Task 01 — Schema Audit and Migration Safety
+
+Prompt:
+
+Analyze `schema_fandaqah.sql` and the current Laravel migrations. Create a schema audit report before writing code. Identify which planned Phase 1 and Phase 2 columns/tables already exist and which are missing. Do not create duplicate columns. Add only missing migrations as new timestamped Laravel migrations.
+
+Check these tables/columns:
+
+* `teams`: business date and Night Audit settings
+* `service_logs`: `is_freezed`, `business_date`
+* `service_categories`: `rev_type`
+* `companies`: `company_group_id`, `payment_terms_days`, `credit_limit`
+* `promissories`: `company_id`, `fulfilled_at`, `signature_status`, `unsigned_reason`
+* `transactions`: `correction_of_transaction_id`, `is_advance_deposit`, `is_freezed`, `cashier_shift_id`
+* `reservations`: `primary_payment_method`
+* `sources`: travel agent commission fields
+* Night Audit tables
+* AR tables
+* cashier shift tables
+* room status tables
+* early/late charge tables
+* checkout balance transfer tables
+
+Deliverables:
+
+* Schema audit markdown
+* Missing migration files only
+* Rollback methods
+* Foreign keys and indexes
+* Migration tests
+
+---
+
+## Task 02 — Permission and Role System
+
+Prompt:
+
+Implement complete permissions in `config/novapermissions.php` and assign them to default roles through a migration/seed. Use the existing role-permission architecture and do not break current roles.
+
+Create permissions for:
+
+* Night Audit
+* No-show rules
+* AR/company groups
+* Promissories
+* Invoice transfer
+* Checkout balance transfers
+* Cashier shifts
+* Room status log
+* Travel agent commissions
+* Early/late charge config
+* Payment corrections
+* Rebates
+* Room adjustments
+* Dashboards
+* ETL/Metabase monitoring
+
+Each CRUD feature must support:
+
+* view
+* create
+* edit
+* delete
+* export where applicable
+* approve where applicable
+
+Add API authorization checks and UI visibility checks. Hide buttons in Vue/Nova when permission is missing, but also enforce permission on backend endpoints.
+
+Deliverables:
+
+* Updated `config/novapermissions.php`
+* Seeder/migration assigning role permissions
+* Policy/Gate/middleware updates
+* Permission matrix documentation
+* Tests proving users cannot view/add/edit/delete without permission
+
+---
+
+## Task 03 — Permission-Based Sidebar Menus
+
+Prompt:
+
+Build a complete permission-aware sidebar menu system for Fandaqah PMS.
+
+Create sidebar groups:
+
+* Dashboard
+* Night Audit
+* Finance
+* AR Management
+* Operations
+* Settings
+
+Each menu item must have:
+
+* English label
+* Arabic label
+* icon
+* route
+* permission slug
+* active route matching
+* order
+* children
+* badge count where needed
+
+If the project already has a sidebar/menu configuration pattern, extend it. If no database menu table exists, implement a clean config/service-based sidebar provider. The provider must return only menu items the current user can view.
+
+Add routes for all new screens. All routes must be protected by auth and permission middleware. Use existing Nova module route conventions: add feature routes inside the relevant `nova-components/<Module>/routes/api.php` when adding to an existing Nova module, not the root API file unless the feature belongs to the main app.
+
+Deliverables:
+
+* Sidebar config/service
+* Vue sidebar rendering updates
+* Route definitions
+* Permission guards
+* Arabic translations
+* Tests for visible/hidden menu items by role
+
+---
+
+## Task 04 — Beautiful Dashboard UI System
+
+Prompt:
+
+Create a beautiful, attractive, eye-catching dashboard system for PMS operations and finance.
+
+Dashboard requirements:
+
+* Responsive card grid
+* KPI cards
+* Color-coded status badges
+* Charts for occupancy, revenue, AR aging, cash variance
+* Sticky filter bar
+* Hotel/team selector
+* Date range selector
+* Business date selector
+* Export buttons
+* Empty states
+* Loading skeletons
+* Error states
+* RTL/Arabic support
+
+Dashboards:
+
+1. Overview Dashboard
+2. Night Audit Dashboard
+3. Occupancy Dashboard
+4. Revenue Dashboard
+5. AR / City Ledger Dashboard
+6. Cashier Dashboard
+7. Travel Agent Commission Dashboard
+8. Metabase Embedded Dashboard
+
+Filters:
+
+* hotel/team
+* business date
+* date range
+* company group
+* company
+* source/travel agent
+* cashier
+* status
+
+Deliverables:
+
+* Vue 2 components
+* API endpoints/resources
+* Dashboard service classes
+* Permission-aware cards
+* Arabic translations
+* Unit/feature tests
+* Selenium tests for major dashboard flows
+
+---
+
+## Task 05 — Night Audit Engine
+
+Prompt:
+
+Implement the full Night Audit engine.
+
+Features:
+
+* Initial business date setter
+* Pre-flight checks
+* Manual run
+* Auto-run scheduler
+* 7-step sequencer
+* No-show processing
+* Transaction freeze
+* Service log freeze
+* Revenue calculation
+* Occupancy calculation
+* Snapshot writer
+* Snapshot queue writer
+* Reservation audit locks
+* Audit log tracking
+* Status polling
+* Failure handling
+* Force-run permission
+* Rerun support
+
+Rules:
+
+* No closed date can be skipped.
+* Frozen transactions must never be modified or deleted.
+* Corrections must be posted as new transactions on current business date.
+* Snapshot queue must be written after snapshot creation.
+* Audit logs must include completed/failed steps.
+* Business date advances only after successful run.
+
+Deliverables:
+
+* `NightAuditService`
+* `NightAuditPreflightService`
+* `BusinessDateTransactionService`
+* `TransactionFreezeService`
+* `NoShowProcessingService`
+* `NightAuditSnapshotService`
+* Artisan command `nightaudit:auto-run`
+* API endpoints
+* Vue/Nova dashboard
+* Tests
+
+---
+
+## Task 06 — Night Audit Rerun
+
+Prompt:
+
+Implement the Night Audit rerun feature.
+
+Rerun rules:
+
+* Last closed night: `night_audit.rerun`
+* 2–7 nights back: `night_audit.rerun` with warning
+* 8–30 nights back: `night_audit.rerun_historical` and mandatory reason
+* More than 30 nights: blocked
+
+On rerun:
+
+* Skip no-show processing
+* Skip freeze step
+* Recalculate revenue and occupancy
+* Mark old snapshot `is_final = 0`
+* Create new final snapshot with incremented `run_number`
+* Insert snapshot queue row
+* Do not advance business date
+
+Deliverables:
+
+* Rerun API
+* Rerun service
+* UI warning modal
+* Reason capture
+* Permission checks
+* Audit log entry
+* Tests
+
+---
+
+## Task 07 — No-Show Charge Rules CRUD
+
+Prompt:
+
+Create complete CRUD for No-Show Charge Rules.
+
+Fields:
+
+* name
+* start_date
+* end_date
+* charge_type: fixed/percentage
+* charge_amount
+* applies_to: all/daily/monthly
+* is_active
+* created_by
+* deleted_at
+
+Rules:
+
+* Prevent overlapping active date ranges per team and applies_to.
+* Soft delete only.
+* Cannot edit an active rule if Night Audit already ran for its date range.
+* If no rule matches a reservation, charge is 0 and reservation is cancelled only.
+
+UI:
+
+* Calendar/timeline view
+* Color coding:
+
+  * green = zero charge
+  * amber = fixed charge
+  * red = percentage charge
+* Preview affected no-show reservations before Night Audit run
+
+Deliverables:
+
+* Model
+* Service
+* FormRequest
+* Resource
+* Controller
+* Routes
+* Vue CRUD
+* Filters
+* Arabic translations
+* Seeder
+* Tests
+
+---
+
+## Task 08 — Freeze and Closed Business Date Enforcement
+
+Prompt:
+
+Implement backend enforcement for closed business dates and frozen records.
+
+Block:
+
+* Updating frozen transactions
+* Deleting frozen transactions
+* Editing frozen service logs
+* Creating reservations with closed `date_in`
+* Backdating check-in into closed date
+* Backdating checkout into closed date
+* Editing reservation prices for closed nights
+* Changing checked-in/checked-out fields after audit lock
+* Creating service logs on closed date
+
+Allow only:
+
+* New backdated finance transaction with `finance.backdate`
+* Payment correction flow using new transactions
+* Room adjustment flow using adjustment service
+* Cancel locked reservation only with `finance.backdate` and mandatory reason
+
+Deliverables:
+
+* Middleware/policies/services
+* API 403 messages
+* Activity logs
+* Tests for blocked actions
+
+---
+
+## Task 09 — Room Revenue Adjustments
+
+Prompt:
+
+Implement Room Revenue Adjustment feature.
+
+API:
+`POST /api/adjustments/room-revenue`
+
+Body:
+
+* team_id
+* reservation_id
+* amount
+* adjustment_for_date
+* reason
+
+Rules:
+
+* Requires `revenue.adjustment`
+* `adjustment_for_date` must be a closed business date
+* Create service log on current open business date
+* Store original closed date in meta
+* Do not mutate frozen records
+
+Deliverables:
+
+* Service
+* FormRequest
+* Controller
+* Vue modal/form
+* Filters
+* Activity log
+* Tests
+
+---
+
+## Task 10 — Frozen Payment Correction Flow
+
+Prompt:
+
+Implement payment method and amount correction for frozen transactions.
+
+API:
+`POST /api/finance/payment-correction`
+
+Body:
+
+* frozen_transaction_id
+* correct_payment_type
+* correct_amount
+* reason
+
+Rules:
+
+* Requires `finance.payment_correction`
+* Original transaction must be frozen
+* Original transaction is never modified
+* Wrong payment method: create correction withdraw and new deposit
+* Overcharge: create correction withdraw for difference
+* Undercharge: create supplementary deposit
+* Link all correction transactions with `correction_of_transaction_id`
+* Post corrections to current open business date
+
+Deliverables:
+
+* Correction service
+* Validation
+* UI workflow
+* Permission checks
+* Activity logs
+* Tests
+
+---
+
+## Task 11 — Early Check-in / Late Checkout Charge Configs
+
+Prompt:
+
+Implement early check-in and late checkout charge system.
+
+CRUD fields:
+
+* charge_type: early_checkin/late_checkout
+* tier_from_hour
+* tier_to_hour
+* rate_type: fixed/percentage_first_night/percentage_nightly_rate
+* rate_amount
+* applies_to
+* is_active
+
+Rules:
+
+* No overlapping hour tiers per team + charge_type + applies_to
+* Receptionist sees calculated charge read-only
+* Users with `checkin.override_early_charge` can override amount with mandatory reason
+* Overrides must be logged
+* Grace periods can have zero charge
+
+UI:
+
+* Visual 24-hour timeline
+* Add/edit/delete tiers
+* Preview charge by selected hour
+* Color-coded tiers
+
+Deliverables:
+
+* CRUD API
+* Charge calculation service
+* Vue settings screen
+* Integration with check-in/checkout flow
+* Seeder
+* Tests
+
+---
+
+## Task 12 — Checkout Balance Resolution
+
+Prompt:
+
+Implement mandatory checkout balance resolution.
+
+Rules:
+
+* Checkout cannot complete with unresolved non-zero balance.
+* Balance > 0 options:
+
+  * collect now
+  * signed promissory
+  * unsigned promissory
+  * corporate transfer
+* Balance < 0 options:
+
+  * refund now
+  * credit note placeholder
+* Balance = 0 completes normally.
+* Every non-zero resolution creates `checkout_balance_transfers`.
+
+Promissory rules:
+
+* signed = guest signed
+* unsigned = guest absent/refused
+* waived = corporate/management decision
+* `unsigned_reason` required when not signed
+
+Deliverables:
+
+* API endpoint
+* Service
+* UI modal during checkout
+* Promissory integration
+* Transfer audit record
+* Tests
+
+---
+
+## Task 13 — Promissory Enhancements and Payment Log
+
+Prompt:
+
+Complete promissory enhancements.
+
+Features:
+
+* Auto-copy `reservation.company_id` to `promissories.company_id`
+* Auto-set `fulfilled_at` when collected amount >= total
+* Support `signature_status`
+* Require reason for unsigned/waived
+* Log every payment in `promissory_payment_log`
+* Support unapply/reversal with `is_reversed`
+* Add full payment log screen
+
+Deliverables:
+
+* Model updates
+* Observer/service updates
+* API endpoints
+* Vue payment-log screen
+* Filters by company, status, payment type, date
+* Seeder
+* Tests
+
+---
+
+## Task 14 — Company Groups and City Ledger
+
+Prompt:
+
+Implement AR Company Groups and City Ledger.
+
+Company Groups CRUD:
+
+* name
+* name_ar
+* tax_number
+* email
+* phone
+* address
+* city
+* credit_limit
+* payment_terms_days
+
+Features:
+
+* Link company to company group
+* Show group-level exposure across hotels
+* Show hotel-level credit limit
+* AR aging by company and group
+* Credit utilization dashboard
+* Export report
+
+Permissions:
+
+* `ar.manage_company_groups`
+* `ar.company_groups.view/create/edit/delete`
+* `ar.city_ledger.view/export`
+
+Deliverables:
+
+* CRUD
+* Link/unlink API
+* AR aging service
+* Dashboard
+* Filters
+* Seeder
+* Tests
+
+---
+
+## Task 15 — Guest Ledger, Deposit Ledger, Trial Balance
+
+Prompt:
+
+Implement PMS finance ledger reports.
+
+Guest Ledger:
+
+* In-house reservations
+* Room number
+* Guest name
+* Check-in date
+* Nights so far
+* Room charges
+* Service charges
+* Payments
+* Balance
+
+Deposit Ledger:
+
+* Advance deposits before check-in
+* Applied/unapplied status
+* Payment type
+* Reservation/customer
+
+Trial Balance:
+
+* Guest Ledger
+* Deposit Ledger
+* City Ledger / AR
+* Reconciliation check
+* Compare against Night Audit snapshot
+
+Filters:
+
+* hotel
+* date
+* business date
+* company
+* guest
+* payment type
+
+Deliverables:
+
+* Report services
+* API endpoints
+* Vue dashboards
+* Export
+* Tests
+
+---
+
+## Task 16 — Cashier Shifts
+
+Prompt:
+
+Implement Cashier Shifts module.
+
+Features:
+
+* Open shift
+* Close shift
+* Manager approval
+* Opening balance
+* Closing balance
+* System balance from transactions
+* Variance
+* Notes
+* Shift status: open/closed/approved
+* Link transactions to shift
+* Prevent cashier from opening multiple active shifts
+* Require manager approval for variance above threshold
+
+Permissions:
+
+* `cashier.open_shift`
+* `cashier.close_shift`
+* `cashier.approve_shift`
+* `cashier.view`
+* `cashier.export`
+
+Deliverables:
+
+* CRUD/API
+* Shift services
+* UI
+* Filters
+* Seeder
+* Tests
+
+---
+
+## Task 17 — Room Status Log
+
+Prompt:
+
+Implement Room Status Log.
+
+Track transitions:
+
+* available
+* cleaning
+* maintenance
+
+Trigger logs on:
+
+* checkout
+* housekeeping completion
+* maintenance start
+* maintenance close
+* manual change
+
+Fields:
+
+* unit_id
+* team_id
+* from_status
+* to_status
+* changed_by
+* change_reason
+* reference_type
+* reference_id
+* changed_at
+
+UI:
+
+* Timeline view per room
+* Table view
+* Filters by room/status/date/user/reason
+* Export
+
+Deliverables:
+
+* Model/service
+* Observer/event hooks
+* API
+* Vue screen
+* Tests
+
+---
+
+## Task 18 — Travel Agent and Commission Module
+
+Prompt:
+
+Implement Travel Agent and Commission module.
+
+Source fields:
+
+* is_travel_agent
+* iata_number
+* commission_rate
+* commission_type
+
+Commission Payment fields:
+
+* source_id
+* reservation_id
+* period_from
+* period_to
+* room_revenue_base
+* commission_rate
+* commission_type
+* commission_amount
+* status: pending/approved/paid/cancelled
+* approved_by
+* paid_at
+* payment_reference
+
+Features:
+
+* Travel agent CRUD using sources
+* Commission calculation
+* Approval workflow
+* Paid workflow
+* Monthly commission summary
+* Filters and export
+
+Permission:
+
+* `commission.manage`
+
+Deliverables:
+
+* CRUD/API
+* Service
+* Dashboard
+* Seeder
+* Tests
+
+---
+
+## Task 19 — Invoice Transfer to AR
+
+Prompt:
+
+Implement formal invoice transfer to AR.
+
+Features:
+
+* Transfer guest folio to City Ledger
+* Create promissory
+* Create invoice transfer record
+* Link reservation invoice
+* Link company
+* Transfer amount
+* Transferred by/at
+* Notes
+
+API:
+`POST /api/ar/invoice-transfer`
+
+Rules:
+
+* Requires `ar.invoice_transfer`
+* Reservation must be checked out or ready for checkout
+* Company required for corporate transfer
+* Prevent duplicate transfer for same invoice unless correction flow is used
+
+Deliverables:
+
+* Service
+* API
+* UI workflow
+* Filters
+* Tests
+
+---
+
+## Task 20 — Data Warehouse and ETL
+
+Prompt:
+
+Implement Data Warehouse and ETL layer.
+
+Warehouse dimensions:
+
+* dim_date
+* dim_hotel
+* dim_guest
+* dim_company
+* dim_room
+* dim_room_type
+* dim_source
+* dim_user
+
+Fact tables:
+
+* fact_reservation_daily
+* fact_daily_occupancy
+* fact_service_revenue
+* fact_ar_aging
+* fact_deposits
+* fact_commissions
+* fact_cashier_shifts
+
+Support tables:
+
+* dw_groups
+* dw_hotel_group_mapping
+* dw_service_category_classification
+* etl_watermark
+* etl_run_log
+
+Airflow DAGs:
+
+* nightly_snapshot
+* realtime_reservations
+* frozen_transactions
+* service_revenue
+* promissory_aging
+* additional_facts
+
+Rules:
+
+* Read from MySQL replica
+* Write to MS SQL warehouse
+* Only write back to production MySQL for snapshot queue status and `night_audit_log.dw_synced_at`
+* Use idempotent upserts
+* Support rerun overwrites
+
+Deliverables:
+
+* SQL warehouse schema
+* Airflow DAGs
+* ETL logs
+* Retry/failure handling
+* Documentation
+* Tests/validation queries
+
+---
+
+## Task 21 — Metabase Dashboards
+
+Prompt:
+
+Create Metabase dashboards and presentation views.
+
+Views:
+
+* `vw_daily_stats`
+* `vw_reservation_detail`
+* `vw_ar_aging_summary`
+* `vw_guest_ledger`
+* `vw_deposit_ledger`
+* `vw_trial_balance`
+* `vw_cashier_summary`
+* `vw_commission_summary`
+* `vw_company_credit_utilization`
+
+Dashboards:
+
+* Daily operations
+* Occupancy
+* Revenue
+* AR aging
+* Trial balance
+* Cashier variance
+* Travel agent commission
+* Group/chain cross-hotel dashboard
+
+Embed dashboards into PMS with permission-aware access.
+
+Deliverables:
+
+* SQL views
+* Metabase dashboard setup notes
+* PMS embedded dashboard page
+* Filters
+* Tests/validation
+
+---
+
+## Task 22 — Sample Seed Data
+
+Prompt:
+
+Create complete seed data for development and QA.
+
+Seed:
+
+* Roles
+* Permissions
+* Sidebar menus
+* Users for each role
+* Teams/hotels
+* Units/room types
+* Service categories with revenue types
+* No-show rules
+* Early/late charge tiers
+* Companies
+* Company groups
+* Promissories
+* Payment logs
+* Checkout balance transfers
+* Cashier shifts
+* Room status logs
+* Travel agents
+* Commission payments
+* Night audit logs
+* Occupancy snapshots
+* Snapshot queue
+* ETL watermarks
+
+Seeders must be safe to re-run. Use `updateOrCreate` or equivalent.
+
+Deliverables:
+
+* Seeder classes
+* Factory updates where useful
+* `DatabaseSeeder` registration
+* Documentation command: `php artisan db:seed --class=FandaqahDemoSeeder`
+
+---
+
+## Task 23 — Filters, Exports, and Search
+
+Prompt:
+
+Add complete filters, search, sorting, pagination, and export to every list/report page.
+
+Standard filters:
+
+* hotel/team
+* date range
+* business date
+* status
+* user
+* amount range
+* company
+* company group
+* source/travel agent
+* payment type
+* reservation number
+* guest/customer
+* created by
+* active/deleted
+
+Requirements:
+
+* URL query persistence
+* Reset filters
+* Loading states
+* Empty states
+* Server-side pagination
+* Server-side sorting
+* CSV/Excel export where allowed
+* Export permission required
+
+Deliverables:
+
+* Reusable filter component
+* Backend query filter classes/scopes
+* Export services
+* Tests
+
+---
+
+## Task 24 — Full CRUD Quality Standard
+
+Prompt:
+
+For every CRUD module, implement this standard:
+
+Backend:
+
+* Model
+* Migration only if missing
+* Controller
+* Service
+* FormRequest
+* Resource
+* Policy/permission middleware
+* Routes
+* Tests
+
+Frontend:
+
+* List page
+* Create modal/page
+* Edit modal/page
+* View details page/drawer
+* Delete confirmation
+* Restore when soft deleted
+* Filters
+* Search
+* Pagination
+* Sorting
+* Toasts
+* Validation errors
+* Loading state
+* Empty state
+* RTL/Arabic
+
+Security:
+
+* Backend permission enforcement
+* TeamScope enforcement
+* No raw IDs in public-facing routes where Hashids are used
+* Audit/activity log for sensitive operations
+
+---
+
+## Task 25 — Testing and Go-Live
+
+Prompt:
+
+Create complete QA coverage.
+
+PHPUnit:
+
+* Unit tests for services
+* Feature tests for APIs
+* Permission tests
+* Multi-tenant isolation tests
+* Night Audit sequencing tests
+* Ledger calculation tests
+
+Selenium:
+
+* Login
+* Sidebar visibility by role
+* Night Audit run
+* No-show rules CRUD
+* Early/late charge CRUD
+* Checkout balance resolution
+* Cashier open/close/approve
+* Company groups CRUD
+* AR aging dashboard
+* Payment correction flow
+
+Go-live checklist:
+
+* Set initial business date
+* Populate `rev_type`
+* Configure no-show rules
+* Configure early/late tiers
+* Assign override permissions
+* Create/link company groups
+* Run historical backfill
+* Verify snapshot queue pending → inprogress → done
+* Run first manual Night Audit
+* Confirm Metabase figures match snapshots
+* Enable auto-run scheduler
+* Finance sign-off
+* Operations sign-off
+
+Deliverables:
+
+* PHPUnit tests
+* Selenium tests
+* QA checklist
+* Deployment commands
+* Rollback plan
+
+---
+
+# COMPLETE IMPLEMENTATION CHECKLIST
+
+## Foundation
+
+* [ ] Audit existing schema before migrations
+* [ ] Add only missing columns/tables
+* [ ] Add indexes and foreign keys
+* [ ] Register permissions
+* [ ] Assign permissions to roles
+* [ ] Build permission-aware sidebar
+* [ ] Add Arabic translations
+* [ ] Add seed data
+
+## Night Audit
+
+* [ ] Business date setter
+* [ ] Pre-flight checks
+* [ ] Manual run
+* [ ] Auto-run scheduler
+* [ ] Status polling
+* [ ] No-show detection
+* [ ] No-show charge posting
+* [ ] Freeze transactions
+* [ ] Freeze service logs
+* [ ] Revenue calculations
+* [ ] Occupancy calculations
+* [ ] Snapshot writer
+* [ ] Snapshot queue
+* [ ] Audit locks
+* [ ] Audit logs
+* [ ] Rerun
+* [ ] Historical backfill
+
+## Finance / AR
+
+* [ ] Room adjustments
+* [ ] Payment corrections
+* [ ] Rebates/write-offs
+* [ ] Checkout balance resolution
+* [ ] Promissory signature status
+* [ ] Promissory payment log
+* [ ] Company groups
+* [ ] City ledger
+* [ ] AR aging
+* [ ] Guest ledger
+* [ ] Deposit ledger
+* [ ] Trial balance
+* [ ] Invoice transfer
+
+## Operations
+
+* [ ] Cashier shifts
+* [ ] Room status log
+* [ ] Early check-in charges
+* [ ] Late checkout charges
+* [ ] Travel agents
+* [ ] Commission payments
+
+## Dashboards
+
+* [ ] Overview dashboard
+* [ ] Night Audit dashboard
+* [ ] Occupancy dashboard
+* [ ] Revenue dashboard
+* [ ] AR dashboard
+* [ ] Cashier dashboard
+* [ ] Commission dashboard
+* [ ] Metabase embedded dashboard
+
+## Data
+
+* [ ] Warehouse schema
+* [ ] Dimension tables
+* [ ] Fact tables
+* [ ] Presentation views
+* [ ] Airflow DAGs
+* [ ] ETL logs
+* [ ] Watermarks
+* [ ] Snapshot queue sync
+
+## QA
+
+* [ ] Permission tests
+* [ ] CRUD tests
+* [ ] Multi-tenant tests
+* [ ] Night Audit tests
+* [ ] Ledger tests
+* [ ] Selenium role/sidebar tests
+* [ ] Go-live validation
+
+---
+
+# IMPORTANT IMPLEMENTATION NOTE
+
+Your SQL dump already shows several planned Phase 1/2 structures exist, including Night Audit queue/snapshot-related tables, no-show rules, early/late charge configs, promissory payment log, cashier shifts, checkout balance transfers, and core AR columns. The first development task must therefore be **schema audit and gap detection**, not blindly creating all migrations again.
+
+
+I checked your uploaded schema/specs and improved the prompt so the coding AI must **deeply inspect the schema first**, generate **task-based migrations**, create **demo seeders**, build the **sidebar**, and complete **Create / View / Edit / Delete** for every module without skipping. Your existing spec already requires CRUD, bilingual UI, validation, permissions, activity logs, soft deletes, audit trail, search/sort/pagination, import/export, Saudi compliance, and `team_id` scoping.  Your sidebar spec also already covers reservations, front desk, rooms, housekeeping, guests, POS, finance, reports, marketing, settings, and advanced tools.  I strengthened it with Laravel-safe implementation rules: migrations should be treated as version-controlled schema work, seeders should be split and ordered through `DatabaseSeeder`, authorization should use gates/policies, bilingual text should use Laravel localization, API tokens can use Sanctum, and security/audit logging should follow strong logging/audit-trail practices. ([Laravel][1]) For Saudi compliance, ZATCA states e-invoicing is implemented in Phase 1 and Phase 2, with Phase 2 starting January 1, 2023. ([ZATCA][2])
+
+Copy this as your **master system/developer prompt**:
+
+```text
+You are a senior full-stack Laravel architect and implementation agent. You are building and completing the Fandaqah Hotel PMS from the provided SQL schema and existing codebase. Your job is not to guess. Your job is to inspect the schema, map every table, create missing migrations, generate demo seeders, build the sidebar, and complete every screen with Create, View, Edit, Delete, permissions, validation, audit logging, and tests.
+
+PROJECT CONTEXT
+- Product: Fandaqah Hotel PMS for Saudi hotels.
+- Stack target: Laravel backend with Vue/React/Inertia or existing frontend stack.
+- Database: Use the provided SQL schema as the source of truth.
+- Compliance: Saudi hotel/PMS requirements including ZATCA e-invoicing, VAT, Shomoos guest verification workflow, night audit, business date locking, cashier shifts, and audit logs.
+- Multi-tenancy: Every hotel-owned record must be scoped by team_id / active hotel. Never leak data between teams.
+- Language: Full Arabic + English UI, validation, menu labels, permissions, notifications, and printable documents.
+- Goal: Production-ready PMS, not demo-only.
+
+ABSOLUTE RULES
+1. Do not skip any table, screen, feature, relationship, permission, migration, seed, or CRUD action.
+2. Before coding, create a Schema Coverage Matrix from the SQL file:
+   - table_name
+   - module
+   - model name
+   - migration file
+   - seeder file
+   - controller/service
+   - routes
+   - policy/permission
+   - sidebar location
+   - CRUD status: list/create/view/edit/delete/restore/export/import
+   - audit/logging status
+   - tests
+3. If a table is system-only, mark it as one of:
+   - managed by Laravel/system
+   - read-only admin viewer
+   - background job/log table
+   - full business CRUD
+   Do not ignore it.
+4. Do not rely on undocumented stored procedures. If reports require stored procedures but they are not present in the SQL dump, create Laravel query classes/services or new migrations for views/procedures only after explaining why.
+5. Never directly edit frozen night-audit records. Any table with is_freezed, business_date, night_audit, cashier_shift, invoice, transaction, or audit-lock meaning must use correction/reversal workflows.
+6. Use database transactions for all financial, reservation, invoice, check-in, check-out, transfer, refund, and night-audit operations.
+7. Every create/update/delete must:
+   - validate request
+   - authorize action
+   - enforce team_id scope
+   - write activity_log/action_events where applicable
+   - preserve audit trail
+   - support soft delete when deleted_at exists
+   - use correction/reversal instead of destructive edit for locked financial records
+8. Use DECIMAL for money in new migrations. Do not add floating money columns.
+9. New schema changes must be made only through migrations. Never manually alter production DB.
+10. Demo seeders must be realistic, relationally valid, and safe for migrate:fresh --seed.
+
+PHASE 0 — DEEP SCHEMA INSPECTION
+First inspect the full SQL schema and produce:
+- Total tables and views found.
+- All foreign keys and implied relationships.
+- Tables with deleted_at.
+- Tables with team_id.
+- Tables missing team_id but likely hotel-owned.
+- Tables with money fields.
+- Tables with JSON/meta/longtext fields.
+- Tables with audit/freeze/business_date fields.
+- Tables requiring read-only views.
+- Tables requiring full CRUD.
+- Tables requiring background jobs.
+- Tables requiring integration handling.
+- Tables requiring report screens.
+- Any schema risks:
+  - missing indexes
+  - missing foreign keys
+  - inconsistent integer types
+  - nullable fields that should be required
+  - duplicate naming
+  - double/float money fields
+  - missing tenant scope
+  - latin1/default charset issues
+  - fields that need enum/constants
+
+Deliverable: SCHEMA_AUDIT.md and SCHEMA_COVERAGE_MATRIX.md.
+
+PHASE 1 — MIGRATION BASELINE + TASK-BASED MIGRATIONS
+Create a clean migration strategy:
+A. Baseline migration:
+   - Convert the provided SQL schema into Laravel migrations.
+   - Preserve table names, columns, indexes, foreign keys, defaults, nullable rules, comments, and soft deletes.
+   - Create migrations in dependency order.
+   - If legacy production DB already exists, create a baseline/squashed migration strategy instead of destructive rebuild.
+
+B. Enhancement migrations:
+   - Add missing indexes for team_id, business_date, status, date_in/date_out, reservation_id, customer_id, transaction_id, invoice_id, deleted_at.
+   - Add missing foreign keys where safe.
+   - Add team_id to hotel-owned tables if missing.
+   - Add audit columns only if needed and not already present.
+   - Add correction/reference columns for financial reversals if missing.
+   - Add sidebar/menu/feature registry tables only if no existing equivalent exists.
+   - Add demo-safe flags where needed, such as is_demo.
+
+C. Migration deliverables:
+   - database/migrations/*
+   - database/schema/mysql-schema.sql if using schema dump
+   - migration dependency notes
+   - rollback safety notes
+   - production migration plan
+
+PHASE 2 — MODELS, RELATIONSHIPS, CASTS, POLICIES
+For every business table:
+- Create/update Eloquent model.
+- Define fillable/guarded safely.
+- Add casts:
+  - money fields as decimal
+  - JSON/meta fields as array
+  - boolean flags as boolean
+  - dates as date/datetime
+- Add SoftDeletes where deleted_at exists.
+- Add relationships:
+  - belongsTo Team
+  - belongsTo User/CreatedBy where present
+  - reservation/customer/company/unit/category/transaction/invoice relationships
+  - morph relationships for comments, media, highlights, activity logs where applicable
+- Add global or explicit team scope.
+- Add policies for viewAny/view/create/update/delete/restore/export/import/approve/reverse/run.
+- Add FormRequest classes for create/update.
+- Add resources/DTOs for API responses.
+
+PHASE 3 — ROLES, PERMISSIONS, AND ACCESS CONTROL
+Implement granular RBAC:
+- Super Admin
+- Hotel Owner
+- General Manager
+- Front Desk Manager
+- Front Desk Agent
+- Housekeeping Supervisor
+- Housekeeper
+- Maintenance User
+- Accountant
+- Cashier
+- Revenue Manager
+- Marketing Manager
+- Auditor
+- Integration Admin
+- Read-only Viewer
+
+For every module create permissions:
+- module.view
+- module.create
+- module.update
+- module.delete
+- module.restore
+- module.export
+- module.import
+- module.approve
+- module.reverse
+- module.run where applicable
+
+Permission examples:
+- reservations.view/create/update/delete/checkin/checkout/cancel/transfer/extend/noshow/export
+- units.view/create/update/delete/status/maintenance/cleaning/export
+- transactions.view/create/update/reverse/export
+- invoices.view/create/credit-note/send-zatca/print/export
+- night-audit.view/run/rerun/close/reopen/export
+- settings.view/update
+- users.view/create/update/delete/impersonate
+- integrations.view/update/test
+- reports.view/export
+
+PHASE 4 — DEMO SEEDERS
+Create realistic demo data in ordered seed classes. Use stable IDs/slugs only where needed. Seeders must run without FK errors.
+
+Seeder order:
+1. CountryCitySeeder
+2. HotelTypeSeeder
+3. TeamSeeder
+4. UserRolePermissionSeeder
+5. TeamSettingsSeeder
+6. PaymentMethodBankSenderSeeder
+7. UnitCategorySeeder
+8. UnitFeatureOptionSeeder
+9. UnitSeeder
+10. CustomerSeeder
+11. CompanyAndGroupSeeder
+12. SourceChannelSeeder
+13. OfferSpecialPricePromoSeeder
+14. ReservationSeeder
+15. ReservationGuestSeeder
+16. CheckinCheckoutSeeder
+17. ServiceCategorySeeder
+18. ServiceSeeder
+19. POSServiceLogSeeder
+20. TransactionSeeder
+21. InvoiceCreditNoteSeeder
+22. PromissorySeeder
+23. CashierShiftSeeder
+24. HousekeepingSeeder
+25. MaintenanceSeeder
+26. NightAuditSeeder
+27. WebsiteSeeder
+28. IntegrationSeeder
+29. NotificationSeeder
+30. ReportSeeder
+
+Demo scenario must include:
+- 1 hotel/team with complete profile.
+- 3 user roles minimum plus admin.
+- 5 unit categories.
+- 30+ units with mixed statuses.
+- 20+ customers with Saudi/non-Saudi identity examples.
+- 5 companies and 2 company groups.
+- Individual reservation.
+- Group reservation.
+- Walk-in booking.
+- Online reservation.
+- OTA/channel reservation.
+- Checked-in stay.
+- Checked-out stay.
+- Cancelled reservation.
+- No-show reservation.
+- Extended reservation.
+- Room transfer.
+- POS service sale.
+- Quick payment.
+- Cash transaction.
+- Card transaction.
+- Bank transfer.
+- Promissory note.
+- Invoice and credit note.
+- Open and closed cashier shift.
+- Night audit run with occupancy snapshot.
+- Housekeeping tasks.
+- Maintenance tasks.
+- Website pages/gallery/settings.
+- Integration settings in sandbox/mock mode.
+
+PHASE 5 — COMPLETE SIDEBAR AND ROUTE MAP
+Build a dynamic permission-aware sidebar. Each sidebar item must have:
+- label_en
+- label_ar
+- icon
+- route
+- permission
+- module
+- order
+- children
+- badge/count where useful
+- active route matching
+- mobile/tablet support
+
+Sidebar structure:
+
+1. Dashboard
+   - Main Dashboard
+   - Occupancy Dashboard
+   - Revenue Dashboard
+   - Night Audit Status
+   - Recent Activity
+
+2. Reservations
+   - All Reservations
+   - Create Reservation
+   - Quick Book
+   - Calendar / Availability Grid
+   - Arrivals
+   - Departures
+   - In-House Guests
+   - Online Reservations
+   - OTA / Channel Reservations
+   - Group Reservations
+   - Reservation Transfers
+   - Reservation Extensions
+   - Digital Contracts
+   - Reservation Ratings
+   - Cancellation / No-Show
+
+3. Front Desk
+   - Check-in
+   - Check-out
+   - Walk-in Booking
+   - Guest Registration
+   - Room Assignment
+   - Early Check-in
+   - Late Checkout
+   - Wake-up Calls
+   - IPTV Guest Needs
+   - Registration Cards
+
+4. Rooms & Housekeeping
+   - Rooms / Units
+   - Room Types / Unit Categories
+   - Availability Board
+   - Housekeeping Board
+   - Unit Cleanings
+   - Maintenance Requests
+   - Room Status Log
+   - Unit Media
+   - Unit Features
+   - Unit Options
+   - Category Services Mapping
+
+5. Guests & Profiles
+   - Guest Directory
+   - Customer Profiles
+   - Companies
+   - Company Groups
+   - Blocked Guests
+   - Turnaway Logs
+   - Guest Notes
+   - Highlights
+   - Duplicate Merge
+
+6. POS & Services
+   - POS Dashboard
+   - Service Categories
+   - Services
+   - POS Sale
+   - Service Logs
+   - Quick Payments
+   - POS Transactions
+   - Refunds / Voids
+   - Qoyod Service Mapping
+
+7. Finance & Accounting
+   - Transactions Ledger
+   - Receipts
+   - Payments
+   - Invoices
+   - Credit Notes
+   - ZATCA Reporting
+   - Promissory Notes
+   - Promissory Collections
+   - Cashier Shifts
+   - Checkout Balance Transfers
+   - Banks
+   - Senders / Payment Receivers
+   - Corrections / Reversals
+   - Qoyod Sync
+   - Trial Balance
+   - Paid-outs
+
+8. Night Audit
+   - Night Audit Dashboard
+   - Run Night Audit
+   - Audit History
+   - Occupancy Snapshots
+   - No-Show Processing
+   - Frozen Transactions
+   - Business Date Transactions
+   - Snapshot Queue
+   - Re-run / Recovery
+
+9. Reports & Analytics
+   - Daily Reports
+   - Occupancy Report
+   - Revenue Report
+   - ADR / RevPAR
+   - No-Show Report
+   - Cancellation Report
+   - Commission Report
+   - Paid-outs Report
+   - Trial Balance
+   - Housekeeping Discrepancy
+   - Turnaway Analysis
+   - Source Performance
+   - Company AR
+   - Custom Report Builder
+   - Export Scheduler
+
+10. Marketing & Revenue
+   - Sources / Booking Channels
+   - Offers
+   - Special Prices
+   - Promo Codes
+   - Promo Code Logs
+   - Vouchers
+   - Voucher Mapping
+   - Website Booking Engine
+   - Online Booking Settings
+   - Revenue Rules
+
+11. Website CMS
+   - Website Settings
+   - Website Pages
+   - Website Galleries
+   - SEO
+   - Policies
+   - Intro Video
+   - Public Booking Preview
+
+12. Integrations
+   - Integration Settings
+   - Integration Logs
+   - STA AH
+   - Qoyod
+   - Jawaly SMS
+   - IPTV
+   - Let Link Devices
+   - Webhooks
+   - API Consumers
+   - API Tokens
+   - Test Connections
+
+13. Settings
+   - Hotel Profile
+   - Team Contact Persons
+   - Users
+   - Roles
+   - Permissions
+   - Team Counters / Auto Numbers
+   - Payment Settings
+   - VAT Settings
+   - No-Show Rules
+   - Early/Late Charge Rules
+   - Breakfast Prices
+   - Notifications
+   - Terms & Conditions
+   - Feature Announcements
+   - Related Teams
+   - Subscription Management
+
+14. System Admin
+   - Activity Log
+   - Action Events
+   - Jobs
+   - Failed Jobs
+   - Telescope Logs
+   - Webhook Calls
+   - Device Logins
+   - Short URLs
+   - Form Integrations
+   - Media Library
+   - Data Import
+   - Data Export
+   - Data Cleanup
+   - Audit Trail Viewer
+
+PHASE 6 — CRUD CONTRACT FOR EVERY MODULE
+Every CRUD module must include:
+
+List screen:
+- search
+- filters
+- sort
+- pagination
+- column picker
+- export CSV/Excel/PDF where relevant
+- bulk actions where safe
+- empty state
+- permission-aware action buttons
+
+Create screen:
+- bilingual labels
+- client validation
+- server validation
+- tenant scoping
+- duplicate checks
+- dependent dropdowns
+- save/save-and-new/cancel
+- activity log
+
+View screen:
+- summary card
+- tabs for related records
+- timeline/activity
+- audit changes
+- attachments/media
+- print/download actions
+- integration status where relevant
+
+Edit screen:
+- authorization
+- validation
+- dirty-change tracking
+- audit trail
+- lock/freeze checks
+- recalculation where relevant
+
+Delete screen:
+- soft delete where possible
+- reason required for business-critical records
+- prevent delete when locked/financially posted
+- restore screen where deleted_at exists
+
+Import/export:
+- template download
+- validation preview
+- dry run
+- error report
+- duplicate handling
+- import activity log
+
+PHASE 7 — MODULE REQUIREMENTS
+
+DASHBOARD
+- Real-time occupancy, revenue, arrivals, departures, in-house guests, rooms out of order, housekeeping status, pending payments, night audit status.
+- Configurable widgets per user.
+- Export dashboard PDF/Excel.
+- Drilldown links to source lists.
+
+RESERVATIONS
+Complete:
+- individual reservations
+- group reservations
+- walk-ins
+- online reservations
+- OTA/channel reservations
+- reservation guests
+- contracts
+- signatures
+- room transfers
+- extensions
+- cancellations
+- no-shows
+- check-in/check-out links
+- invoices/transactions/promissories linkage
+- audit locks
+- Shomoos status display
+- pricing recalculation with offers/special prices/source/company/rules
+- bulk check-in/cancel/export/print
+
+FRONT DESK
+Complete:
+- check-in workflow
+- check-out workflow
+- room assignment
+- guest registration
+- ID capture hooks
+- digital signature
+- early check-in charge
+- late checkout charge
+- no-show handling
+- wake-up/IPTV needs
+- registration card print
+- balance validation before checkout
+- checkout balance transfer to promissory/refund/waive/credit note
+
+ROOMS & HOUSEKEEPING
+Complete:
+- unit categories
+- units
+- unit media
+- features/icons/options
+- category services
+- housekeeping board
+- cleaning tasks
+- maintenance tasks
+- room status log
+- bulk status update
+- photos before/after
+- maintenance expected completion
+- mobile/tablet interface
+
+GUESTS & COMPANIES
+Complete:
+- customers
+- customer duplicate merge
+- guests linked to reservations
+- companies
+- company groups
+- company notes
+- blocked guests
+- turnaway logs/reasons
+- comments
+- highlights
+- AR balance display
+- profile timeline
+
+POS & SERVICES
+Complete:
+- service categories
+- services
+- service logs
+- service log notes
+- quick payments
+- POS transactions
+- refunds/voids
+- VAT calculation
+- invoice number generation
+- Qoyod mapping
+- service-to-category/unit mappings
+- reservation charge posting
+
+FINANCE & ACCOUNTING
+Complete:
+- transactions
+- correction/reversal flow
+- receipts/payments
+- invoices
+- credit notes
+- ZATCA status/reporting
+- promissory notes
+- promissory collection logs
+- cashier shifts
+- checkout balance transfers
+- banks
+- senders/payment receivers
+- Qoyod sync
+- trial balance
+- paid-outs
+- immutable audit for posted/closed records
+
+NIGHT AUDIT
+Complete:
+- settings: auto-run time, cutoff, business date
+- manual run
+- rerun with run_number
+- final/non-final snapshots
+- occupancy snapshot
+- revenue snapshot
+- no-show processing
+- business_date assignment
+- transaction freeze
+- service log freeze
+- reservation audit locks
+- failure recovery
+- queue processing
+- detailed audit log
+- report export
+
+REPORTS
+Complete:
+- daily reports
+- occupancy
+- revenue
+- ADR
+- RevPAR
+- no-show
+- cancellation
+- commission
+- trial balance
+- paid-outs
+- housekeeping discrepancy
+- turnaway
+- source performance
+- company AR
+- custom report builder
+- export PDF/Excel/CSV
+- scheduled exports if supported
+
+MARKETING & REVENUE
+Complete:
+- sources/channels
+- offers
+- special prices
+- promo codes
+- promo logs
+- vouchers
+- voucher mapping
+- booking engine pricing
+- revenue rules
+- source commission
+- pricing preview by date/category/channel
+
+WEBSITE CMS
+Complete:
+- website settings
+- pages
+- galleries
+- SEO fields
+- colors/theme
+- terms/policies
+- intro video
+- online reservation management
+- public preview
+
+INTEGRATIONS
+Complete:
+- integrations
+- integration_settings
+- integration_logs
+- STA AH
+- Qoyod
+- Jawaly SMS
+- IPTV
+- Let Link devices
+- webhooks
+- API consumers/tokens
+- test connection button
+- sandbox/mock mode for demo
+- retry failed sync
+- show success/failure rate
+
+SETTINGS
+Complete:
+- team/hotel profile
+- contact persons
+- users
+- roles
+- permissions
+- team counters
+- auto numbers
+- payment settings
+- VAT settings
+- no-show rules
+- early/late charge rules
+- breakfast prices
+- notifications
+- terms
+- announcements
+- media
+- related teams
+- subscriptions
+
+SYSTEM ADMIN
+Complete:
+- activity_log viewer
+- action_events viewer
+- jobs/failed_jobs monitor
+- telescope read-only viewer
+- webhook calls
+- device logins
+- short URLs
+- API tokens
+- form integrations
+- media library
+- bulk import/export
+- audit trail viewer
+- security logs
+
+PHASE 8 — SAUDI COMPLIANCE
+Implement:
+- ZATCA e-invoice generation status.
+- Tax invoice and simplified tax invoice support.
+- Credit/debit note references.
+- QR/XML storage hooks where schema supports it.
+- VAT breakdown on every taxable transaction.
+- Shomoos workflow fields/status for guest registration.
+- Saudi timezone default: Asia/Riyadh.
+- Hijri/Gregorian display support where needed.
+- Arabic printable invoices/contracts/registration cards.
+- Audit history for compliance-sensitive actions.
+
+PHASE 9 — UI/UX REQUIREMENTS
+- Modern responsive layout.
+- Sidebar collapsible and permission-aware.
+- RTL/LTR support.
+- Arabic/English switch.
+- Tablet-optimized housekeeping/front desk.
+- Keyboard shortcuts for front desk.
+- Loading states and skeletons.
+- Toast notifications.
+- Confirmation modals for destructive actions.
+- Print-friendly invoice/contract/report layouts.
+- Empty states and helpful guidance.
+- Accessible labels and contrast.
+
+PHASE 10 — TESTING
+For every module create:
+- Feature tests for list/create/view/edit/delete/restore/export.
+- Policy tests.
+- Tenant isolation tests.
+- Validation tests.
+- Audit log tests.
+- Soft delete tests.
+- Import/export tests.
+- Financial transaction rollback tests.
+- Night audit freeze tests.
+- Seeder test: migrate:fresh --seed passes.
+- Sidebar permission visibility tests.
+
+Critical end-to-end tests:
+- Create reservation → check in → add services → payment → invoice → check out.
+- Group reservation → multiple rooms → company billing → promissory.
+- No-show → night audit charge → invoice/transaction.
+- Room transfer → audit trail → price recalculation.
+- Cashier shift open → transactions → close → variance.
+- Credit note → original invoice reference → ZATCA status.
+- Housekeeping cleaning → status update → room available.
+- Maintenance request → out-of-order → completed → room available.
+- Online reservation → confirm → check-in.
+- Permission denial for unauthorized user.
+- Tenant A cannot access Tenant B data.
+
+PHASE 11 — DELIVERY FORMAT
+For every implementation batch, output:
+1. What tables were covered.
+2. What files were created/updated.
+3. What routes were added.
+4. What permissions were added.
+5. What sidebar items were added.
+6. What seeders were added.
+7. What tests were added.
+8. What remains uncovered.
+9. Commands to run:
+   - composer install/update if needed
+   - php artisan migrate
+   - php artisan db:seed
+   - php artisan test
+   - npm install/build if needed
+
+QUALITY BAR
+- No placeholder CRUD.
+- No fake buttons.
+- No screens without permissions.
+- No forms without validation.
+- No financial edits without audit/correction.
+- No tenant leakage.
+- No hardcoded Arabic/English text inside components if localization exists.
+- No raw SQL where Eloquent/query builder is safer, except for optimized reports with clear reason.
+- No skipped tables.
+
+START NOW
+Step 1: Parse the SQL schema and produce the Schema Coverage Matrix.
+Step 2: Identify missing migrations/enhancements.
+Step 3: Build the seed plan.
+Step 4: Build the sidebar route map.
+Step 5: Implement module by module in priority order:
+   1. Auth/RBAC/team scope
+   2. Dashboard/sidebar
+   3. Reservations/front desk
+   4. Rooms/housekeeping
+   5. Guests/companies
+   6. POS/services
+   7. Finance/invoices/ZATCA
+   8. Night audit
+   9. Reports
+   10. Marketing/website
+   11. Integrations
+   12. Settings/system admin
+Step 6: Run tests and report uncovered items until coverage is 100%.
+```
+
+One extra improvement: remove any claim like “stored procedures already exist” unless you have another DB dump, because the uploaded spec asks for reports based on stored procedures, but the SQL file I inspected did not show procedure definitions. Your schema does clearly include night-audit/no-show and frozen/business-date fields that should drive the locking workflow.  
+
+[1]: https://laravel.com/docs/13.x/migrations "Database: Migrations | Laravel 13.x - The clean stack for Artisans and agents"
+[2]: https://zatca.gov.sa/en/E-Invoicing/Pages/default.aspx "
+	E-Invoicing
+"
+========================================================
+New prompt
+=======================================================
+Below is a **separate prompt pack** you can copy one by one into your coding AI. I upgraded it so every prompt forces: **schema check, options/master data, CRUD, migrations, seeders, routes, dashboard, sidebar, permissions, and no skipped features**.
+
+I also corrected one point from the uploaded SQL: the schema includes stored procedures such as `get_aggregate_history_forecast` and others, plus the `zatca_e_invoices` view, so reports can use existing procedures where present.  Laravel migration work should be done through migration files with `up` and `down` methods, seed data should be ordered through `DatabaseSeeder`, routes should live in Laravel route files, authorization should use gates/policies, and bilingual text should use Laravel localization. ([Laravel][1]) ZATCA e-invoicing must support Phase 1 and Phase 2 requirements, with Phase 2 integration starting January 1, 2023. ([ZATCA][2])
+
+---
+
+# Prompt 1 — Master No-Skip Schema Audit Prompt
+
+```text
+You are a senior Laravel + Vue/React/Inertia architect. You must complete the Fandaqah Hotel PMS from the provided SQL schema. Before writing any feature code, inspect the full SQL schema and create a complete implementation map.
+
+Main rule:
+Do not skip any table, view, stored procedure, sidebar item, CRUD operation, permission, route, migration, seeder, dashboard widget, report, or option/master-data screen.
+
+Use the uploaded SQL schema as the source of truth.
+
+First deliver these files:
+
+1. SCHEMA_AUDIT.md
+Include:
+- total tables
+- total views
+- total stored procedures
+- all table names
+- all views
+- all stored procedures
+- tables with team_id
+- tables without team_id but likely hotel-owned
+- tables with deleted_at
+- tables with business_date / freeze / lock fields
+- tables with money fields
+- tables with JSON/text/meta fields
+- system tables
+- integration tables
+- report tables
+- read-only tables
+- full CRUD tables
+- background/job tables
+- risky schema issues:
+  - missing FK
+  - missing indexes
+  - double/float money columns
+  - missing team scope
+  - nullable required business fields
+  - inconsistent column names
+  - unsupported enum values
+  - duplicate/legacy tables
+
+2. SCHEMA_COVERAGE_MATRIX.md
+For every table/view/procedure include:
+- table/view/procedure name
+- module
+- purpose
+- model
+- migration
+- seeder
+- controller
+- service class
+- FormRequest
+- policy
+- permission keys
+- route names
+- sidebar location
+- CRUD level:
+  - list
+  - create
+  - view
+  - edit
+  - delete
+  - restore
+  - export
+  - import
+  - approve
+  - reverse/correct
+  - run/process
+- dashboard usage
+- report usage
+- audit logging
+- tests
+- status: complete / missing / blocked
+
+3. MODULE_MAP.md
+Group every table into these modules:
+- Dashboard
+- Reservations
+- Front Desk
+- Rooms & Housekeeping
+- Guests & Companies
+- POS & Services
+- Finance & Accounting
+- Night Audit
+- Reports & Analytics
+- Marketing & Revenue
+- Website CMS
+- Integrations
+- Settings
+- System Admin
+
+Rules:
+- If table is business-owned, it needs CRUD unless explicitly system-only.
+- If table is log/history/audit, create read-only list/view/export screens.
+- If table is settings/options/master data, create full CRUD.
+- If table is financial/frozen/audited, never hard delete; use correction/reversal.
+- If table has deleted_at, implement restore.
+- If table has team_id, every query must scope by active team.
+- If table lacks team_id but is hotel-owned, propose migration to add team_id.
+- If reports use existing stored procedures, map procedure to report screen.
+- If a screen needs frontend + route + policy + seeder + test, list all files.
+
+Do not start coding until the coverage matrix has 100% of schema objects mapped.
+```
+
+---
+
+# Prompt 2 — All Features + CRUD Completion Prompt
+
+```text
+Complete all Fandaqah PMS features from the schema. Build every module with full CRUD and advanced workflow actions.
+
+Global CRUD contract for every business module:
+
+List page:
+- search
+- advanced filters
+- date filters where relevant
+- status filters where relevant
+- sort
+- pagination
+- column chooser
+- export CSV/Excel/PDF where relevant
+- import where relevant
+- bulk actions where safe
+- permission-aware buttons
+- empty state
+- mobile/tablet responsive layout
+- Arabic/English labels
+
+Create page:
+- full form
+- quick-create where useful
+- bilingual labels
+- client-side validation
+- server-side FormRequest validation
+- team_id scoping
+- duplicate checks
+- dependent dropdowns
+- save
+- save and new
+- cancel
+- audit/activity log
+
+View page:
+- summary card
+- details tabs
+- related records tabs
+- audit/activity timeline
+- comments/notes where supported
+- attachments/media where supported
+- print/download buttons
+- integration status
+- financial totals where relevant
+
+Edit page:
+- permission check
+- validation
+- dirty change tracking
+- audit trail
+- freeze/business date checks
+- recalculation where needed
+- lock warning for posted/frozen records
+
+Delete page:
+- soft delete when deleted_at exists
+- delete reason for important business records
+- prevent deletion for posted/frozen financial records
+- restore screen when deleted_at exists
+
+Import/export:
+- template download
+- validation preview
+- dry run
+- import error report
+- duplicate handling
+- import activity log
+
+Complete these modules:
+
+1. Dashboard
+- real-time occupancy
+- revenue
+- arrivals
+- departures
+- in-house guests
+- out-of-order rooms
+- housekeeping status
+- pending payments
+- night audit status
+- cashier shift status
+- ZATCA pending invoices
+- integration health
+- configurable widgets per user
+- export dashboard PDF/Excel
+- drilldown to source screens
+
+2. Reservations
+CRUD and workflow for:
+- all reservations
+- create reservation
+- quick book
+- individual reservation
+- group reservation
+- online reservation
+- OTA/channel reservation
+- arrivals board
+- departures board
+- in-house guests
+- calendar/availability grid
+- reservation guests
+- reserved rooms
+- contracts
+- digital signatures
+- transfers/room moves
+- extensions
+- cancellations
+- no-show
+- ratings/feedback
+- message logs
+- reservation services
+- invoices
+- transactions
+- promissories
+- audit locks
+- Shomoos status
+- STA AH/Qoyod mapping where schema supports it
+
+Special actions:
+- check in
+- check out
+- cancel
+- mark no-show
+- extend stay
+- transfer room
+- apply offer
+- apply special price
+- generate contract
+- collect payment
+- generate invoice
+- print invoice
+- bulk check-in
+- bulk cancel
+- bulk export
+- bulk print
+
+3. Front Desk
+Build:
+- check-in workflow
+- check-out workflow
+- walk-in booking
+- guest registration
+- ID/shomoos capture fields
+- room assignment
+- room swap
+- early check-in charge
+- late checkout charge
+- no-show handling
+- wake-up calls
+- IPTV guest needs
+- registration card print
+- digital signature capture
+- checkout balance transfer:
+  - promissory
+  - refund
+  - waive
+  - credit note
+
+4. Rooms & Housekeeping
+CRUD:
+- units
+- unit categories
+- unit media
+- unit category services
+- unit feature icons
+- unit general features
+- unit special features
+- unit options
+- unit cleanings
+- unit maintenances
+- room status log read-only
+- occupied/occupied rooms read-only or workflow-managed
+
+Special actions:
+- change room status
+- assign cleaning
+- start cleaning
+- complete cleaning
+- upload cleaning photo
+- open maintenance
+- assign maintenance
+- complete maintenance
+- upload completion photo
+- bulk status update
+- bulk maintenance scheduling
+
+5. Guests & Companies
+CRUD:
+- customers
+- guests
+- reservation guests
+- companies
+- company groups
+- company notes
+- blocked guests
+- turnaway logs
+- turnaway reasons
+- comments
+- highlights
+- highlightables
+
+Special actions:
+- merge duplicate customers
+- block guest
+- unblock guest
+- link customer to reservation
+- add note
+- add highlight
+- view AR balance
+- view customer timeline
+- view company reservations/promissories
+
+6. POS & Services
+CRUD:
+- service categories
+- services
+- service logs
+- service log notes
+- quick payments
+- POS transactions
+- service category Qoyod mapping
+- service Qoyod mapping
+- reservation services
+- unit category services
+
+Special actions:
+- create POS sale
+- add service to reservation
+- calculate VAT/EWA
+- collect payment
+- generate invoice number
+- void transaction
+- refund transaction
+- issue credit note
+- sync Qoyod mapping
+
+7. Finance & Accounting
+CRUD/workflows:
+- transactions
+- transaction Qoyod mapping
+- invoices
+- reservation invoices
+- invoice credit notes
+- invoice transfers
+- checkout balance transfers
+- promissories
+- promissory payment log
+- payment logs
+- cashier shifts
+- banks
+- senders
+- commission payments
+- business date transactions
+- subscription invoices/payments if SaaS admin enabled
+- wallets if used by schema
+
+Special actions:
+- create payment
+- create receipt
+- reverse/correct transaction
+- open cashier shift
+- close cashier shift
+- approve cashier shift
+- calculate variance
+- generate invoice
+- issue credit note
+- send/report to ZATCA
+- Qoyod sync
+- transfer balance
+- collect promissory
+
+8. Night Audit
+Build complete workflow:
+- night audit dashboard
+- run night audit
+- rerun night audit
+- show progress
+- show failed step
+- recover failed run
+- generate occupancy snapshot
+- process no-show
+- freeze reservations/transactions/service logs
+- business date assignment
+- audit locks
+- daily report generation
+- snapshot queue processing
+- export audit report
+
+9. Reports & Analytics
+Screens:
+- daily reports
+- occupancy report
+- revenue report
+- ADR / RevPAR
+- no-show report
+- cancellation report
+- commission report
+- paid-outs
+- trial balance
+- housekeeping discrepancy
+- turnaway analysis
+- source performance
+- company AR
+- integration logs
+- activity logs
+- custom report builder
+- export scheduler
+
+Use existing stored procedures where present. If a report procedure exists, use it safely with team_id and date filters. If no procedure exists, create query/service class.
+
+10. Marketing & Revenue
+CRUD:
+- sources/channels
+- offers
+- special prices
+- promo codes
+- promo code logs
+- vouchers
+- voucher entity mapping
+- revenue rules if migration added
+
+Special actions:
+- apply source commission
+- apply offer
+- validate promo code
+- redeem voucher
+- pricing preview by date/category/channel
+- dynamic pricing suggestion if enabled
+
+11. Website CMS
+CRUD:
+- website settings
+- website pages
+- website galleries
+- SEO metadata
+- policies
+- intro video
+- public booking preview
+- online reservations management
+
+12. Integrations
+CRUD/admin:
+- integrations
+- integration settings
+- integration logs
+- form integrations
+- STA AH sync
+- Qoyod sync
+- Jawaly SMS
+- IPTV
+- Let Link devices
+- public API consumers
+- API tokens
+- webhook calls
+- short URLs
+- verification tokens
+- OAuth/API tables where relevant
+
+Special actions:
+- test connection
+- retry failed sync
+- view success/failure rate
+- approve/reject form integration
+- generate/revoke API token
+
+13. Settings
+CRUD:
+- teams/hotel profile
+- contact persons
+- users
+- roles
+- permissions
+- role_permission
+- role_user
+- team users
+- team counters
+- auto numbers
+- settings
+- payment settings
+- VAT settings
+- breakfast prices
+- no-show charge rules
+- early/late charge configs
+- notification controls
+- scheduled notifications
+- terms
+- announcements
+- feature announcements
+- media
+- related teams
+- subscriptions/plans if SaaS enabled
+
+14. System Admin
+Screens:
+- activity_log viewer
+- action_events viewer
+- jobs
+- failed_jobs
+- telescope entries
+- telescope tags
+- telescope monitoring
+- device logins
+- webhook calls
+- sessions
+- password resets
+- OAuth clients/tokens
+- cache read-only/admin if needed
+- data import
+- data export
+- data cleanup
+- audit trail viewer
+
+Acceptance:
+For every module, output:
+- routes
+- controllers
+- models
+- migrations
+- seeders
+- permissions
+- sidebar item
+- dashboard widgets
+- tests
+- status complete
+- remaining gaps
+
+Do not stop until every schema object is mapped and every business feature has CRUD or documented read-only/system handling.
+```
+
+---
+
+# Prompt 3 — Sidebar + Dashboard View Prompt
+
+```text
+Build the complete Fandaqah PMS sidebar and dashboard. The sidebar must be dynamic, bilingual, permission-aware, team-aware, responsive, collapsible, searchable, and grouped by module.
+
+Create a sidebar registry if no existing table/config exists.
+
+Each sidebar item must include:
+- id/key
+- label_en
+- label_ar
+- icon
+- route_name
+- url
+- permission
+- module
+- parent_key
+- order
+- children
+- badge_count_query
+- active_route_patterns
+- is_visible
+- is_beta
+- is_external
+- device_visibility: desktop/tablet/mobile
+- created_at/updated_at
+
+Sidebar groups and children:
+
+1. Dashboard
+- Main Dashboard
+- Occupancy Dashboard
+- Revenue Dashboard
+- Front Desk Dashboard
+- Housekeeping Dashboard
+- Finance Dashboard
+- Night Audit Status
+- Recent Activity
+- Integration Health
+- ZATCA Queue
+
+2. Reservations
+- All Reservations
+- Create Reservation
+- Quick Book
+- Calendar / Availability Grid
+- Arrivals
+- Departures
+- In-House Guests
+- Online Reservations
+- OTA / Channel Reservations
+- Group Reservations
+- Reservation Guests
+- Reserved Rooms
+- Reservation Transfers
+- Reservation Extensions
+- Digital Contracts
+- Digital Signatures
+- Reservation Ratings
+- Cancellation / No-Show
+- Reservation Messages
+- Reservation Audit Locks
+
+3. Front Desk
+- Check-in
+- Check-out
+- Walk-in Booking
+- Guest Registration
+- Room Assignment
+- Room Swap
+- Early Check-in
+- Late Checkout
+- No-Show Handling
+- Wake-up Calls
+- IPTV Guest Needs
+- Registration Cards
+- Checkout Balance Transfer
+
+4. Rooms & Housekeeping
+- Rooms / Units
+- Room Types / Unit Categories
+- Availability Board
+- Room Status Board
+- Housekeeping Board
+- Unit Cleanings
+- Maintenance Requests
+- Room Status Log
+- Unit Media
+- Unit Features
+- Unit Options
+- Unit General Features
+- Unit Special Features
+- Unit Category Services
+
+5. Guests & Companies
+- Guest Directory
+- Customer Profiles
+- Guests
+- Reservation Guests
+- Companies
+- Company Groups
+- Company Notes
+- Blocked Guests
+- Turnaway Logs
+- Turnaway Reasons
+- Guest Notes
+- Comments
+- Highlights
+- Duplicate Merge
+
+6. POS & Services
+- POS Dashboard
+- Service Categories
+- Services
+- POS Sale
+- Service Logs
+- Service Log Notes
+- Quick Payments
+- POS Transactions
+- Refunds / Voids
+- Reservation Services
+- Qoyod Service Mapping
+- Unit Category Services
+
+7. Finance & Accounting
+- Transactions Ledger
+- Receipts
+- Payments
+- Invoices
+- Reservation Invoices
+- Credit Notes
+- Invoice Transfers
+- ZATCA Reporting
+- Promissory Notes
+- Promissory Collections
+- Cashier Shifts
+- Checkout Balance Transfers
+- Business Date Transactions
+- Banks
+- Senders / Payment Receivers
+- Commission Payments
+- Corrections / Reversals
+- Qoyod Sync
+- Trial Balance
+- Paid-outs
+
+8. Night Audit
+- Night Audit Dashboard
+- Run Night Audit
+- Audit History
+- Occupancy Snapshots
+- No-Show Processing
+- No-Show Rules
+- Frozen Transactions
+- Business Date Transactions
+- Snapshot Queue
+- Re-run / Recovery
+- Night Audit Reports
+
+9. Reports & Analytics
+- Daily Reports
+- Occupancy Report
+- Revenue Report
+- ADR / RevPAR
+- Forecast & History
+- No-Show Report
+- Cancellation Report
+- Commission Report
+- Paid-outs Report
+- Trial Balance
+- Housekeeping Discrepancy
+- Turnaway Analysis
+- Source Performance
+- Company AR
+- Guest Demographics
+- Integration Logs
+- Activity Logs
+- Custom Report Builder
+- Export Scheduler
+
+10. Marketing & Revenue
+- Sources / Booking Channels
+- Offers
+- Special Prices
+- Promo Codes
+- Promo Code Logs
+- Vouchers
+- Voucher Mapping
+- Website Booking Engine
+- Online Booking Settings
+- Revenue Rules
+- Pricing Preview
+
+11. Website CMS
+- Website Settings
+- Website Pages
+- Website Galleries
+- SEO
+- Policies
+- Intro Video
+- Terms Display
+- Public Booking Preview
+
+12. Integrations
+- Integration Settings
+- Integration Logs
+- STA AH
+- Qoyod
+- Jawaly SMS
+- IPTV
+- Let Link Devices
+- Form Integrations
+- Webhooks
+- API Consumers
+- API Tokens
+- OAuth Clients
+- Test Connections
+
+13. Settings
+- Hotel Profile
+- Team Contact Persons
+- Users
+- Roles
+- Permissions
+- Team Users
+- Team Counters / Auto Numbers
+- Payment Settings
+- VAT Settings
+- No-Show Rules
+- Early/Late Charge Rules
+- Breakfast Prices
+- Notifications
+- Scheduled Notifications
+- Terms & Conditions
+- Feature Announcements
+- Announcements
+- Media Library
+- Related Teams
+- Subscription Management
+- Plans
+
+14. System Admin
+- Activity Log
+- Action Events
+- Jobs
+- Failed Jobs
+- Telescope Logs
+- Webhook Calls
+- Device Logins
+- Sessions
+- Short URLs
+- Form Integrations
+- Media Library
+- Data Import
+- Data Export
+- Data Cleanup
+- Audit Trail Viewer
+- Security Logs
+
+Dashboard widgets:
+
+Main dashboard:
+- occupancy %
+- available rooms
+- occupied rooms
+- out-of-order rooms
+- arrivals today
+- departures today
+- in-house guests
+- pending check-ins
+- pending check-outs
+- today revenue
+- MTD revenue
+- pending payments
+- open cashier shifts
+- night audit status
+- ZATCA pending invoices
+- failed integrations
+- recent activity
+
+Front desk dashboard:
+- arrivals
+- departures
+- in-house
+- no-show candidates
+- unpaid balances
+- room assignment pending
+
+Housekeeping dashboard:
+- dirty rooms
+- clean rooms
+- inspection pending
+- maintenance rooms
+- overdue cleaning tasks
+
+Finance dashboard:
+- today collections
+- cash/card/bank totals
+- open cashier shift totals
+- promissory outstanding
+- invoices pending ZATCA
+- credit notes
+
+Night audit dashboard:
+- current business date
+- last run time
+- next scheduled run
+- failed steps
+- frozen transactions
+- occupancy snapshot
+- no-show charges
+- rerun button with permission
+
+Requirements:
+- Use permissions to show/hide every sidebar child.
+- Badges must update from queries.
+- Sidebar must support Arabic RTL and English LTR.
+- Dashboard cards must link to the relevant list screens.
+- Add tests for sidebar visibility per role.
+- Add seed data for sidebar items and dashboard widget defaults.
+```
+
+---
+
+# Prompt 4 — Options / Master Data Prompt
+
+```text
+Create a complete Options & Master Data module for Fandaqah PMS. This module must expose all configuration and lookup tables as full CRUD screens unless the table is system-only.
+
+Create menu:
+Settings → Options & Master Data
+
+Required option groups:
+
+1. Hotel / Team Options
+Tables:
+- teams
+- team_contact_persons
+- team_counters
+- team_users
+- related_teams
+- settings
+- auto_numbers
+- hotel_types
+
+CRUD:
+- hotel profile
+- contact persons
+- auto numbering
+- counters
+- related teams
+- global settings
+- hotel types
+
+2. Location / Identity Options
+Tables:
+- countries
+- cities
+- id_types
+
+CRUD:
+- countries
+- cities
+- ID types
+- nationality labels
+- Arabic/English names
+
+3. User / Role Options
+Tables:
+- users
+- roles
+- role_user
+- role_permission
+- permissions if present or create migration
+
+CRUD:
+- users
+- roles
+- permissions
+- assign role to user
+- assign permissions to role
+- activate/deactivate user
+- reset password flow
+- impersonation only for authorized role
+
+4. Reservation Options
+Tables:
+- sources
+- offers
+- special_prices
+- promo_codes
+- vouchers
+- voucher_entity
+- breakfast_prices
+- early_late_charge_configs
+- no_show_charge_rules
+
+CRUD:
+- booking sources
+- source commission
+- offers
+- special prices
+- promo codes
+- vouchers
+- breakfast prices
+- early/late charge rules
+- no-show charge rules
+
+5. Room Options
+Tables:
+- unit_categories
+- unit_options
+- unit_feature_icons
+- unit_general_feature
+- unit_special_features
+- unit_category_services
+
+CRUD:
+- room categories
+- room options
+- feature icons
+- general features
+- special features
+- category service mapping
+- pricing setup
+- min/max guests
+- weekday prices
+- hourly/daily/monthly prices
+
+6. Guest / Company Options
+Tables:
+- customer
+- companies
+- company_groups
+- blocked_guests
+- turnaway_reasons
+- highlights
+- highlightables
+
+CRUD:
+- customer categories if present/create constants
+- company groups
+- blocked guest reasons
+- turnaway reasons
+- highlights/tags
+
+7. POS / Service Options
+Tables:
+- service_categories
+- services
+- service_category_qoyods
+- service_qoyods
+- unit_category_services
+
+CRUD:
+- service categories
+- services
+- VAT option
+- Qoyod mappings
+- category display order
+- assign services to room category
+
+8. Finance Options
+Tables:
+- banks
+- senders
+- payment settings if existing settings table
+- ewa_mappers
+- ewa_mapper_qoyods
+- term_qoyods
+- leasing_categories
+- leasing_category_qoyods
+
+CRUD:
+- bank accounts
+- payment receivers
+- EWA mappers
+- Qoyod finance mappings
+- leasing categories
+- payment methods
+- VAT settings
+- gateway settings
+
+9. Notification Options
+Tables:
+- notification_controls
+- scheduled_notifications
+- notifications
+- pms_notifications
+- jawaly_sms_log read-only
+
+CRUD:
+- notification control
+- scheduled notifications
+- SMS templates
+- email templates if table exists or config
+- PMS notifications read/update
+- SMS logs read-only
+
+10. Website Options
+Tables:
+- website_settings
+- website_pages
+- website_galleries
+- terms
+- announcements
+- feature_announcements
+- media
+
+CRUD:
+- website settings
+- pages
+- galleries
+- terms
+- announcements
+- feature announcements
+- media upload/delete
+
+11. Integration Options
+Tables:
+- integrations
+- integration_settings
+- integration_logs
+- form_integrations
+- public_api_consumers
+- api_tokens
+- let_link_devices
+- webhook_calls
+- short_urls
+- verificator_tokens
+
+CRUD/admin:
+- integrations
+- integration settings
+- public API consumers
+- API tokens
+- Let Link devices
+- short URLs
+- form integrations approve/reject
+- integration logs read-only
+- webhook logs read-only
+- test connection action
+
+For every option screen:
+- list/create/view/edit/delete/restore/export/import where relevant
+- bilingual labels
+- status active/inactive
+- order field if applicable
+- team_id scoping
+- duplicate prevention
+- audit log
+- permissions
+- seed data
+- route
+- sidebar item
+- tests
+
+If an option is currently stored as enum/constants, create a centralized config/enums file and expose it as read-only unless business users must edit it.
+```
+
+---
+
+# Prompt 5 — Migration Prompt
+
+```text
+Create complete Laravel migrations for the Fandaqah PMS schema and enhancements.
+
+Rules:
+- Use the SQL schema as the baseline.
+- Preserve existing table names and columns unless a safe enhancement is required.
+- Use Laravel migrations only. Do not manually alter DB.
+- Every migration must have reversible down() logic where safe.
+- Preserve indexes, foreign keys, nullable rules, defaults, comments, charset/collation, soft deletes.
+- Use decimal for new money columns.
+- Do not create duplicate tables.
+- Do not drop data.
+- Use dependency order.
+
+Migration deliverables:
+
+1. Baseline migrations
+Create migrations grouped by dependency:
+- system/core tables
+- users/roles/permissions
+- teams/settings
+- locations/lookup
+- rooms/unit tables
+- customers/companies
+- reservations
+- front desk workflows
+- POS/services
+- finance/invoices/transactions
+- promissory/cashier shifts
+- night audit
+- reports/procedures/views
+- marketing/revenue
+- website CMS
+- integrations
+- logs/system admin
+
+2. Enhancement migrations
+Add only if missing:
+- team_id to hotel-owned tables
+- indexes:
+  - team_id
+  - status
+  - deleted_at
+  - business_date
+  - date_in_time
+  - date_out_time
+  - reservation_id
+  - customer_id
+  - company_id
+  - unit_id
+  - unit_category_id
+  - transaction_id
+  - invoice_id
+  - cashier_shift_id
+  - created_at
+- foreign keys where safe
+- sidebar/menu registry if no existing equivalent:
+  - sidebar_items
+  - dashboard_widgets
+  - user_dashboard_widgets
+- permissions table if not existing
+- import/export logs if not existing
+- correction/reversal columns if missing
+- audit reason columns for destructive actions if missing
+
+3. Views and procedures
+- Preserve existing SQL views such as ZATCA invoice view.
+- Preserve existing stored procedures used for reports.
+- Put raw SQL view/procedure creation in migrations with DB::unprepared.
+- Add down() to drop view/procedure safely.
+- Document every procedure and which report uses it.
+
+4. Migration output required
+For each migration:
+- file name
+- purpose
+- tables touched
+- columns added/changed
+- indexes added
+- FK added
+- rollback behavior
+- related model
+- related seeder
+- related route/sidebar feature
+
+5. Safety
+- For production, create backup instructions.
+- For legacy production DB, do not run migrate:fresh.
+- For local/demo, support php artisan migrate:fresh --seed.
+- Add tests that migrations run successfully.
+```
+
+---
+
+# Prompt 6 — Demo Seeder Prompt
+
+```text
+Create complete demo seed data for Fandaqah PMS. Seed data must cover every module, sidebar item, dashboard widget, role, permission, and important workflow.
+
+Rules:
+- Use DatabaseSeeder to call seeders in correct dependency order.
+- Every seeder must be idempotent or safe to rerun where practical.
+- Use factories where practical.
+- Use realistic Saudi hotel data.
+- Use team_id on all tenant-owned rows.
+- Use Arabic and English names.
+- Use valid relationships.
+- No orphan rows.
+- No FK errors.
+- Support php artisan migrate:fresh --seed.
+
+Seeder order:
+
+1. CountryCitySeeder
+- Saudi Arabia
+- major cities: Riyadh, Jeddah, Makkah, Madinah, Dammam, Khobar, Abha
+- countries for guest nationalities
+
+2. HotelTypeSeeder
+- Hotel
+- Furnished Apartments
+- Resort
+- Aparthotel
+
+3. TeamSeeder
+- at least 1 demo hotel/team
+- full billing details
+- VAT number
+- commercial registration
+- address
+- contact info
+- timezone Asia/Riyadh
+- night audit settings
+
+4. UserRolePermissionSeeder
+Create roles:
+- Super Admin
+- Hotel Owner
+- General Manager
+- Front Desk Manager
+- Front Desk Agent
+- Housekeeping Supervisor
+- Housekeeper
+- Maintenance User
+- Accountant
+- Cashier
+- Revenue Manager
+- Marketing Manager
+- Auditor
+- Integration Admin
+- Read-only Viewer
+
+Create permissions for every module:
+- view
+- create
+- update
+- delete
+- restore
+- export
+- import
+- approve
+- reverse
+- run
+- print
+- sync
+- test
+- cancel
+- checkin
+- checkout
+- transfer
+- extend
+- noshow
+
+Create demo users for each major role.
+
+5. SidebarSeeder
+Seed all sidebar groups and children:
+- dashboard
+- reservations
+- front desk
+- rooms & housekeeping
+- guests & companies
+- POS & services
+- finance
+- night audit
+- reports
+- marketing
+- website CMS
+- integrations
+- settings
+- system admin
+
+6. DashboardWidgetSeeder
+Seed default widgets:
+- occupancy %
+- available rooms
+- arrivals
+- departures
+- revenue
+- payments
+- night audit
+- housekeeping
+- ZATCA pending
+- failed integrations
+- recent activity
+
+7. TeamSettingsSeeder
+- VAT %
+- payment settings
+- business date
+- night audit cutoff
+- invoice numbering
+- reservation numbering
+- language defaults
+- SMS/email settings mock mode
+
+8. PaymentMethodBankSenderSeeder
+- cash
+- credit card
+- Mada
+- bank transfer
+- STC Pay if needed
+- demo bank
+- demo senders/payment receivers
+
+9. UnitCategorySeeder
+Create at least:
+- Standard Room
+- Deluxe Room
+- Junior Suite
+- Family Suite
+- Apartment
+Each with Arabic/English name, daily/hourly/monthly prices, guest count, bed count, weekday prices.
+
+10. UnitFeatureOptionSeeder
+Seed:
+- WiFi
+- parking
+- breakfast
+- sea/city view
+- smoking/non-smoking
+- accessibility
+- TV/IPTV
+- minibar
+- room options/features/icons
+
+11. UnitSeeder
+Create 30+ rooms:
+- mixed categories
+- floors
+- room numbers
+- statuses:
+  - available
+  - occupied
+  - cleaning
+  - maintenance
+  - out of order
+- IPTV MAC sample
+- QR code fields if present
+
+12. CustomerSeeder
+Create 20+ customers:
+- Saudi citizen
+- GCC guest
+- tourist
+- business guest
+- VIP
+- member
+- corporate guest
+- ID/passport/visa fields where schema supports
+- Arabic/English contact details
+
+13. CompanyAndGroupSeeder
+Create:
+- 2 company groups
+- 5 companies
+- tax number
+- credit limit
+- payment terms
+- contact people
+
+14. SourceChannelSeeder
+Create:
+- Walk-in
+- Phone
+- Website
+- Booking.com
+- Expedia
+- Corporate
+- Travel Agent
+- STA AH mock channel
+
+15. OfferSpecialPricePromoSeeder
+Create:
+- weekday special price
+- weekend special price
+- percentage offer
+- fixed discount offer
+- promo code
+- voucher
+
+16. ReservationSeeder
+Create:
+- individual reservation
+- group reservation
+- walk-in
+- online reservation
+- OTA/channel reservation
+- checked-in reservation
+- checked-out reservation
+- cancelled reservation
+- no-show reservation
+- extended reservation
+- transferred reservation
+- complimentary/house-use/day-use if schema supports
+
+17. ReservationGuestSeeder
+- main guest
+- additional guest
+- family guests
+- linked reservation guests
+
+18. CheckinCheckoutSeeder
+- check-in records
+- check-out records
+- digital signatures
+- registration card fields
+
+19. ServiceCategorySeeder
+- Restaurant
+- Room Service
+- Laundry
+- Transportation
+- Minibar
+- Miscellaneous
+
+20. ServiceSeeder
+- breakfast
+- dinner
+- laundry
+- airport pickup
+- minibar item
+- extra bed
+- late checkout fee
+- early check-in fee
+
+21. POSServiceLogSeeder
+- service sale linked to reservation
+- direct POS sale
+- service notes
+- VAT/EWA totals
+
+22. TransactionSeeder
+Create:
+- cash payment
+- card payment
+- bank transfer
+- deposit
+- withdrawal
+- refund
+- correction/reversal
+- insurance/deposit if schema supports
+
+23. InvoiceCreditNoteSeeder
+- reservation invoice
+- POS invoice
+- simplified tax invoice
+- tax invoice
+- credit note
+- ZATCA pending/reported statuses
+
+24. PromissorySeeder
+- promissory note
+- partial collection
+- fulfilled promissory
+
+25. CashierShiftSeeder
+- open shift
+- closed shift
+- variance example
+
+26. HousekeepingSeeder
+- pending cleaning
+- in-progress cleaning
+- completed cleaning with notes/photos
+- room status changes
+
+27. MaintenanceSeeder
+- open maintenance
+- assigned maintenance
+- completed maintenance
+- out-of-order room
+
+28. NightAuditSeeder
+- night audit run
+- occupancy snapshot
+- no-show log
+- business date transaction
+- snapshot queue
+
+29. WebsiteSeeder
+- website settings
+- home page
+- about page
+- rooms page
+- contact page
+- gallery
+- policies
+- SEO fields
+
+30. IntegrationSeeder
+- integrations in sandbox/mock mode:
+  - ZATCA
+  - Qoyod
+  - STA AH
+  - Jawaly SMS
+  - IPTV
+  - Let Link
+- integration settings
+- integration logs success/failure
+
+31. NotificationSeeder
+- notification controls
+- scheduled notifications
+- PMS notifications
+- SMS log sample
+
+32. ReportSeeder
+- daily report
+- performance indicators
+- report scheduler if supported
+
+After seeding, output:
+- login users/passwords
+- seeded counts per table
+- demo workflows available
+- command:
+  php artisan migrate:fresh --seed
+- tests that confirm seeded data exists
+```
+
+---
+
+# Prompt 7 — Routes, Controllers, Services Prompt
+
+```text
+Create the full route/controller/service structure for Fandaqah PMS.
+
+Rules:
+- Use route names consistently.
+- Protect all routes with auth, verified if used, team scope, and permission middleware.
+- Use resource controllers for normal CRUD.
+- Use custom action routes for workflows.
+- Every route must map to sidebar item or hidden workflow action.
+- Every route must have policy authorization.
+- Every route must have tests.
+
+Route naming convention:
+module.resource.action
+
+Example:
+reservations.index
+reservations.create
+reservations.store
+reservations.show
+reservations.edit
+reservations.update
+reservations.destroy
+reservations.restore
+reservations.export
+reservations.import
+reservations.checkin
+reservations.checkout
+reservations.cancel
+reservations.transfer
+reservations.extend
+reservations.noshow
+
+Create these route groups:
+
+1. Dashboard
+GET /dashboard
+GET /dashboard/occupancy
+GET /dashboard/revenue
+GET /dashboard/front-desk
+GET /dashboard/housekeeping
+GET /dashboard/finance
+GET /dashboard/night-audit
+GET /dashboard/integration-health
+POST /dashboard/widgets
+PATCH /dashboard/widgets/{widget}
+
+2. Reservations
+Route::resource('reservations')
+POST /reservations/{reservation}/check-in
+POST /reservations/{reservation}/check-out
+POST /reservations/{reservation}/cancel
+POST /reservations/{reservation}/no-show
+POST /reservations/{reservation}/extend
+POST /reservations/{reservation}/transfer
+POST /reservations/{reservation}/contract
+POST /reservations/{reservation}/signature
+GET /reservations-calendar
+GET /arrivals
+GET /departures
+GET /in-house-guests
+Route::resource('online-reservations')
+Route::resource('ota-reservations')
+Route::resource('group-reservations')
+Route::resource('reservation-guests')
+Route::resource('reservation-transfers')->only(index, show)
+Route::resource('reservation-extensions')->only(index, show)
+Route::resource('reservation-contracts')
+Route::resource('reservation-ratings')
+
+3. Front Desk
+GET /front-desk
+GET /front-desk/check-in
+POST /front-desk/check-in/{reservation}
+GET /front-desk/check-out
+POST /front-desk/check-out/{reservation}
+GET /front-desk/walk-in
+POST /front-desk/walk-in
+GET /front-desk/room-assignment
+POST /front-desk/room-assignment
+POST /front-desk/room-swap
+Route::resource('guest-registrations')
+Route::resource('iptv-guest-needs')
+Route::resource('wake-up-calls')
+POST /checkout-balance-transfers
+
+4. Rooms & Housekeeping
+Route::resource('units')
+Route::resource('unit-categories')
+Route::resource('unit-media')
+Route::resource('unit-cleanings')
+POST /unit-cleanings/{cleaning}/start
+POST /unit-cleanings/{cleaning}/complete
+Route::resource('unit-maintenances')
+POST /unit-maintenances/{maintenance}/assign
+POST /unit-maintenances/{maintenance}/complete
+GET /room-status-log
+POST /units/bulk-status
+Route::resource('unit-options')
+Route::resource('unit-feature-icons')
+Route::resource('unit-general-features')
+Route::resource('unit-special-features')
+Route::resource('unit-category-services')
+
+5. Guests & Companies
+Route::resource('customers')
+POST /customers/merge
+Route::resource('guests')
+Route::resource('companies')
+Route::resource('company-groups')
+Route::resource('company-notes')
+Route::resource('blocked-guests')
+Route::resource('turnaway-logs')
+Route::resource('turnaway-reasons')
+Route::resource('comments')
+Route::resource('highlights')
+POST /highlightables
+DELETE /highlightables/{highlightable}
+
+6. POS & Services
+GET /pos
+Route::resource('service-categories')
+Route::resource('services')
+Route::resource('service-logs')
+Route::resource('service-log-notes')
+Route::resource('quick-payments')
+Route::resource('pos-transactions')
+POST /pos/sale
+POST /pos-transactions/{transaction}/void
+POST /pos-transactions/{transaction}/refund
+Route::resource('service-qoyods')
+Route::resource('service-category-qoyods')
+
+7. Finance & Accounting
+Route::resource('transactions')
+POST /transactions/{transaction}/reverse
+POST /transactions/{transaction}/correct
+Route::resource('invoices')
+Route::resource('reservation-invoices')
+Route::resource('invoice-credit-notes')
+Route::resource('invoice-transfers')
+Route::resource('promissories')
+POST /promissories/{promissory}/collect
+Route::resource('cashier-shifts')
+POST /cashier-shifts/open
+POST /cashier-shifts/{shift}/close
+POST /cashier-shifts/{shift}/approve
+Route::resource('checkout-balance-transfers')
+Route::resource('banks')
+Route::resource('senders')
+Route::resource('commission-payments')
+GET /zatca/e-invoices
+POST /zatca/e-invoices/{invoice}/report
+POST /qoyod/sync/{type}/{id}
+
+8. Night Audit
+GET /night-audit
+POST /night-audit/run
+POST /night-audit/rerun/{run}
+GET /night-audit/history
+GET /night-audit/snapshots
+GET /night-audit/no-shows
+POST /night-audit/no-shows/process
+GET /night-audit/frozen-transactions
+GET /night-audit/business-date-transactions
+GET /night-audit/snapshot-queue
+POST /night-audit/snapshot-queue/{item}/retry
+
+9. Reports
+GET /reports/daily
+GET /reports/occupancy
+GET /reports/revenue
+GET /reports/adr-revpar
+GET /reports/forecast-history
+GET /reports/no-show
+GET /reports/cancellation
+GET /reports/commission
+GET /reports/paid-outs
+GET /reports/trial-balance
+GET /reports/housekeeping-discrepancy
+GET /reports/turnaway
+GET /reports/source-performance
+GET /reports/company-ar
+Route::resource('custom-reports')
+Route::resource('report-schedules')
+
+10. Marketing & Revenue
+Route::resource('sources')
+Route::resource('offers')
+Route::resource('special-prices')
+Route::resource('promo-codes')
+Route::resource('promo-code-logs')->only(index, show)
+Route::resource('vouchers')
+Route::resource('voucher-entities')
+GET /pricing-preview
+POST /pricing-preview/calculate
+
+11. Website CMS
+Route::resource('website-settings')
+Route::resource('website-pages')
+Route::resource('website-galleries')
+Route::resource('terms')
+Route::resource('announcements')
+Route::resource('feature-announcements')
+GET /website/preview
+
+12. Integrations
+Route::resource('integrations')
+Route::resource('integration-settings')
+Route::resource('integration-logs')->only(index, show)
+POST /integrations/{integration}/test
+POST /integrations/{integration}/sync
+Route::resource('form-integrations')
+POST /form-integrations/{form}/approve
+POST /form-integrations/{form}/reject
+Route::resource('public-api-consumers')
+Route::resource('api-tokens')
+Route::resource('let-link-devices')
+Route::resource('webhook-calls')->only(index, show)
+Route::resource('short-urls')
+Route::resource('verificator-tokens')
+
+13. Settings
+Route::resource('teams')
+Route::resource('team-contact-persons')
+Route::resource('users')
+Route::resource('roles')
+Route::resource('permissions')
+Route::resource('team-counters')
+Route::resource('auto-numbers')
+Route::resource('settings')
+Route::resource('breakfast-prices')
+Route::resource('early-late-charge-configs')
+Route::resource('no-show-charge-rules')
+Route::resource('notification-controls')
+Route::resource('scheduled-notifications')
+Route::resource('media')
+Route::resource('related-teams')
+Route::resource('plans')
+Route::resource('subscriptions')
+
+14. System Admin
+GET /system/activity-log
+GET /system/action-events
+GET /system/jobs
+GET /system/failed-jobs
+POST /system/failed-jobs/{job}/retry
+GET /system/telescope
+GET /system/device-logins
+GET /system/sessions
+GET /system/security-logs
+GET /system/data-import
+POST /system/data-import
+GET /system/data-export
+POST /system/data-export
+GET /system/audit-trail
+
+For every route, create:
+- controller method
+- service method
+- FormRequest where create/update/action
+- Resource/DTO response
+- policy check
+- route test
+- sidebar link if visible
+- permission key
+```
+
+---
+
+# Prompt 8 — Acceptance, Testing, and “No Skip” Final Audit Prompt
+
+```text
+Run a full completion audit for Fandaqah PMS.
+
+You must verify:
+
+1. Schema coverage
+- every table mapped
+- every view mapped
+- every stored procedure mapped
+- every business table has CRUD
+- every log/history table has read-only viewer/export
+- every system table has correct handling
+- every option/master-data table has CRUD
+
+2. Migration coverage
+- all baseline migrations exist
+- all enhancement migrations exist
+- indexes added
+- FKs added where safe
+- team scope added where needed
+- money fields fixed for new changes
+- views/procedures preserved
+- migration rollback checked
+
+3. Seeder coverage
+- every module has demo data
+- every sidebar item seeded
+- every dashboard widget seeded
+- every role/permission seeded
+- demo reservations cover all workflows
+- demo finance covers invoices/transactions/promissories/cashier shifts
+- demo night audit covers snapshot/no-show/freeze
+- php artisan migrate:fresh --seed passes
+
+4. CRUD coverage
+For every module confirm:
+- list
+- create
+- view
+- edit
+- delete
+- restore when supported
+- export
+- import where relevant
+- approve where relevant
+- reverse/correct where relevant
+- run/process where relevant
+- print/download where relevant
+
+5. Sidebar coverage
+- every module appears
+- every child route exists
+- every route has permission
+- every permission maps to role
+- Arabic/English labels exist
+- badges work
+- active route matching works
+- mobile/tablet layout works
+
+6. Dashboard coverage
+- all widgets render
+- widgets use real data
+- widgets link to source screens
+- widgets are permission-aware
+- widget settings save per user
+- export works
+
+7. Security
+- auth middleware
+- team isolation
+- policies/gates
+- CSRF for web routes
+- validation
+- rate limiting where needed
+- no raw unsafe SQL
+- no tenant leakage
+
+8. Compliance
+- ZATCA invoice status
+- tax invoice/simplified tax invoice support
+- credit note references
+- QR/XML hooks where schema supports
+- VAT breakdown
+- Shomoos guest fields/status
+- business date
+- night audit freeze
+- audit trail
+
+9. Tests
+Must include:
+- feature tests
+- policy tests
+- validation tests
+- tenant isolation tests
+- seeder tests
+- migration tests
+- sidebar visibility tests
+- dashboard widget tests
+- import/export tests
+- financial rollback tests
+- night audit freeze tests
+- E2E workflow tests
+
+Critical E2E flows:
+- reservation → check-in → POS service → payment → invoice → check-out
+- group reservation → company billing → promissory
+- no-show → night audit charge → invoice/transaction
+- room transfer → price recalculation → audit log
+- cashier shift open → transactions → close → variance
+- credit note → original invoice reference → ZATCA status
+- cleaning task → room available
+- maintenance task → room out-of-order → completed
+- online reservation → confirm → check-in
+- unauthorized user denied
+- tenant A cannot access tenant B
+
+Final output format:
+- completed modules
+- completed tables
+- missing modules
+- missing tables
+- generated files
+- generated routes
+- generated permissions
+- generated sidebar items
+- generated seeders
+- generated tests
+- commands run
+- test result
+- remaining risk list
+
+Quality bar:
+- no placeholder buttons
+- no fake screens
+- no skipped features
+- no CRUD without validation
+- no routes without policies
+- no sidebar item without route
+- no route without permission
+- no financial update without audit/correction
+- no dashboard fake data
+- no seed data FK errors
+- no hardcoded translations when localization exists
+```
+
+---
+
+Use them in this order: **Prompt 1 → Prompt 5 → Prompt 6 → Prompt 3 → Prompt 7 → Prompt 4 → Prompt 2 → Prompt 8**. Your uploaded master prompt already requires schema inspection, CRUD, migrations, seeders, sidebar route map, tests, and final uncovered-item reporting, so these separate prompts are built to enforce that same “no skip” rule module by module. 
+
+[1]: https://laravel.com/docs/13.x/migrations?utm_source=chatgpt.com "Database: Migrations | Laravel 13.x - The clean stack for ..."
+[2]: https://zatca.gov.sa/en/E-Invoicing/Pages/default.aspx?utm_source=chatgpt.com "E-Invoicing"

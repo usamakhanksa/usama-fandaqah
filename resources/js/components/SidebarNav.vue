@@ -11,62 +11,56 @@
     <!-- Navigation -->
     <nav class="nav-container">
       <div class="nav-scroll">
-        <!-- Main items -->
-        <SidebarMenuItem v-for="item in items" :key="item.path" :to="item.path" :label="$t(`nav.${item.key}`)">
-          <template #icon>
-            <component :is="item.icon" class="w-5 h-5" />
-          </template>
-        </SidebarMenuItem>
-
-        <!-- Collapsible: Financial Management -->
-        <div class="nav-group">
-          <button 
-            @click="financeOpen = !financeOpen" 
-            class="group-toggle"
-            :class="{ 'expanded': financeOpen }"
-          >
-            <CreditCardIcon class="w-5 h-5 flex-shrink-0" />
-            <span class="flex-1 text-start">{{ $t('nav.financial') }}</span>
-            <ChevronDownIcon class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': financeOpen }" />
-          </button>
+        <!-- Dynamic Menu Items -->
+        <template v-for="item in menuItems" :key="item.key">
           
-          <div v-if="financeOpen" class="submenu animate-in slide-in-from-top-2 duration-300">
-            <div class="dotted-line"></div>
-            <SidebarMenuItem v-for="item in financial" :key="item.path" :to="item.path" :label="$t(`nav.${item.key}`)">
-              <template #icon>
-                <div class="dot-icon"></div>
-              </template>
-            </SidebarMenuItem>
-          </div>
-        </div>
-
-        <!-- Collapsible: POS -->
-        <div class="nav-group">
-          <button 
-            @click="posOpen = !posOpen" 
-            class="group-toggle"
-            :class="{ 'expanded': posOpen }"
+          <!-- Single Item -->
+          <SidebarMenuItem 
+            v-if="!item.children || item.children.length === 0" 
+            :to="item.route" 
+            :label="locale === 'ar' ? item.label_ar : item.label_en"
+            :active="item.is_active"
           >
-            <ShoppingBagIcon class="w-5 h-5 flex-shrink-0" />
-            <span class="flex-1 text-start">{{ $t('nav.pos') }}</span>
-            <ChevronDownIcon class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': posOpen }" />
-          </button>
-          
-          <div v-if="posOpen" class="submenu">
-            <div class="dotted-line"></div>
-            <SidebarMenuItem v-for="item in pos" :key="item.path" :to="item.path" :label="$t(`nav.${item.key}`)">
-              <template #icon>
-                <div class="dot-icon"></div>
-              </template>
-            </SidebarMenuItem>
+            <template #icon>
+              <component :is="getIcon(item.icon)" class="w-5 h-5" />
+            </template>
+          </SidebarMenuItem>
+
+          <!-- Group Item -->
+          <div v-else class="nav-group">
+            <button 
+              @click="toggleGroup(item.key)" 
+              class="group-toggle"
+              :class="{ 'expanded': openGroups[item.key], 'active-group': item.is_active }"
+            >
+              <component :is="getIcon(item.icon)" class="w-5 h-5 flex-shrink-0" />
+              <span class="flex-1 text-start">{{ locale === 'ar' ? item.label_ar : item.label_en }}</span>
+              <ChevronDownIcon class="w-4 h-4 transition-transform duration-300" :class="{ 'rotate-180': openGroups[item.key] }" />
+            </button>
+            
+            <div v-if="openGroups[item.key]" class="submenu animate-in slide-in-from-top-2 duration-300">
+              <div class="dotted-line"></div>
+              <SidebarMenuItem 
+                v-for="child in item.children" 
+                :key="child.key" 
+                :to="child.route" 
+                :label="locale === 'ar' ? child.label_ar : child.label_en"
+                :active="child.is_active"
+              >
+                <template #icon>
+                  <div class="dot-icon"></div>
+                </template>
+              </SidebarMenuItem>
+            </div>
           </div>
-        </div>
-        
+
+        </template>
+
         <!-- Admin Section -->
         <div v-if="isAdmin" class="admin-divider mt-8 px-8 py-2">
            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ locale === 'ar' ? 'التحكم بالإدارة' : 'Admin Control' }}</span>
         </div>
-        <SidebarMenuItem v-if="isAdmin" to="/leads" :label="$t('nav.leads')">
+        <SidebarMenuItem v-if="isAdmin" to="/leads" :label="locale === 'ar' ? 'العملاء المحتملين' : 'Leads'">
            <template #icon>
              <MessageSquareIcon class="w-5 h-5" />
            </template>
@@ -78,11 +72,11 @@
     <div class="px-4 mt-auto mb-4">
       <div class="pro-card">
          <div class="pro-icon bg-white/20 p-2 rounded-lg">
-            <ZapIcon class="w-4 h-4 text-white" />
+            <BoltIcon class="w-4 h-4 text-white" />
          </div>
          <div class="mt-2 text-white">
             <p class="text-xs font-bold">{{ locale === 'ar' ? 'اشترك في النسخة الاحترافية' : 'Go Pro' }}</p>
-            <p class="text-[10px] opacity-70">{{ locale === 'ar' ? 'افتح مميزات الشركات المتطورة' : 'Unlock corporate features' }}</p>
+            <p class="text-[10px] opacity-70">{{ locale === 'ar' ? 'افتح مميزات الشركات المتطدة' : 'Unlock corporate features' }}</p>
          </div>
       </div>
     </div>
@@ -90,45 +84,59 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import SidebarMenuItem from './SidebarMenuItem.vue';
-import { 
-  BarChart2Icon, HomeIcon, HotelIcon, UsersIcon, BuildingIcon, 
-  CalendarIcon, BriefcaseIcon, PuzzleIcon, SettingsIcon, GlobeIcon,
-  CreditCardIcon, ChevronDownIcon, ShoppingBagIcon, ZapIcon, MessageSquareIcon
-} from 'lucide-vue-next';
+import api from '../services/api'; // Or however the api client is structured
+import { useRouter } from 'vue-router';
+import * as Icons from 'lucide-vue-next';
+import { ChevronDownIcon, MessageSquareIcon } from 'lucide-vue-next';
+import { BoltIcon } from '@heroicons/vue/24/solid';
 
 const { locale } = useI18n();
-const posOpen = ref(false);
-const financeOpen = ref(false);
-const isAdmin = ref(true);
+const router = useRouter();
+const isAdmin = ref(true); // Can be tied to user state
 
-const items = [
-  { key: 'dashboard', path: '/dashboard', icon: BarChart2Icon },
-  { key: 'rooms', path: '/rooms', icon: HotelIcon },
-  { key: 'guests', path: '/guests', icon: UsersIcon },
-  { key: 'units', path: '/units', icon: BuildingIcon },
-  { key: 'schedule', path: '/reservations/schedule', icon: CalendarIcon },
-  { key: 'management', path: '/reservations/management', icon: BriefcaseIcon },
-  { key: 'services', path: '/services', icon: PuzzleIcon },
-  { key: 'user_groups', path: '/user-groups', icon: UsersIcon },
-  { key: 'settings', path: '/settings', icon: SettingsIcon },
-  { key: 'reports', path: '/reports', icon: GlobeIcon },
-];
+const menuItems = ref([]);
+const openGroups = ref({});
 
-const financial = [
-  { key: 'receipts', path: '/financial/receipts' },
-  { key: 'expenses', path: '/financial/expenses' },
-  { key: 'bills', path: '/financial/bills' },
-];
+const getIcon = (iconName) => {
+  return Icons[iconName] || Icons.CircleIcon;
+};
 
-const pos = [
-  { key: 'make_order', path: '/pos/store' },
-  { key: 'services', path: '/pos/services' },
-  { key: 'transactions', path: '/pos/transactions' },
-  { key: 'products', path: '/pos/products' },
-];
+const toggleGroup = (key) => {
+  openGroups.value[key] = !openGroups.value[key];
+};
+
+onMounted(async () => {
+  const currentRoute = router.currentRoute.value;
+  const isAuthenticated = localStorage.getItem('auth_fandaqah') || localStorage.getItem('sanctum_token');
+
+  if (currentRoute.name === 'login' || currentRoute.path.startsWith('/login') || !isAuthenticated) {
+    return;
+  }
+
+  try {
+    const { data } = await api.get('/sidebar');
+    menuItems.value = data.data;
+    
+    // Auto-expand active groups
+    data.data.forEach(item => {
+      if (item.is_active && item.children && item.children.length > 0) {
+        openGroups.value[item.key] = true;
+      }
+    });
+  } catch (err) {
+    if (err.response?.status !== 401) {
+        console.error('Failed to load sidebar menu', err);
+    } else {
+      // If unauthorized, redirect to login
+      localStorage.removeItem('sanctum_token');
+      localStorage.removeItem('auth_fandaqah');
+      router.push('/login');
+    }
+  }
+});
 </script>
 
 <style scoped>
@@ -191,6 +199,12 @@ const pos = [
 .group-toggle:hover {
   background: #f8fafc;
   color: #e95a54;
+}
+
+.active-group {
+  color: #e95a54;
+  background: #fef2f2;
+  font-weight: 700;
 }
 
 .submenu {

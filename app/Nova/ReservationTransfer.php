@@ -2,136 +2,71 @@
 
 namespace App\Nova;
 
-use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class ReservationTransfer extends Resource
 {
-    /**
-     * The model the resource corresponds to.
-     *
-     * @var string
-     */
-    public static $model = 'App\ReservationTransfer';
+    public static $model = \App\ReservationTransfer::class;
 
-    /**
-     * The single value that should be used to represent the resource when being displayed.
-     *
-     * @var string
-     */
     public static $title = 'id';
 
-    /**
-     * The columns that should be searched.
-     *
-     * @var array
-     */
+    public static $group = 'Booking Management';
+
     public static $search = [
-        'id',
+        'id', 'reason'
     ];
 
-    /**
-     * Get the fields displayed by the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function fields(Request $request)
+    public function fields(NovaRequest $request)
     {
         return [
-            // ID::make(__('Id') , 'id')->sortable(),
-            BelongsTo::make(__('reservation') , 'reservation' , Reservation::class)->display('number') ,
+            ID::make()->sortable(),
 
-            BelongsTo::make(__('old Unit Number') , 'old_unit' , Unit::class)->display('unit_number') ,
-            Text::make(__('old Date In'), 'old_date_in'),
-            Text::make(__('old Date Out'), 'old_date_out'),
-
-            Text::make(__('old Price'), 'old_price'),
-
-            BelongsTo::make(__('new Unit Number') , 'new_unit' , Unit::class)->display('unit_number') ,
-            Text::make(__('new Date In'), 'new_date_in'),
-            Text::make(__('new Date Out'), 'new_date_out'),
-            Text::make(__('new Price'), 'new_price'),
-
-            Text::make(__('Reason'), 'reason'),
-
-            BelongsTo::make(__('Creator'), 'creator', User::class)->display('name')->rules('required'),
-
-
+            BelongsTo::make('Reservation')->searchable(),
+            BelongsTo::make('Creator', 'creator', 'App\Nova\User'),
+            
+            // Old booking details
+            BelongsTo::make('Old Unit', 'old_unit', 'App\Nova\Unit')->readonly(),
+            Date::make('Old Check In', 'old_date_in')->readonly(),
+            Date::make('Old Check Out', 'old_date_out')->readonly(),
+            Number::make('Old Price', 'old_price')->step(0.01)->readonly(),
+            
+            // New booking details
+            BelongsTo::make('New Unit', 'new_unit', 'App\Nova\Unit')->searchable(),
+            Date::make('New Check In', 'new_date_in'),
+            Date::make('New Check Out', 'new_date_out'),
+            Number::make('New Price', 'new_price')->step(0.01),
+            
+            Textarea::make('Reason'),
+            
+            DateTime::make('Created At')->onlyOnDetail(),
+            DateTime::make('Updated At')->onlyOnDetail(),
         ];
     }
 
-    /**
-     * Get the cards available for the request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function cards(Request $request)
+    public function cards(NovaRequest $request)
     {
         return [];
     }
 
-    /**
-     * Get the filters available for the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function filters(Request $request)
+    public function filters(NovaRequest $request)
     {
         return [];
     }
 
-    /**
-     * Get the lenses available for the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function lenses(Request $request)
+    public function lenses(NovaRequest $request)
     {
         return [];
     }
 
-    /**
-     * Get the actions available for the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
-     */
-    public function actions(Request $request)
+    public function actions(NovaRequest $request)
     {
         return [];
-    }
-
-
-    public function authorizedToView(Request $request)
-    {
-        return false;
-    }
-
-    public function authorizedToUpdate(Request $request)
-    {
-        return false;
-    }
-
-    public function authorizedToDelete(Request $request)
-    {
-        return false;
-    }
-
-    public static function authorizedToCreate(Request $request)
-   {
-       return false ;
-   }
-
-    // Hide Search Input in resource
-    public static function searchable()
-    {
-        return false;
     }
 }

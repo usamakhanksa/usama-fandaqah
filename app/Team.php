@@ -30,7 +30,11 @@ class Team extends SparkTeam implements Wallet
         'private_domain_status',
         'name',
         'owner_id',
-        'country_id'
+        'country_id',
+        'business_date',
+        'night_audit_auto_enabled',
+        'night_audit_auto_run_time',
+        'last_night_audit_at'
     ];
     protected $casts = [
         'created_at' => 'datetime',
@@ -57,49 +61,69 @@ class Team extends SparkTeam implements Wallet
         parent::boot();
 
         static::created(function ($query) {
-
-            $role = new \App\Role();
-            $role->name = 'Admin';
-            $role->slug = 'admin';
-            $role->deletable = 0;
-            $role->team_id = $query->id;
-
-
-
-            $role->save();
+            $role = \App\Role::where('slug', 'admin')->where('team_id', $query->id)->first();
+            if (!$role) {
+                $role = new \App\Role();
+                $role->name = 'Admin';
+                $role->slug = 'admin-' . $query->id;
+                $role->deletable = 0;
+                $role->team_id = $query->id;
+                $role->save();
+            }
             foreach (config('novapermissions.permissions') as $key => $permissions) {
-                $role->grant($key);
+                \DB::table('role_permission')->insertOrIgnore([
+                    'role_id' => $role->id,
+                    'permission_slug' => $key,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
 
             $user = User::find($query->owner_id);
             $user->roles()->attach($role);
 
             // Staff roles and permissions
-            $staff = new \App\Role();
-            $staff->name = 'Staff';
-            $staff->slug = 'staff';
-            $staff->team_id = $query->id;
-            $staff->deletable = 0;
-            $staff->save();
+            $staff = \App\Role::where('slug', 'staff')->where('team_id', $query->id)->first();
+            if (!$staff) {
+                $staff = new \App\Role();
+                $staff->name = 'Staff';
+                $staff->slug = 'staff-' . $query->id;
+                $staff->team_id = $query->id;
+                $staff->deletable = 0;
+                $staff->save();
+            }
 
 
             $excluded_permissions = ['view settings', 'view reports', 'view financial'];
 
             foreach (config('novapermissions.permissions') as $key => $permissions) {
                 if (!in_array($key, $excluded_permissions)) {
-                    $staff->grant($key);
+                    \DB::table('role_permission')->insertOrIgnore([
+                        'role_id' => $staff->id,
+                        'permission_slug' => $key,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
                 }
             }
 
 
-            $housekeeping = new \App\Role();
-            $housekeeping->name = 'Housekeeping';
-            $housekeeping->slug = 'housekeeping';
-            $housekeeping->team_id = $query->id;
-            $housekeeping->deletable = 0;
-            $housekeeping->save();
+            $housekeeping = \App\Role::where('slug', 'housekeeping')->where('team_id', $query->id)->first();
+            if (!$housekeeping) {
+                $housekeeping = new \App\Role();
+                $housekeeping->name = 'Housekeeping';
+                $housekeeping->slug = 'housekeeping-' . $query->id;
+                $housekeeping->team_id = $query->id;
+                $housekeeping->deletable = 0;
+                $housekeeping->save();
+            }
             // attach view reservation permission to housekeeping role
-            $housekeeping->grant('view reservations');
+            \DB::table('role_permission')->insertOrIgnore([
+                'role_id' => $housekeeping->id,
+                'permission_slug' => 'view reservations',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
 
             if (is_null($query->trial_ends_at)) {

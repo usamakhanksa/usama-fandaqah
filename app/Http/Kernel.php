@@ -80,6 +80,7 @@ class Kernel extends HttpKernel
         'passport-administrators' => \App\Http\Middleware\PassportCustomProvider::class,
         'fandaqah.booking' => FandaqahBooking::class,
         'check.header' => \App\Http\Middleware\MyTravel::class,
+        'team.scope' => \App\Http\Middleware\TeamScopeMiddleware::class,
 
     ];
 

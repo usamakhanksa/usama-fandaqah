@@ -2,14 +2,12 @@
 
 namespace App;
 
-use Laravelista\Comments\Commentable;
 use Watson\Rememberable\Rememberable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Thomasjohnkane\Snooze\Traits\SnoozeNotifiable;
 use App\Scopes\TeamScope;
 
 class Customer extends Model
@@ -18,13 +16,11 @@ class Customer extends Model
     use SoftDeletes;
     use LogsActivity;
     use Notifiable;
-    use SnoozeNotifiable;
-    use Commentable;
 
     /**
      * table
      */
-    protected $table = 'customer';
+    protected $table = 'customers';
 
     /**
      * fillable
@@ -364,19 +360,13 @@ class Customer extends Model
         return $this->hasMany('App\Reservation', 'customer_id')->orderByDesc('id');
     }
 
-    public function comments()
-    {
-        return $this->morphMany(config('comments.model'), 'commentable')->whereHasMorph('commenter', [User::class], function ($u) {
-            $u->where('current_team_id', auth()->user()->current_team_id);
-        })->orderBy('created_at', 'desc');
-    }
 
     public static function validate($input, $id = null)
     {
         if ($id != null) {
-            $rules = ['id_number' => "unique:customer,id_number,{$id},id,deleted_at,NULL"];
+            $rules = ['id_number' => "unique:customers,id_number,{$id},id,deleted_at,NULL"];
         } else {
-            $rules = ['id_number' => 'unique:customer,id_number,NULL,id,deleted_at,NULL'];
+            $rules = ['id_number' => 'unique:customers,id_number,NULL,id,deleted_at,NULL'];
         }
 
         return Validator::make($input, $rules, self::messages());

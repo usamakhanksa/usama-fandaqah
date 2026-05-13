@@ -15,20 +15,32 @@ use App\Events\ReservationDeleted;
 use Illuminate\Support\Facades\Auth;
 use App\Events\ReservationTransferred;
 use App\Http\Resources\OffersAndSpecialPrices\ModelDatesMinifiedResource;
+use App\Services\AuditEnforcementService;
 
 class ReservationObserver
 {
+    protected $enforcement;
+
+    public function __construct(AuditEnforcementService $enforcement)
+    {
+        $this->enforcement = $enforcement;
+    }
+
     public function creating(Reservation $reservation)
     {
-
+        $teamId = $reservation->team_id ?? Auth::user()->current_team_id ?? null;
+        
+        // Rule: Block creating reservations with closed date_in
+        if ($teamId && $reservation->date_in) {
+            if ($this->enforcement->isDateClosed($teamId, $reservation->date_in) && !$this->enforcement->canBackdate()) {
+                abort(403, 'Cannot create reservations for a closed business date.');
+            }
+        }
     }
 
     public function created(Reservation $reservation)
     {
-
-
         if(is_null(auth()->user())){
-
                 $description = "  انشاء الحجز رقم  {$reservation->number}";
                 $log = Activity::where('team_id' , 0)
                                     ->where('subject_type' , 'App\\Reservation')
@@ -36,12 +48,10 @@ class ReservationObserver
                                     ->where('description' , $description)
                                     ->latest()->first();
 
-
                 if($log){
                     $log->team_id = $reservation->team_id;
                     $log->save();
                 }
-
         }
 
         $reservation->disableLogging();
@@ -49,12 +59,47 @@ class ReservationObserver
 
     /**
      * Listen to the User created event.
-     *
-     * @param  \App\User  $user
-     * @return void
      */
     public function updating(Reservation $reservation)
     {
+        $teamId = $reservation->team_id;
+
+        // Rule: Block editing reservation prices for closed nights
+        if ($reservation->isDirty(['total_price', 'prices'])) {
+            if ($this->enforcement->isBackdated($teamId, $reservation->date_in) && !$this->enforcement->canBackdate()) {
+                abort(403, 'Cannot edit prices for closed/past business dates.');
+            }
+        }
+
+        // Rule: Block backdating check-in into closed date
+        if ($reservation->isDirty('checked_in') && $reservation->checked_in) {
+            if ($this->enforcement->isDateClosed($teamId, $reservation->checked_in) && !$this->enforcement->canBackdate()) {
+                abort(403, 'Cannot backdate check-in into a closed business date.');
+            }
+        }
+
+        // Rule: Block backdating checkout into closed date
+        if ($reservation->isDirty('checked_out') && $reservation->checked_out) {
+            if ($this->enforcement->isDateClosed($teamId, $reservation->checked_out) && !$this->enforcement->canBackdate()) {
+                abort(403, 'Cannot backdate check-out into a closed business date.');
+            }
+        }
+
+        // Rule: Block changing checked-in/checked-out fields after audit lock (if already audited)
+        if ($reservation->isDirty(['checked_in', 'checked_out']) && $reservation->getOriginal('checked_in')) {
+             $origDate = Carbon::parse($reservation->getOriginal('checked_in'))->format('Y-m-d');
+             if ($this->enforcement->isDateClosed($teamId, $origDate) && !$this->enforcement->canBackdate()) {
+                 abort(403, 'Cannot modify check-in/out status after Night Audit lock.');
+             }
+        }
+
+        // Rule: Cancel locked reservation only with finance.backdate
+        if ($reservation->isDirty('status') && $reservation->status === 'canceled') {
+            if ($this->enforcement->isDateClosed($teamId, $reservation->date_in) && !$this->enforcement->canBackdate()) {
+                abort(403, 'Special permission (finance.backdate) required to cancel a reservation from a closed date.');
+            }
+        }
+
         if($reservation->isDirty('unit_id')){
             $new_unit_id = $reservation->unit_id;
             $old_unit_id = $reservation->getOriginal('unit_id');
@@ -81,26 +126,16 @@ class ReservationObserver
         }
     }
 
-    /**
-     * Handle the reservation "updated" event.
-     *
-     * @param  \App\Reservation  $reservation
-     * @return void
-     */
     public function updated(Reservation $reservation)
     {
         if($reservation->isDirty('customer_id')){
-
             $new_customer_id = $reservation->customer_id;
             $old_customer_id = $reservation->getOriginal('customer_id');
             $reservation->enableLogging();
 
-
             if($new_customer_id != $old_customer_id){
-                // means customer changed
                 $old_customer = Customer::find($old_customer_id);
                 $new_customer = Customer::find($new_customer_id);
-
 
                 $message =  !is_null($old_customer) ?   "  تغيير العميل علي الحجز رقم {$reservation->number}" :  "  تسكين العميل علي الحجز رقم {$reservation->number}" ;
                 $properties = [
@@ -141,15 +176,10 @@ class ReservationObserver
                     ->performedOn($reservation)
                     ->withProperties($properties)
                     ->log($message);
-
-
             }
-
         }
 
         if(is_null(auth()->user()) && $reservation->action_type == Reservation::ACTION_UPDATERESERVATIONFROMCOMMAND){
-
-            // this is definitly an auto renew reservation
                 $log = Activity::where('team_id' , 0)
                                     ->where('subject_type' , 'App\\Reservation')
                                     ->where('subject_id' , $reservation->id)
@@ -160,40 +190,17 @@ class ReservationObserver
                     $log->team_id = $reservation->team_id;
                     $log->save();
                 }
-
         }
     }
 
-    /**
-     * Handle the reservation "deleted" event.
-     *
-     * @param  \App\Reservation  $reservation
-     * @return void
-     */
     public function deleted(Reservation $reservation)
     {
+        // Rule: Block deleting reservations from closed dates
+        $teamId = $reservation->team_id;
+        if ($this->enforcement->isDateClosed($teamId, $reservation->date_in) && !$this->enforcement->canBackdate()) {
+            abort(403, 'Cannot delete a reservation belonging to a closed business date.');
+        }
+
         event(new ReservationDeleted($reservation));
-    }
-
-    /**
-     * Handle the reservation "restored" event.
-     *
-     * @param  \App\Reservation  $reservation
-     * @return void
-     */
-    public function restored(Reservation $reservation)
-    {
-        //
-    }
-
-    /**
-     * Handle the reservation "force deleted" event.
-     *
-     * @param  \App\Reservation  $reservation
-     * @return void
-     */
-    public function forceDeleted(Reservation $reservation)
-    {
-        //
     }
 }

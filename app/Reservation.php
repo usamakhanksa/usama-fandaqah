@@ -689,6 +689,11 @@ class Reservation extends Model implements  Wallet, WalletFloat
          return $this->belongsTo(Source::class) ;
     }
 
+    public function commissionPayment()
+    {
+        return $this->hasOne(\App\Models\CommissionPayment::class);
+    }
+
     public static function countForDate(Carbon $carbon)
     {
         return static::where('date_in', '=', $carbon->startOfDay()->toDateTimeString())
@@ -1331,6 +1336,18 @@ class Reservation extends Model implements  Wallet, WalletFloat
         return $this->hasOne(ReservationContract::class)
                     ->where('status', 'signed')
                     ->latest();
+    }
+
+    public function reservationTransfers(){
+        return $this->hasMany(ReservationTransfer::class);
+    }
+
+    public function reservationExtensions(){
+        return $this->hasMany(ReservationExtension::class);
+    }
+
+    public function ratings(){
+        return $this->hasMany(Rating::class);
     }
 
 

@@ -1,14 +1,30 @@
 <template>
   <teleport to="body">
-    <div v-if="modelValue" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" @click.self="$emit('update:modelValue', false)">
-      <div class="bg-white rounded-xl w-full max-w-xl p-4 shadow-xl">
-        <div class="font-bold mb-3">{{ title }}</div>
+    <div v-if="isOpen" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" @click.self="close">
+      <div class="bg-white rounded-xl w-full max-w-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">{{ title }}</h2>
+          <button @click="close" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
+        </div>
         <slot />
       </div>
     </div>
   </teleport>
 </template>
 <script setup>
-defineProps({ modelValue: Boolean, title: String });
-defineEmits(['update:modelValue']);
+import { computed } from 'vue';
+
+const props = defineProps({ 
+  modelValue: Boolean, 
+  title: String 
+});
+
+const emit = defineEmits(['update:modelValue', 'close']);
+
+const isOpen = computed(() => props.modelValue);
+
+const close = () => {
+  emit('update:modelValue', false);
+  emit('close');
+};
 </script>

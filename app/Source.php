@@ -36,4 +36,8 @@ class Source extends Model
         static::addGlobalScope(new TeamScope());
     } 
 
+    public function commissionPayments()
+    {
+        return $this->hasMany(\App\Models\CommissionPayment::class);
+    }
 }

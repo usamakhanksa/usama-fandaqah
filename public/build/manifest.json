@@ -1,4 +1,24 @@
 {
+  "node_modules/primeicons/fonts/primeicons.eot": {
+    "file": "assets/primeicons-DMOk5skT.eot",
+    "src": "node_modules/primeicons/fonts/primeicons.eot"
+  },
+  "node_modules/primeicons/fonts/primeicons.svg": {
+    "file": "assets/primeicons-Dr5RGzOO.svg",
+    "src": "node_modules/primeicons/fonts/primeicons.svg"
+  },
+  "node_modules/primeicons/fonts/primeicons.ttf": {
+    "file": "assets/primeicons-MpK4pl85.ttf",
+    "src": "node_modules/primeicons/fonts/primeicons.ttf"
+  },
+  "node_modules/primeicons/fonts/primeicons.woff": {
+    "file": "assets/primeicons-WjwUDZjB.woff",
+    "src": "node_modules/primeicons/fonts/primeicons.woff"
+  },
+  "node_modules/primeicons/fonts/primeicons.woff2": {
+    "file": "assets/primeicons-C6QP2o4f.woff2",
+    "src": "node_modules/primeicons/fonts/primeicons.woff2"
+  },
   "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js": {
     "file": "assets/apexcharts.ssr.esm-fe46cd2d-CEIEYvuU.js",
     "name": "apexcharts.ssr.esm-fe46cd2d",
@@ -6,12 +26,12 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-DBE4ILBT.css",
+    "file": "assets/app-BS9qhIwu.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/main.js": {
-    "file": "assets/main-C4QrAd8A.js",
+    "file": "assets/main-BvQl9YXm.js",
     "name": "main",
     "src": "resources/js/main.js",
     "isEntry": true,
@@ -20,7 +40,14 @@
       "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js"
     ],
     "css": [
-      "assets/main-D4Kuag86.css"
+      "assets/main-BoAqZMd1.css"
+    ],
+    "assets": [
+      "assets/primeicons-DMOk5skT.eot",
+      "assets/primeicons-C6QP2o4f.woff2",
+      "assets/primeicons-WjwUDZjB.woff",
+      "assets/primeicons-MpK4pl85.ttf",
+      "assets/primeicons-Dr5RGzOO.svg"
     ]
   }
 }

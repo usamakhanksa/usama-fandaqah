@@ -2,402 +2,303 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Customer;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CleaningResource;
-use App\Http\Resources\GuestResource;
-use App\Http\Resources\MaintenanceResource;
-use App\Http\Resources\OccupiedResource;
-use App\Http\Resources\ReservationTransferResource;
-use App\Http\Resources\RevenueTaxResource;
-use App\Http\Resources\UnitsMovementResource;
-use App\Occupied;
-use App\Reservation;
-use App\ReservationTransfer;
-use App\Team;
-use App\Transaction;
-use App\UnitCleaning;
-use App\UnitMaintenance;
-use App\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 
 class ReportsController extends Controller
 {
-	/**
-	* get transaction index method
-    *
-	* @return App\Http\Resources\TransactionResource
-	*/
-	public function unitCleanings(Request $request)
-	{
-        $data = QueryBuilder::for(UnitCleaning::class)
-            ->allowedIncludes(['customer'])
-            ->allowedFilters([
-                AllowedFilter::exact('number'),
-                AllowedFilter::scope('by_creator'),
-            ])
-            ->defaultSort('-id')
-            ->paginate($request->get('per_page', 30));
-
-		return  CleaningResource::collection($data)->additional([
-			'meta' => [
-            ]
-        ]);
-	}
-
-    /**
-    * get transaction index method
-    *
-    * @return App\Http\Resources\TransactionResource
-    */
-    public function unitMaintenance(Request $request)
+    public function deposits(Request $request)
     {
-        $data = QueryBuilder::for(UnitMaintenance::class)
-            ->allowedIncludes(['customer'])
-            ->allowedFilters([
-                AllowedFilter::exact('number'),
-                AllowedFilter::scope('by_creator'),
-            ])
-            ->defaultSort('-id')
-            ->paginate($request->get('per_page', 30));
-
-        return  MaintenanceResource::collection($data)->additional([
-            'meta' => [
-            ]
+        return response()->json([
+            'data' => $this->generateDummyDeposits()
         ]);
     }
 
-    /**
-    * get transaction index method
-    *
-    * @return App\Http\Resources\TransactionResource
-    */
-    public function Occupied(Request $request)
+    public function withdraws(Request $request)
     {
-        $data = QueryBuilder::for(Occupied::class)
-            ->allowedIncludes(['customer'])
-            ->defaultSort('-id')
-            ->paginate($request->get('per_page', 30));
-
-        return  OccupiedResource::collection($data)->additional([
-            'meta' => [
-            ]
+        return response()->json([
+            'data' => $this->generateDummyWithdraws()
         ]);
     }
 
-
-    /**
-    * get transaction index method
-    *
-    * @return App\Http\Resources\TransactionResource
-    */
-    public function reservationTransfers(Request $request)
+    public function safeMovement(Request $request)
     {
-        $data = QueryBuilder::for(ReservationTransfer::class)
-            ->allowedIncludes(['customer'])
-            ->defaultSort('-id')
-            ->paginate($request->get('per_page', 30));
-
-        return  ReservationTransferResource::collection($data)->additional([
-            'meta' => [
-            ]
+        return response()->json([
+            'data' => $this->generateDummySafeMovement()
         ]);
     }
 
-    /**
-    * get transaction index method
-    *
-    * @return App\Http\Resources\TransactionResource
-    */
-    public function guests(Request $request)
+    public function customerMovement(Request $request)
     {
-        $data = QueryBuilder::for(Customer::class)
-            ->allowedFilters([
-                AllowedFilter::scope('by_registration_date'),
-                AllowedFilter::scope('by_gender'),
-                AllowedFilter::scope('by_phone_number'),
-                AllowedFilter::scope('by_id_number'),
-            ])
-            ->defaultSort('-id')
-            ->paginate($request->get('per_page', 30));
-
-        return  GuestResource::collection($data)->additional([
-            'meta' => [
-            ]
+        return response()->json([
+            'data' => $this->generateDummyCustomerMovement()
         ]);
     }
 
-    /**
-    * get transaction index method
-    *
-    * @return App\Http\Resources\TransactionResource
-    */
-    public function unitsMovement(Request $request)
+    public function services(Request $request)
     {
-        $data = QueryBuilder::for(Reservation::class)
-            ->whereHas('unit')
-            ->allowedFilters([
-                AllowedFilter::scope('by_number'),
-                AllowedFilter::scope('by_unit_number'),
-                AllowedFilter::scope('by_customer_id_number'),
-                AllowedFilter::scope('by_created_at'),
-            ])
-            ->defaultSort('-id')
-            ->paginate($request->get('per_page', 30));
-
-        return  UnitsMovementResource::collection($data)->additional([
-            'meta' => [
-            ]
+        return response()->json([
+            'data' => $this->generateDummyServices()
         ]);
     }
 
-
-    /**
-     * Function will handle generating a monthly report for transactions
-     */
     public function monthly(Request $request)
     {
-        // Generals and Initials
-        $current_team_id = $request->current_team_id;
-        $month = $request['month'] ;
-        $year = $request['year'] ;
-        $employee_id = $request['employee_id'] ;
-        $total_withdraw = 0;
-        $total_deposit = 0;
-        $days_arr = [];
-
-
-        // Month and Year required to proceed , Stop from here can not proceed
-        if($month == 0 || $year == 0 ){
-            return response()->json([
-                'status' => 'invalid_month_or_year'
-            ]);
-        }
-
-        // fetch all reservations to be used in our morph relation
-        $reservations = Reservation::where('team_id', $current_team_id)->pluck('id')->toArray();
-        $users = User::where('current_team_id', $current_team_id)->pluck('id')->toArray();
-
-        $days = $this->days_in_month($month,$year);
-
-        // Loop through days
-        for($day = 1 ; $day <= $days ; $day++){
-            // Forming our date
-            $date = date('Y-m-d' , strtotime($year .'-'. $month . '-' . $day)) ;
-
-            // Nice and Elegant Switch case to swap employee id
-            switch ($employee_id){
-                case !0 :
-                    /**
-                     * Query Transactions
-                     * Why am doing what you see
-                     * cause orWhereHasMorph Relation having a critical issue
-                     * so i had to separate the logic in to categorized deposit transactions
-                     * one for team and one for reservation
-                     */
-                    $withdraw_team_transaction = Transaction::where('type' , 'withdraw')
-                        ->whereHasMorph('payable', Team::class, function ($query) use($employee_id, $current_team_id) {
-                            $query->where('payable_id', $current_team_id);
-                        })
-                        ->whereHas('creator' , function($u) use($employee_id){
-                           $u->where('id' , $employee_id);
-                        })
-                        ->where('is_public' , 1)
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-
-                    $withdraw_reservation_transaction = Transaction::where('type' , 'withdraw')
-                        ->whereHasMorph('payable', Reservation::class, function ($query) use ($reservations , $employee_id) {
-                            $query->whereIn('payable_id', $reservations);
-                        })
-                        ->whereHas('creator' , function($u) use($employee_id){
-                            $u->where('id' , $employee_id);
-                        })
-                        ->where('is_public' , 1)
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-                    $withdraw_transaction = $withdraw_team_transaction + $withdraw_reservation_transaction ;
-
-
-                    $deposit_team_transaction = Transaction::where('type' , 'deposit')
-                        ->whereHasMorph('payable', Team::class, function ($query) use($employee_id, $current_team_id) {
-                            $query->where('payable_id', $current_team_id);
-                        })
-                        ->whereHas('creator' , function($u) use($employee_id){
-                            $u->where('id' , $employee_id);
-                        })
-                        ->where('is_public' , 1)
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-
-                    $deposit_reservation_transaction = Transaction::where('type' , 'deposit')
-                        ->whereHasMorph('payable', Reservation::class, function ($query) use ($reservations , $employee_id) {
-                            $query->whereIn('payable_id', $reservations);
-                        })
-                        ->whereHas('creator' , function($u) use($employee_id){
-                            $u->where('id' , $employee_id);
-                        })
-                        ->where('is_public' , 1)
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-
-                    $deposit_transaction = $deposit_team_transaction + $deposit_reservation_transaction ;
-                break;
-                default :
-                    /**
-                     * Query Transactions
-                     * Why am doing what you see
-                     * cause orWhereHasMorph Relation having a critical issue
-                     * so i had to separate the logic in to categorized deposit transactions
-                     * one for team and one for reservation
-                     */
-                    $withdraw_team_transaction = Transaction::where('type' , 'withdraw')
-                        ->whereHasMorph('payable', Team::class, function ($query) use($current_team_id) {
-                            $query->where('payable_id', $current_team_id);
-                        })
-                        ->where('is_public' , 1)
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-
-                    $withdraw_reservation_transaction = Transaction::where('type' , 'withdraw')
-                        ->whereHasMorph('payable', Reservation::class, function ($query) use ($reservations) {
-                            $query->whereIn('payable_id', $reservations);
-                        })
-                        ->where('is_public' , 1)
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-
-                    $withdraw_transaction = $withdraw_team_transaction + $withdraw_reservation_transaction ;
-
-                    $deposit_team_transaction = Transaction::where('type' , 'deposit')
-                        ->where('is_public' , 1)
-                        ->whereHasMorph('payable', Team::class, function ($query) use($current_team_id){
-                            $query->where('payable_id', $current_team_id);
-                        })
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-
-                    $deposit_reservation_transaction = Transaction::where('type' , 'deposit')
-                        ->where('is_public' , 1)
-                        ->whereHasMorph('payable', Reservation::class, function ($query) use ($reservations) {
-                            $query->whereIn('payable_id', $reservations);
-                        })
-                        ->where('meta->date' , 'LIKE' , "%$date%")
-                        ->sum('amount');
-
-                    $deposit_transaction = $deposit_team_transaction + $deposit_reservation_transaction ;
-                    break ;
-            }
-
-            // Fill Days array
-            $days_arr[$day]['number'] = $day;
-            $days_arr[$day]['withdraw'] = $withdraw_transaction/100;
-            $days_arr[$day]['deposit'] = $deposit_transaction/100;
-            $days_arr[$day]['total'] = $days_arr[$day]['deposit'] + $days_arr[$day]['withdraw'] ;
-
-            // Fill withdraw transactions array
-            $total_withdraw += $withdraw_transaction/100;
-            // Fill deposit transactions array
-            $total_deposit += $deposit_transaction/100;
-        }
-
-        // Returning a Json Response
         return response()->json([
-            'data' => [
-                'days' => $days_arr,
-            ],
-            'meta' => [
-                'total_withdraw' => abs($total_withdraw),
-                'total_deposit' => $total_deposit,
-                'credit' => $total_deposit -(-$total_withdraw)
-            ]
-        ], 200);
+            'data' => $this->generateDummyMonthly()
+        ]);
     }
 
-    protected function days_in_month($month, $year){
-        return $month == 2 ? ($year % 4 ? 28 : ($year % 100 ? 29 : ($year % 400 ? 28 : 29))) : (($month - 1) % 7 % 2 ? 30 : 31);
+    public function unitsMovement(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyUnitsMovement()
+        ]);
     }
 
+    public function occupancy(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyOccupancy()
+        ]);
+    }
 
-    /**
-     * @author Emad rashad
-     * @description  : function is used to render data for revenue-tax-fee-report
-     * @param NovaRequest $request
-     * @return json
-     */
+    public function cleaning(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyCleaning()
+        ]);
+    }
+
+    public function maintenance(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyMaintenance()
+        ]);
+    }
+
+    public function transfers(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyTransfers()
+        ]);
+    }
+
+    public function revenues(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyRevenues()
+        ]);
+    }
+
+    public function resources(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyResources()
+        ]);
+    }
+
+    public function contracts(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyContracts()
+        ]);
+    }
+
+    public function invoices(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyInvoices()
+        ]);
+    }
+
+    public function daily(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyDaily()
+        ]);
+    }
+
+    // Data generation methods
+    private function generateDummyDeposits()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'DEP-001', 'date' => '2025-01-15', 'amount' => 5000.00, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'DEP-002', 'date' => '2025-01-16', 'amount' => 3500.00, 'status' => 'Completed'],
+            ['id' => 3, 'reference_number' => 'DEP-003', 'date' => '2025-01-17', 'amount' => 7500.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'DEP-004', 'date' => '2025-01-18', 'amount' => 4200.00, 'status' => 'Completed'],
+            ['id' => 5, 'reference_number' => 'DEP-005', 'date' => '2025-01-19', 'amount' => 6000.00, 'status' => 'Completed'],
+        ];
+    }
+
+    private function generateDummyWithdraws()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'WTH-001', 'date' => '2025-01-15', 'amount' => 2000.00, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'WTH-002', 'date' => '2025-01-16', 'amount' => 1500.00, 'status' => 'Completed'],
+            ['id' => 3, 'reference_number' => 'WTH-003', 'date' => '2025-01-17', 'amount' => 3000.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'WTH-004', 'date' => '2025-01-18', 'amount' => 2500.00, 'status' => 'Completed'],
+        ];
+    }
+
+    private function generateDummySafeMovement()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'SM-001', 'date' => '2025-01-15', 'amount' => 10000.00, 'status' => 'Verified'],
+            ['id' => 2, 'reference_number' => 'SM-002', 'date' => '2025-01-16', 'amount' => -2500.00, 'status' => 'Verified'],
+            ['id' => 3, 'reference_number' => 'SM-003', 'date' => '2025-01-17', 'amount' => 5500.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'SM-004', 'date' => '2025-01-18', 'amount' => 3200.00, 'status' => 'Verified'],
+        ];
+    }
+
+    private function generateDummyCustomerMovement()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'CM-001', 'date' => '2025-01-15', 'amount' => 1200.00, 'status' => 'Active'],
+            ['id' => 2, 'reference_number' => 'CM-002', 'date' => '2025-01-16', 'amount' => 800.00, 'status' => 'Active'],
+            ['id' => 3, 'reference_number' => 'CM-003', 'date' => '2025-01-17', 'amount' => 1500.00, 'status' => 'Completed'],
+            ['id' => 4, 'reference_number' => 'CM-004', 'date' => '2025-01-18', 'amount' => 950.00, 'status' => 'Active'],
+        ];
+    }
+
+    private function generateDummyServices()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'SRV-001', 'date' => '2025-01-15', 'amount' => 450.00, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'SRV-002', 'date' => '2025-01-16', 'amount' => 320.00, 'status' => 'Completed'],
+            ['id' => 3, 'reference_number' => 'SRV-003', 'date' => '2025-01-17', 'amount' => 580.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'SRV-004', 'date' => '2025-01-18', 'amount' => 275.00, 'status' => 'Completed'],
+        ];
+    }
+
+    private function generateDummyMonthly()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'MTH-001', 'date' => '2025-01-31', 'amount' => 45000.00, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'MTH-002', 'date' => '2025-02-28', 'amount' => 52000.00, 'status' => 'Completed'],
+            ['id' => 3, 'reference_number' => 'MTH-003', 'date' => '2025-03-31', 'amount' => 48000.00, 'status' => 'Pending'],
+        ];
+    }
+
+    private function generateDummyUnitsMovement()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'UM-001', 'date' => '2025-01-15', 'amount' => 0, 'status' => 'Occupied'],
+            ['id' => 2, 'reference_number' => 'UM-002', 'date' => '2025-01-16', 'amount' => 0, 'status' => 'Vacant'],
+            ['id' => 3, 'reference_number' => 'UM-003', 'date' => '2025-01-17', 'amount' => 0, 'status' => 'Maintenance'],
+            ['id' => 4, 'reference_number' => 'UM-004', 'date' => '2025-01-18', 'amount' => 0, 'status' => 'Occupied'],
+        ];
+    }
+
+    private function generateDummyOccupancy()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'OCC-001', 'date' => '2025-01-15', 'amount' => 85.5, 'status' => 'Active'],
+            ['id' => 2, 'reference_number' => 'OCC-002', 'date' => '2025-01-16', 'amount' => 92.3, 'status' => 'Active'],
+            ['id' => 3, 'reference_number' => 'OCC-003', 'date' => '2025-01-17', 'amount' => 78.9, 'status' => 'Active'],
+            ['id' => 4, 'reference_number' => 'OCC-004', 'date' => '2025-01-18', 'amount' => 95.1, 'status' => 'Active'],
+        ];
+    }
+
+    private function generateDummyCleaning()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'CLN-001', 'date' => '2025-01-15', 'amount' => 0, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'CLN-002', 'date' => '2025-01-16', 'amount' => 0, 'status' => 'In Progress'],
+            ['id' => 3, 'reference_number' => 'CLN-003', 'date' => '2025-01-17', 'amount' => 0, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'CLN-004', 'date' => '2025-01-18', 'amount' => 0, 'status' => 'Completed'],
+        ];
+    }
+
+    private function generateDummyMaintenance()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'MNT-001', 'date' => '2025-01-15', 'amount' => 500.00, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'MNT-002', 'date' => '2025-01-16', 'amount' => 350.00, 'status' => 'In Progress'],
+            ['id' => 3, 'reference_number' => 'MNT-003', 'date' => '2025-01-17', 'amount' => 200.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'MNT-004', 'date' => '2025-01-18', 'amount' => 450.00, 'status' => 'Completed'],
+        ];
+    }
+
+    private function generateDummyTransfers()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'TRF-001', 'date' => '2025-01-15', 'amount' => 1500.00, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'TRF-002', 'date' => '2025-01-16', 'amount' => 2300.00, 'status' => 'Completed'],
+            ['id' => 3, 'reference_number' => 'TRF-003', 'date' => '2025-01-17', 'amount' => 1800.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'TRF-004', 'date' => '2025-01-18', 'amount' => 950.00, 'status' => 'Completed'],
+        ];
+    }
+
+    private function generateDummyRevenues()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'REV-001', 'date' => '2025-01-15', 'amount' => 12500.00, 'status' => 'Taxed'],
+            ['id' => 2, 'reference_number' => 'REV-002', 'date' => '2025-01-16', 'amount' => 15800.00, 'status' => 'Taxed'],
+            ['id' => 3, 'reference_number' => 'REV-003', 'date' => '2025-01-17', 'amount' => 11200.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'REV-004', 'date' => '2025-01-18', 'amount' => 18900.00, 'status' => 'Taxed'],
+        ];
+    }
+
+    private function generateDummyResources()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'RES-001', 'date' => '2025-01-15', 'amount' => 800.00, 'status' => 'Booked'],
+            ['id' => 2, 'reference_number' => 'RES-002', 'date' => '2025-01-16', 'amount' => 650.00, 'status' => 'Available'],
+            ['id' => 3, 'reference_number' => 'RES-003', 'date' => '2025-01-17', 'amount' => 900.00, 'status' => 'Booked'],
+            ['id' => 4, 'reference_number' => 'RES-004', 'date' => '2025-01-18', 'amount' => 550.00, 'status' => 'Available'],
+        ];
+    }
+
+    private function generateDummyContracts()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'CTR-001', 'date' => '2025-01-15', 'amount' => 5000.00, 'status' => 'Active'],
+            ['id' => 2, 'reference_number' => 'CTR-002', 'date' => '2025-01-16', 'amount' => 4500.00, 'status' => 'Active'],
+            ['id' => 3, 'reference_number' => 'CTR-003', 'date' => '2025-01-17', 'amount' => 6000.00, 'status' => 'Expired'],
+            ['id' => 4, 'reference_number' => 'CTR-004', 'date' => '2025-01-18', 'amount' => 3500.00, 'status' => 'Active'],
+        ];
+    }
+
+    private function generateDummyInvoices()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'INV-001', 'date' => '2025-01-15', 'amount' => 3500.00, 'status' => 'Paid'],
+            ['id' => 2, 'reference_number' => 'INV-002', 'date' => '2025-01-16', 'amount' => 4200.00, 'status' => 'Paid'],
+            ['id' => 3, 'reference_number' => 'INV-003', 'date' => '2025-01-17', 'amount' => 2800.00, 'status' => 'Pending'],
+            ['id' => 4, 'reference_number' => 'INV-004', 'date' => '2025-01-18', 'amount' => 5100.00, 'status' => 'Overdue'],
+        ];
+    }
+
+    private function generateDummyDaily()
+    {
+        return [
+            ['id' => 1, 'reference_number' => 'DAY-001', 'date' => '2025-01-15', 'amount' => 15000.00, 'status' => 'Completed'],
+            ['id' => 2, 'reference_number' => 'DAY-002', 'date' => '2025-01-16', 'amount' => 18200.00, 'status' => 'Completed'],
+            ['id' => 3, 'reference_number' => 'DAY-003', 'date' => '2025-01-17', 'amount' => 12500.00, 'status' => 'Completed'],
+            ['id' => 4, 'reference_number' => 'DAY-004', 'date' => '2025-01-18', 'amount' => 21000.00, 'status' => 'Completed'],
+        ];
+    }
+
+    public function unitCleanings(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyCleaning()
+        ]);
+    }
+
+    public function unitMaintenance(Request $request)
+    {
+        return response()->json([
+            'data' => $this->generateDummyMaintenance()
+        ]);
+    }
+
     public function revenueTax(Request $request)
     {
-        // Request Filters
-        $dateFrom = $request->get('date_from');
-        $dateTo   = $request->get('date_to');
-        $current_team_id = $request->current_team_id;
-
-        $perPage = $request->get('per_page');
-
-        // General Holders
-        $total = [];
-        $total_rent_price = 0;
-        $total_ewa_tax_amount = 0;
-        // total rent amount is the vat for now cause there is no service tax till now
-        $total_rent_tax_amount = 0;
-        $total_service_tax_amount = 0;
-        // this will be the sum of total rent amount & total service amount
-        $total_vat_tax_amount = 0;
-
-        // when is not working here ( when conditional eloquent )
-        if($dateFrom == null || $dateTo == null){
-            $reservations = Reservation::where('team_id' , $current_team_id)
-                ->with('customer')
-                ->orderByDesc('created_at')
-                ->paginate($perPage);
-        }else{
-            $reservations = Reservation::where('team_id' , $current_team_id)
-                ->dateTimeBetween($dateFrom, $dateTo)
-                ->with('customer')
-                ->orderByDesc('created_at')
-                ->paginate($perPage);
-        }
-
-
-        if(count($reservations)){
-            // Reservations without pagination need for some point of view
-            if($dateFrom == null || $dateTo == null){
-                $reservationsWithoutPagination = Reservation::where('team_id' , $current_team_id)
-                    ->with('customer')
-                    ->orderByDesc('created_at')
-                    ->get();
-            }else{
-                $reservationsWithoutPagination = Reservation::where('team_id' , $current_team_id)
-                    ->dateTimeBetween($dateFrom, $dateTo)
-                    ->with('customer')
-                    ->orderByDesc('created_at')
-                    ->get();
-            }
-
-
-            foreach ($reservationsWithoutPagination as $reservation){
-                $total_rent_price += $reservation->sub_total ;
-                $total_ewa_tax_amount += $reservation->ewa_total ;
-                $total_rent_tax_amount += $reservation->vat_total ;
-                $total_service_tax_amount += 0 ;
-                $total_vat_tax_amount += $reservation->vat_total  + 0 ;
-            }
-
-            // Filling the total array
-            $total['rent_price'] = number_format($total_rent_price, 2);
-            $total['ewa_tax_amount'] = number_format($total_ewa_tax_amount, 2);
-            $total['rent_tax_amount'] = number_format($total_rent_tax_amount, 2);
-            $total['service_tax_amount'] = number_format($total_service_tax_amount, 2);
-            $total['vat_tax_amount'] = number_format($total_vat_tax_amount, 2);
-        }
-
-        return RevenueTaxResource::collection($reservations)->additional([
-            'meta' => [
-                'total' => $total
-            ]
+        return response()->json([
+            'data' => $this->generateDummyRevenues()
         ]);
     }
 }
