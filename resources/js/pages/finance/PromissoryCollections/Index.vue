@@ -114,7 +114,7 @@ const getMethodColor = (method) => {
                                         </span>
                                     </td>
                                 </tr>
-                                <tr v-if="collections.data.length === 0">
+                                 <tr v-if="!collections || !collections.data || collections.data.length === 0">
                                     <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                         <AlertCircleIcon class="w-12 h-12 text-gray-200 mx-auto mb-2" />
                                         <p class="text-sm">No collections found.</p>

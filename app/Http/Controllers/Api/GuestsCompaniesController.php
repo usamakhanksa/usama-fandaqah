@@ -336,9 +336,9 @@ class GuestsCompaniesController extends Controller
 
     public function turnawayLogsIndex(Request $request): JsonResponse
     {
-        $query = TurnawayLog::where('team_id', $this->teamId($request))->with(['reason', 'createdBy'])->orderBy('date', 'desc');
+        $query = TurnawayLog::where('team_id', $this->teamId($request))->with(['reason', 'createdBy'])->orderBy('requested_date', 'desc');
 
-        if ($request->filled('date')) $query->whereDate('date', $request->date);
+        if ($request->filled('date')) $query->whereDate('requested_date', $request->date);
 
         return response()->json($query->paginate(20));
     }

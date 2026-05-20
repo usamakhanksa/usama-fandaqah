@@ -73,7 +73,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="banks.length === 0">
+           <tr v-if="!banks || banks.length === 0">
             <td colspan="5" class="px-6 py-12 text-center text-slate-400">
               <div class="flex flex-col items-center gap-2">
                 <Building2 class="w-12 h-12 text-slate-200" />

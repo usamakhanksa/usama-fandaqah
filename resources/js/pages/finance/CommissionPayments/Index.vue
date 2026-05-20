@@ -70,7 +70,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="payments.data.length === 0">
+           <tr v-if="!payments || !payments.data || payments.data.length === 0">
             <td colspan="6" class="px-6 py-12 text-center text-slate-400">
               <div class="flex flex-col items-center gap-2">
                 <PercentCircle class="w-12 h-12 text-slate-200" />

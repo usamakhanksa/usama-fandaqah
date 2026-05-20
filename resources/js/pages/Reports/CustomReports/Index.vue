@@ -14,41 +14,46 @@
       <div class="p-6 border-b border-slate-50">
         <h3 class="font-bold text-[#2a273c]">Saved Reports</h3>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead class="bg-slate-50 text-slate-400 text-xs font-bold uppercase">
-            <tr>
-              <th class="px-6 py-4">Name</th>
-              <th class="px-6 py-4">Module</th>
-              <th class="px-6 py-4">Shared</th>
-              <th class="px-6 py-4">Created</th>
-              <th class="px-6 py-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-50">
-            <tr v-for="report in reports.data" :key="report.id">
-              <td class="px-6 py-4 text-sm font-medium text-[#2a273c]">{{ report.name }}</td>
-              <td class="px-6 py-4 text-sm">{{ report.module }}</td>
-              <td class="px-6 py-4 text-sm">
-                <span :class="report.is_shared ? 'text-emerald-600' : 'text-slate-400'">
-                  {{ report.is_shared ? 'Yes' : 'No' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-sm">{{ new Date(report.created_at).toLocaleDateString() }}</td>
-              <td class="px-6 py-4 text-sm">
-                <div class="flex items-center gap-2">
-                  <Link :href="`/reports/custom-reports/${report.id}`" class="text-[#e95a54] hover:underline">View</Link>
-                  <Link :href="`/reports/custom-reports/${report.id}/edit`" class="text-slate-600 hover:underline">Edit</Link>
-                  <button @click="deleteReport(report.id)" class="text-red-600 hover:underline">Delete</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="p-6" v-if="reports.links">
-        <Pagination :links="reports.links" />
-      </div>
+       <div class="overflow-x-auto">
+         <table class="w-full text-left">
+           <thead class="bg-slate-50 text-slate-400 text-xs font-bold uppercase">
+             <tr>
+               <th class="px-6 py-4">Name</th>
+               <th class="px-6 py-4">Module</th>
+               <th class="px-6 py-4">Shared</th>
+               <th class="px-6 py-4">Created</th>
+               <th class="px-6 py-4">Actions</th>
+             </tr>
+           </thead>
+           <tbody class="divide-y divide-slate-50">
+             <tr v-if="reports && reports.data" v-for="report in reports.data" :key="report.id">
+               <td class="px-6 py-4 text-sm font-medium text-[#2a273c]">{{ report.name }}</td>
+               <td class="px-6 py-4 text-sm">{{ report.module }}</td>
+               <td class="px-6 py-4 text-sm">
+                 <span :class="report.is_shared ? 'text-emerald-600' : 'text-slate-400'">
+                   {{ report.is_shared ? 'Yes' : 'No' }}
+                 </span>
+               </td>
+               <td class="px-6 py-4 text-sm">{{ new Date(report.created_at).toLocaleDateString() }}</td>
+               <td class="px-6 py-4 text-sm">
+                 <div class="flex items-center gap-2">
+                   <Link :href="`/reports/custom-reports/${report.id}`" class="text-[#e95a54] hover:underline">View</Link>
+                   <Link :href="`/reports/custom-reports/${report.id}/edit`" class="text-slate-600 hover:underline">Edit</Link>
+                   <button @click="deleteReport(report.id)" class="text-red-600 hover:underline">Delete</button>
+                 </div>
+               </td>
+             </tr>
+             <tr v-if="!reports || !reports.data || reports.data.length === 0">
+               <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                 <p>No custom reports found.</p>
+               </td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+       <div class="p-6" v-if="reports && reports.links">
+         <Pagination :links="reports.links" />
+       </div>
     </div>
   </div>
 </template>

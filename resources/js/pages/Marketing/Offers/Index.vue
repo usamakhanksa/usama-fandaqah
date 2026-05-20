@@ -86,7 +86,7 @@ const toggleStatus = (id) => {
                     </div>
                 </div>
                 
-                <div v-if="offers.data.length === 0" class="bg-white p-12 text-center rounded-xl shadow-sm border">
+                 <div v-if="!offers || !offers.data || offers.data.length === 0" class="bg-white p-12 text-center rounded-xl shadow-sm border">
                     <LocalOfferIcon class="text-gray-300 !text-6xl mb-4" />
                     <p class="text-gray-500">No offers found. Create your first marketing offer!</p>
                 </div>
