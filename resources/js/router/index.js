@@ -29,6 +29,25 @@ import ReportsPage from '../pages/ReportsPage.vue';
 import UserGroupingPage from '../pages/UserGroupingPage.vue';
 import LeadsPage from '../pages/LeadsPage.vue';
 
+// Settings
+import SidebarAccessPage from '../pages/settings/SidebarAccessPage.vue';
+import RolesPermissionsPage from '../pages/settings/RolesPermissionsPage.vue';
+import NightAuditSettingsPage from '../pages/settings/NightAuditSettingsPage.vue';
+import NoshowSettingsPage from '../pages/settings/NoshowSettingsPage.vue';
+import RevenueTypesPage from '../pages/settings/RevenueTypesPage.vue';
+import EarlyLateSettingsPage from '../pages/settings/EarlyLateSettingsPage.vue';
+
+// Operations Extended
+import NightAuditLogsPage from '../pages/operations/NightAuditLogsPage.vue';
+import NightAuditRerunPage from '../pages/operations/NightAuditRerunPage.vue';
+import NoShowPreviewPage from '../pages/operations/NoShowPreviewPage.vue';
+import NightAuditBackfillPage from '../pages/operations/NightAuditBackfillPage.vue';
+import AuditLocksPage from '../pages/operations/AuditLocksPage.vue';
+
+// Financial Ledgers
+import GuestLedgerPage from '../pages/finance/GuestLedgerPage.vue';
+import DepositLedgerPage from '../pages/finance/DepositLedgerPage.vue';
+
 // Reservations
 import ReservationSchedulePage from '../pages/ReservationSchedulePage.vue';
 import ReservationCreatePage from '../pages/ReservationCreatePage.vue';
@@ -127,6 +146,43 @@ import CashierShiftsPage from '../pages/finance/CashierShiftsPage.vue';
 import RoomStatusLogsPage from '../pages/finance/RoomStatusLogsPage.vue';
 import TravelAgentsPage from '../pages/finance/TravelAgentsPage.vue';
 import CommissionsDashboard from '../pages/finance/CommissionsDashboard.vue';
+import ReceiptsIndex from '../pages/finance/Receipts/Index.vue';
+import PaymentsIndex from '../pages/finance/Payments/Index.vue';
+import InvoicesIndex from '../pages/finance/Invoices/Index.vue';
+import BanksIndex from '../pages/finance/Banks/Index.vue';
+import SendersIndex from '../pages/finance/Senders/Index.vue';
+import CommissionPaymentsIndex from '../pages/finance/CommissionPayments/Index.vue';
+import CreditNotesIndex from '../pages/finance/CreditNotes/Index.vue';
+import InvoiceTransfersIndex from '../pages/finance/InvoiceTransfers/Index.vue';
+import PromissoryNotesIndex from '../pages/finance/PromissoryNotes/Index.vue';
+import PromissoryCollectionsIndex from '../pages/finance/PromissoryCollections/Index.vue';
+
+// Reports
+import DailyReport from '../pages/Reports/DailyReport.vue';
+import OccupancyReport from '../pages/Reports/OccupancyReport.vue';
+import RevenueReport from '../pages/Reports/RevenueReport.vue';
+import TrialBalanceReport from '../pages/Reports/TrialBalanceReport.vue';
+import CompanyArReport from '../pages/Reports/CompanyArReport.vue';
+import SourcePerformanceReport from '../pages/Reports/SourcePerformanceReport.vue';
+import TurnawayReport from '../pages/Reports/TurnawayReport.vue';
+import PaidOutsReport from '../pages/Reports/PaidOutsReport.vue';
+import HousekeepingDiscrepancyReport from '../pages/Reports/HousekeepingDiscrepancyReport.vue';
+import CommissionReport from '../pages/Reports/CommissionReport.vue';
+import CancellationReport from '../pages/Reports/CancellationReport.vue';
+import NoShowReport from '../pages/Reports/NoShowReport.vue';
+import ForecastReport from '../pages/Reports/ForecastReport.vue';
+import AdrRevparReport from '../pages/Reports/AdrRevparReport.vue';
+import CustomReportsIndex from '../pages/Reports/CustomReports/Index.vue';
+import CustomReportsCreate from '../pages/Reports/CustomReports/Create.vue';
+import CustomReportsShow from '../pages/Reports/CustomReports/Show.vue';
+import SchedulesIndex from '../pages/Reports/Schedules/Index.vue';
+import SchedulesCreate from '../pages/Reports/Schedules/Create.vue';
+import SchedulesEdit from '../pages/Reports/Schedules/Edit.vue';
+
+// Marketing
+import MarketingOffersIndex from '../pages/Marketing/Offers/Index.vue';
+import MarketingPromoCodesIndex from '../pages/Marketing/PromoCodes/Index.vue';
+import MarketingPricingPreviewIndex from '../pages/Marketing/PricingPreview/Index.vue';
 
 // AR
 import InvoiceTransferPage from '../pages/ar/InvoiceTransferPage.vue';
@@ -158,7 +214,13 @@ const routes = [
 
   // ── Operations ────────────────────────────────────────────────
   { path: '/operations/night-audit', component: NightAuditControl, name: 'night-audit-control' },
+  { path: '/operations/night-audit/status', component: NightAuditControl, name: 'night-audit-status' },
+  { path: '/operations/night-audit/logs', component: NightAuditLogsPage, name: 'night-audit-logs' },
+  { path: '/operations/night-audit/rerun', component: NightAuditRerunPage, name: 'night-audit-rerun' },
+  { path: '/operations/night-audit/backfill', component: NightAuditBackfillPage, name: 'night-audit-backfill' },
+  { path: '/operations/night-audit/locks', component: AuditLocksPage, name: 'audit-locks' },
   { path: '/operations/no-show-rules', component: NoShowRules, name: 'no-show-rules' },
+  { path: '/operations/no-show-preview', component: NoShowPreviewPage, name: 'no-show-preview' },
   { path: '/operations/room-adjustments', component: RoomAdjustments, name: 'room-adjustments' },
   { path: '/operations/insurance-recovery/create', component: OperationsCheckoutPage, props: { mode: 'insurance' } },
   { path: '/operations/payment-indebtedness/create', component: OperationsCheckoutPage, props: { mode: 'payment' } },
@@ -265,42 +327,95 @@ const routes = [
 
   // ── Finance ───────────────────────────────────────────────────
   { path: '/financial', redirect: '/financial/receipts' },
-  { path: '/financial/receipts', component: FinancialManagementPage },
+  { path: '/financial/receipts', component: ReceiptsIndex, name: 'financial.receipts' },
   { path: '/financial/receipts/create', component: FinancialEntryWizardPage },
   { path: '/financial/receipts/success/:id', component: FinancialSuccessPage },
-  { path: '/financial/expenses', component: FinancialManagementPage },
+  { path: '/financial/expenses', component: FinancialManagementPage, name: 'financial.expenses' },
   { path: '/financial/expenses/create', component: FinancialEntryWizardPage },
   { path: '/financial/expenses/success/:id', component: FinancialSuccessPage },
-  { path: '/financial/bills', component: FinancialManagementPage },
-  { path: '/financial/fund-movement', component: FinancialManagementPage },
-  { path: '/financial/credit-notes', component: FinancialManagementPage },
+  { path: '/financial/bills', component: FinancialManagementPage, name: 'financial.bills' },
+  { path: '/financial/fund-movement', component: FinancialManagementPage, name: 'financial.fund-movement' },
+  { path: '/financial/credit-notes', component: CreditNotesIndex, name: 'financial.credit-notes' },
+
+  // ── Finance Extended ────────────────────────────────────────────
+  { path: '/finance/receipts', component: ReceiptsIndex, name: 'finance.receipts' },
+  { path: '/finance/payments', component: PaymentsIndex, name: 'finance.payments' },
+  { path: '/finance/invoices', component: InvoicesIndex, name: 'finance.invoices' },
+  { path: '/finance/banks', component: BanksIndex, name: 'finance.banks' },
+  { path: '/finance/senders', component: SendersIndex, name: 'finance.senders' },
+  { path: '/finance/commission-payments', component: CommissionPaymentsIndex, name: 'finance.commission-payments' },
   { path: '/finance/payment-correction', component: PaymentCorrection, name: 'payment-correction' },
   { path: '/finance/cashier-shifts', component: CashierShiftsPage, name: 'cashier-shifts' },
   { path: '/finance/room-status-logs', component: RoomStatusLogsPage, name: 'room-status-logs' },
   { path: '/finance/travel-agents', component: TravelAgentsPage, name: 'travel-agents' },
   { path: '/finance/commissions', component: CommissionsDashboard, name: 'commissions' },
+  { path: '/finance/guest-ledger', component: GuestLedgerPage, name: 'guest-ledger' },
+  { path: '/finance/deposit-ledger', component: DepositLedgerPage, name: 'deposit-ledger' },
+  { path: '/finance/invoice-transfers', component: InvoiceTransfersIndex, name: 'finance.invoice-transfers' },
+  { path: '/finance/promissory-notes', component: PromissoryNotesIndex, name: 'finance.promissory-notes' },
+  { path: '/finance/promissory-collections', component: PromissoryCollectionsIndex, name: 'finance.promissory-collections' },
+
+  // ── Reports ───────────────────────────────────────────────────
+  { path: '/reports/daily', component: DailyReport, name: 'reports.daily' },
+  { path: '/reports/occupancy', component: OccupancyReport, name: 'reports.occupancy' },
+  { path: '/reports/revenue', component: RevenueReport, name: 'reports.revenue' },
+  { path: '/reports/forecast-history', component: ForecastReport, name: 'reports.forecast' },
+  { path: '/reports/no-show', component: NoShowReport, name: 'reports.no-show' },
+  { path: '/reports/cancellation', component: CancellationReport, name: 'reports.cancellation' },
+  { path: '/reports/commission', component: CommissionReport, name: 'reports.commission' },
+  { path: '/reports/paid-outs', component: PaidOutsReport, name: 'reports.paid-outs' },
+  { path: '/reports/turnaway', component: TurnawayReport, name: 'reports.turnaway' },
+  { path: '/reports/source-performance', component: SourcePerformanceReport, name: 'reports.source-performance' },
+  { path: '/reports/company-ar', component: CompanyArReport, name: 'reports.company-ar' },
+  { path: '/reports/trial-balance', component: TrialBalanceReport, name: 'reports.trial-balance' },
+  { path: '/reports/housekeeping-discrepancy', component: HousekeepingDiscrepancyReport, name: 'reports.housekeeping-discrepancy' },
+  { path: '/reports/adr-revpar', component: AdrRevparReport, name: 'reports.adr-revpar' },
+  { path: '/reports/custom-reports', component: CustomReportsIndex, name: 'reports.custom' },
+  { path: '/reports/custom-reports/create', component: CustomReportsCreate, name: 'reports.custom.create' },
+  { path: '/reports/custom-reports/:id', component: CustomReportsShow, name: 'reports.custom.show' },
+  { path: '/reports/report-schedules', component: SchedulesIndex, name: 'reports.schedules' },
+  { path: '/reports/report-schedules/create', component: SchedulesCreate, name: 'reports.schedules.create' },
+  { path: '/reports/report-schedules/:id/edit', component: SchedulesEdit, name: 'reports.schedules.edit' },
+
+  // ── Marketing ──────────────────────────────────────────────────
+  { path: '/marketing/offers', component: MarketingOffersIndex, name: 'marketing.offers' },
+  { path: '/marketing/promo-codes', component: MarketingPromoCodesIndex, name: 'marketing.promo-codes' },
+  { path: '/marketing/pricing-preview', component: MarketingPricingPreviewIndex, name: 'marketing.pricing-preview' },
 
   // ── AR ────────────────────────────────────────────────────────
   { path: '/ar/invoice-transfers', component: InvoiceTransferPage, name: 'invoice-transfers' },
   { path: '/ar/promissories', component: PromissoriesPage, name: 'ar.promissories' },
   { path: '/ar/promissory-payment-logs', component: PromissoryPaymentLogPage },
   { path: '/ar/company-groups', component: CompanyGroupsPage },
-  { path: '/ar/city-ledger', component: CityLedgerPage },
+  { path: '/ar/city-ledger', component: CityLedgerPage, name: 'ar.city-ledger' },
+  { path: '/ar/aging', component: CityLedgerPage, name: 'ar.aging' },
+  { path: '/ar/credit-utilization', component: CityLedgerPage, name: 'ar.credit-utilization' },
 
   // ── Channel Manager ───────────────────────────────────────────
   { path: '/channel-manager', component: ChannelManagerPage },
   { path: '/channel-manager/availability-rates', component: ManageCategoriesPage },
   { path: '/channel-manager/reservations', component: ChannelReservationsPage },
 
+  // ── Settings ──────────────────────────────────────────────────
+  { path: '/settings', component: SettingsPage, name: 'settings' },
+  { path: '/settings/night-audit', component: NightAuditSettingsPage, name: 'settings.night-audit' },
+  { path: '/settings/early-late', component: EarlyLateSettingsPage, name: 'settings.early-late' },
+  { path: '/settings/no-show', component: NoshowSettingsPage, name: 'settings.no-show' },
+  { path: '/settings/revenue-types', component: RevenueTypesPage, name: 'settings.revenue-types' },
+  { path: '/settings/roles', component: RolesPermissionsPage, name: 'settings.roles' },
+  { path: '/settings/sidebar', component: SidebarAccessPage, name: 'settings.sidebar-access' },
+
   // ── User Groups ───────────────────────────────────────────────
   { path: '/user-groups', component: UserGroupingPage },
   { path: '/user-groups/roles/create', component: UserGroupingPage },
   { path: '/user-groups/roles/:id/edit', component: UserGroupingPage },
 
+  // ── Night Audit Extended ──────────────────────────────────────
+  { path: '/night-audit/early-late-charges', component: EarlyLateSettingsPage, name: 'night-audit.early-late-charges' },
+
   // ── Misc ──────────────────────────────────────────────────────
   { path: '/leads', component: LeadsPage, name: 'leads' },
   { path: '/rooms', component: RoomsPage },
-  { path: '/settings', component: SettingsPage },
   { path: '/reports', component: ReportsPage },
   { path: '/profile', component: SettingsPage, name: 'profile' },
   { path: '/:pathMatch(.*)*', redirect: '/dashboard' },

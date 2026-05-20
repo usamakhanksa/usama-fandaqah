@@ -29,18 +29,15 @@ class ReportInvoiceToZatca implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($invoice, $credential, $model, $reservation_id)
+    public function __construct($invoice, $credential, $model, $reservation_id, $team_id)
     {
         $this->invoice = $invoice;
         $this->credential = $credential;
         $this->reservation_id = $reservation_id;
         $this->model = $model;
+        $this->team_id = $team_id;
         
-        $this->team_id = auth()->user()->current_team_id;
-        $org = auth()->user()->getSupplierEGS();
-
-        $this->service = new GenerateOrReportInvoice($credential->username, $credential->password, $org);
-
+        // We will initialize service in handle() to ensure we have credentials
     }
 
     /**
@@ -50,23 +47,31 @@ class ReportInvoiceToZatca implements ShouldQueue
      */
     public function handle()
     {
+        $team = Team::findOrFail($this->team_id);
+        // Note: getSupplierEGS() should be a method on Team or User, 
+        // assuming it's available on Team for background jobs.
+        $org = $team->getSupplierEGS(); 
+
+        $this->service = new GenerateOrReportInvoice($this->credential->username, $this->credential->password, $org);
+
         $compliant_invoice = $this->generateInvoice();
         $this->reportInvoice($compliant_invoice);
-
     }
 
     public function generateInvoice() {
-        $team = Team::findOrFail($this->team_id);
-        $invoice = ReservationInvoice::findOrFail($reservation_id);
+        // Use the main Invoice model
+        $invoice = \App\Models\Invoice::findOrFail($this->invoice->id);
         $compliant_invoice = $this->service->generateCompliantInvoice($invoice->id);
         return $compliant_invoice;
     }
 
     public function reportInvoice ($invoice) {
         if($invoice['invoice_type'] === 'standard tax invoice') {
-            $response = $invoice_pusher->reportSimplified($invoice->invoice, $invoice->invoice_hash, $invoice->uuid);
+            // Standard (B2B) requires Clearance
+            $response = $this->service->reportStandard($invoice->invoice, $invoice->invoice_hash, $invoice->uuid);
         } else if ($invoice['invoice_type'] === 'simplified tax invoice') {
-            $response = $invoice_pusher->reportStandard($invoice->invoice, $invoice->invoice_hash, $invoice->uuid);
+            // Simplified (B2C) requires Reporting
+            $response = $this->service->reportSimplified($invoice->invoice, $invoice->invoice_hash, $invoice->uuid);
         }
     }
 }

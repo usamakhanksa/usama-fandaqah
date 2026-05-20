@@ -17,12 +17,18 @@ import Pagination from '@/Components/Pagination.vue';
 import { debounce } from 'lodash';
 
 const props = defineProps({
-    creditNotes: Object,
-    filters: Object,
+    creditNotes: {
+        type: Object,
+        default: () => ({ data: [] })
+    },
+    filters: {
+        type: Object,
+        default: () => ({})
+    },
 });
 
-const search = ref(props.filters.search || '');
-const status = ref(props.filters.status || '');
+const search = ref(props.filters?.search || '');
+const status = ref(props.filters?.status || '');
 
 watch([search, status], debounce(([s, st]) => {
     router.get(route('finance.credit-notes.index'), { search: s, status: st }, { preserveState: true, replace: true });
@@ -119,7 +125,7 @@ const formatCurrency = (amount) => {
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-for="note in creditNotes.data" :key="note.id" class="hover:bg-gray-50 transition-colors">
+                                <tr v-for="note in creditNotes?.data" :key="note.id" class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <Link :href="route('finance.credit-notes.show', note.id)" class="text-sm font-semibold text-indigo-600 hover:text-indigo-900">
                                             {{ note.credit_note_number }}
@@ -127,7 +133,7 @@ const formatCurrency = (amount) => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <Link :href="route('finance.invoices.show', note.invoice_id)" class="text-sm text-gray-600 hover:underline inline-flex items-center">
-                                            {{ note.invoice.invoice_number }}
+                                            {{ note.invoice?.invoice_number }}
                                             <ExternalLinkIcon class="w-3 h-3 ml-1" />
                                         </Link>
                                     </td>
@@ -152,7 +158,7 @@ const formatCurrency = (amount) => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <span :class="['px-2.5 py-0.5 rounded-full text-xs font-medium', getZatcaStatusColor(note.zatca_status)]">
-                                            {{ note.zatca_status.replace('_', ' ') }}
+                                            {{ note.zatca_status?.replace('_', ' ') }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -161,7 +167,7 @@ const formatCurrency = (amount) => {
                                         </Link>
                                     </td>
                                 </tr>
-                                <tr v-if="creditNotes.data.length === 0">
+                                <tr v-if="!creditNotes?.data || creditNotes?.data.length === 0">
                                     <td colspan="8" class="px-6 py-12 text-center text-gray-500">
                                         <div class="flex flex-col items-center">
                                             <FileTextIcon class="w-12 h-12 text-gray-300 mb-2" />
@@ -173,7 +179,7 @@ const formatCurrency = (amount) => {
                         </table>
                     </div>
                     
-                    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                    <div v-if="creditNotes?.data?.length > 0" class="bg-gray-50 px-6 py-4 border-t border-gray-200">
                         <Pagination :links="creditNotes.links" />
                     </div>
                 </div>

@@ -162,7 +162,7 @@ const loadLookups = async () => {
   try {
     const [types, flrs] = await Promise.all([
       api.get('/master-data/room_types'),
-      api.get('/master-data/floors') // Assuming this endpoint exists
+      api.get('/master-data/room_floors')
     ]);
     roomTypes.value = types.data.data || [];
     floors.value = flrs.data.data || [];

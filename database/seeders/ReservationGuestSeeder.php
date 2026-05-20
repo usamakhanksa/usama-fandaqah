@@ -19,7 +19,7 @@ class ReservationGuestSeeder extends Seeder
     public function run()
     {
         // Get the demo team
-        $team = Team::where('slug', 'demo-hotel')->first();
+        $team = Team::where('slug', 'fandaqah-palace')->first() ?: Team::where('slug', 'demo-hotel')->first();
         
         if (!$team) {
             $this->command->error('Demo team not found. Please run TeamSeeder first.');

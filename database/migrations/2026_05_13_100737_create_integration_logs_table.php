@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('integration_logs');
         Schema::create('integration_logs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('team_id')->index();

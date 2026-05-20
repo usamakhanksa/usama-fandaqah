@@ -21,7 +21,7 @@
 
     <div v-else class="space-y-6">
       <!-- Balance Status -->
-      <div :class="['p-6 rounded-3xl shadow-sm border', totals.balanced ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200']]">
+      <div :class="['p-6 rounded-3xl shadow-sm border', totals.balanced ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200']">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-lg font-bold text-[#2a273c]">Trial Balance</h3>

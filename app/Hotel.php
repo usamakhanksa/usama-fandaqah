@@ -5,7 +5,6 @@ namespace App;
 use App\Integration;
 use App\Jobs\TeamDeleted;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\SoftDeletes ;
 
 class Hotel extends Model
@@ -38,7 +37,7 @@ class Hotel extends Model
     {
         parent::boot();
 
-        // Creation event  setting default plan and plan ends after
+        // Creation event  setting default plan and setting default plan and plan ends after
         static::creating(function ($query) {
 
             $current_date= now() ;

@@ -12,12 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('offers', function (Blueprint $table) {
-            $table->decimal('discount_percent', 5, 2)->nullable()->after('discount_percentage');
-        });
-        
-        Schema::table('offers', function (Blueprint $table) {
-            $table->date('start_date')->nullable()->after('discount_percent');
-            $table->date('end_date')->nullable()->after('start_date');
+            //
         });
     }
 
@@ -27,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('offers', function (Blueprint $table) {
-            $table->dropColumn(['discount_percent', 'start_date', 'end_date']);
+            //
         });
     }
 };

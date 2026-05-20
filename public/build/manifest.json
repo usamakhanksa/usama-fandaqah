@@ -1,4 +1,103 @@
 {
+  "_@heroicons-Codv-CQ4.js": {
+    "file": "assets/@heroicons-Codv-CQ4.js",
+    "name": "@heroicons",
+    "imports": [
+      "_@vue-DgzODTBS.js"
+    ]
+  },
+  "_@intlify-CpgmiWt5.js": {
+    "file": "assets/@intlify-CpgmiWt5.js",
+    "name": "@intlify"
+  },
+  "_@kurkle-D8fDXNIl.js": {
+    "file": "assets/@kurkle-D8fDXNIl.js",
+    "name": "@kurkle"
+  },
+  "_@vue-DgzODTBS.js": {
+    "file": "assets/@vue-DgzODTBS.js",
+    "name": "@vue"
+  },
+  "_apexcharts-BqElZgNz.js": {
+    "file": "assets/apexcharts-BqElZgNz.js",
+    "name": "apexcharts"
+  },
+  "_axios-B8_nURbH.js": {
+    "file": "assets/axios-B8_nURbH.js",
+    "name": "axios"
+  },
+  "_chart.js-CV3qNZGp.js": {
+    "file": "assets/chart.js-CV3qNZGp.js",
+    "name": "chart.js",
+    "imports": [
+      "_@kurkle-D8fDXNIl.js"
+    ]
+  },
+  "_dayjs-C9Bz08Wv.js": {
+    "file": "assets/dayjs-C9Bz08Wv.js",
+    "name": "dayjs"
+  },
+  "_lucide-vue-next-BNc3LNFj.js": {
+    "file": "assets/lucide-vue-next-BNc3LNFj.js",
+    "name": "lucide-vue-next",
+    "imports": [
+      "_@vue-DgzODTBS.js"
+    ]
+  },
+  "_pinia-cDBxqdpF.js": {
+    "file": "assets/pinia-cDBxqdpF.js",
+    "name": "pinia",
+    "imports": [
+      "_@vue-DgzODTBS.js"
+    ]
+  },
+  "_primeicons-C1taWTi5.css": {
+    "file": "assets/primeicons-C1taWTi5.css",
+    "src": "_primeicons-C1taWTi5.css"
+  },
+  "_sweetalert2-CxryAhEz.js": {
+    "file": "assets/sweetalert2-CxryAhEz.js",
+    "name": "sweetalert2"
+  },
+  "_vue-chartjs-uExdsdj5.js": {
+    "file": "assets/vue-chartjs-uExdsdj5.js",
+    "name": "vue-chartjs",
+    "imports": [
+      "_chart.js-CV3qNZGp.js",
+      "_@vue-DgzODTBS.js"
+    ]
+  },
+  "_vue-demi-l0sNRNKZ.js": {
+    "file": "assets/vue-demi-l0sNRNKZ.js",
+    "name": "vue-demi"
+  },
+  "_vue-i18n-De1PSaJ9.js": {
+    "file": "assets/vue-i18n-De1PSaJ9.js",
+    "name": "vue-i18n",
+    "imports": [
+      "_@intlify-CpgmiWt5.js",
+      "_@vue-DgzODTBS.js"
+    ]
+  },
+  "_vue-l0sNRNKZ.js": {
+    "file": "assets/vue-l0sNRNKZ.js",
+    "name": "vue"
+  },
+  "_vue-router-BfZPmGm9.js": {
+    "file": "assets/vue-router-BfZPmGm9.js",
+    "name": "vue-router",
+    "imports": [
+      "_@vue-DgzODTBS.js"
+    ]
+  },
+  "_vue3-apexcharts-CDqi1IRC.js": {
+    "file": "assets/vue3-apexcharts-CDqi1IRC.js",
+    "name": "vue3-apexcharts",
+    "imports": [
+      "_apexcharts-BqElZgNz.js",
+      "_@vue-DgzODTBS.js"
+    ]
+  },
   "node_modules/primeicons/fonts/primeicons.eot": {
     "file": "assets/primeicons-DMOk5skT.eot",
     "src": "node_modules/primeicons/fonts/primeicons.eot"
@@ -19,28 +118,36 @@
     "file": "assets/primeicons-C6QP2o4f.woff2",
     "src": "node_modules/primeicons/fonts/primeicons.woff2"
   },
-  "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js": {
-    "file": "assets/apexcharts.ssr.esm-fe46cd2d-CEIEYvuU.js",
-    "name": "apexcharts.ssr.esm-fe46cd2d",
-    "src": "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js",
-    "isDynamicEntry": true
-  },
   "resources/css/app.css": {
-    "file": "assets/app-BS9qhIwu.css",
+    "file": "assets/app-Bw9f3lHt.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/main.js": {
-    "file": "assets/main-BvQl9YXm.js",
+    "file": "assets/main-BBozTAgi.js",
     "name": "main",
     "src": "resources/js/main.js",
     "isEntry": true,
-    "dynamicImports": [
-      "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js",
-      "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js"
+    "imports": [
+      "_@vue-DgzODTBS.js",
+      "_pinia-cDBxqdpF.js",
+      "_vue-router-BfZPmGm9.js",
+      "_axios-B8_nURbH.js",
+      "_vue-i18n-De1PSaJ9.js",
+      "_lucide-vue-next-BNc3LNFj.js",
+      "_vue3-apexcharts-CDqi1IRC.js",
+      "_sweetalert2-CxryAhEz.js",
+      "_dayjs-C9Bz08Wv.js",
+      "_vue-chartjs-uExdsdj5.js",
+      "_chart.js-CV3qNZGp.js",
+      "_@heroicons-Codv-CQ4.js",
+      "_@intlify-CpgmiWt5.js",
+      "_apexcharts-BqElZgNz.js",
+      "_@kurkle-D8fDXNIl.js"
     ],
     "css": [
-      "assets/main-BoAqZMd1.css"
+      "assets/main-OGiVo2a5.css",
+      "assets/primeicons-C1taWTi5.css"
     ],
     "assets": [
       "assets/primeicons-DMOk5skT.eot",

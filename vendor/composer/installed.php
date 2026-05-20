@@ -3,7 +3,7 @@
         'name' => 'fandaqah/hotel-dashboard',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '44458bb4f4872b14b63b942c5c7d522c2402b3fc',
+        'reference' => 'ac96045d5a3fcb8a27ed8c33401c5c22028fbb3c',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -205,7 +205,7 @@
         'fandaqah/hotel-dashboard' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '44458bb4f4872b14b63b942c5c7d522c2402b3fc',
+            'reference' => 'ac96045d5a3fcb8a27ed8c33401c5c22028fbb3c',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

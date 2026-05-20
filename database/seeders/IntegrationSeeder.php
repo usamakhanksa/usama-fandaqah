@@ -9,7 +9,7 @@ use App\Models\FormIntegration;
 use App\Models\ApiConsumer;
 use App\Models\ApiToken;
 use App\Models\Team;
-use App\Models\User;
+use App\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -101,9 +101,10 @@ class IntegrationSeeder extends Seeder
                 ],
             ];
 
-            $admin = $team->users()->where('role', 'admin')->first() ?? $team->users()->first();
+            $admin = $team->users()->where('role', 'admin')->first() ?? $team->users()->first() ?? User::first() ?? User::factory()->create();
 
             foreach ($integrations as $integrationData) {
+                $integrationData['slug'] = $integrationData['slug'] . '-' . $team->id;
                 $integrationData['team_id'] = $team->id;
                 $integrationData['created_by'] = $admin->id;
 
@@ -130,7 +131,7 @@ class IntegrationSeeder extends Seeder
         }
     }
 
-    private function createIntegrationSettings(Integration $integration, User $user)
+    private function createIntegrationSettings(Integration $integration, $user)
     {
         $settingsData = [
             'zatca-fatoora' => [
@@ -170,7 +171,7 @@ class IntegrationSeeder extends Seeder
         }
     }
 
-    private function createIntegrationLogs(Integration $integration, User $user)
+    private function createIntegrationLogs(Integration $integration, $user)
     {
         $actions = ['push_guest', 'pull_reservation', 'sync_inventory', 'webhook_received', 'data_validated'];
         $logTypes = ['success', 'info', 'warning'];
@@ -192,9 +193,9 @@ class IntegrationSeeder extends Seeder
         }
     }
 
-    private function createFormIntegrations(Team $team, User $user)
+    private function createFormIntegrations(Team $team, $user)
     {
-        $integration = Integration::where('team_id', $team->id)->where('slug', 'zatca-fatoora')->first();
+        $integration = Integration::where('team_id', $team->id)->where('slug', 'zatca-fatoora-' . $team->id)->first();
 
         if ($integration) {
             FormIntegration::firstOrCreate(
@@ -216,7 +217,7 @@ class IntegrationSeeder extends Seeder
         }
     }
 
-    private function createApiConsumers(Team $team, User $user)
+    private function createApiConsumers(Team $team, $user)
     {
         $consumers = [
             [
@@ -250,7 +251,7 @@ class IntegrationSeeder extends Seeder
         }
     }
 
-    private function createApiTokens(Team $team, User $user)
+    private function createApiTokens(Team $team, $user)
     {
         $consumers = ApiConsumer::where('team_id', $team->id)->get();
 
@@ -259,7 +260,7 @@ class IntegrationSeeder extends Seeder
                 ApiToken::create([
                     'team_id' => $team->id,
                     'api_consumer_id' => $consumer->id,
-                    'name' => "{$consumer->name} Token {$i + 1}",
+                    'name' => $consumer->name . ' Token ' . ($i + 1),
                     'token' => Str::random(64),
                     'abilities' => ['read', 'write'],
                     'expires_at' => now()->addYear(),

@@ -14,10 +14,22 @@ import {
 } from 'lucide-vue-next';
 
 const props = defineProps({
-    notes: Object,
-    aging: Object,
-    stats: Object,
-    filters: Object,
+    notes: {
+        type: Object,
+        default: () => ({ data: [] })
+    },
+    aging: {
+        type: Object,
+        default: () => ({})
+    },
+    stats: {
+        type: Object,
+        default: () => ({})
+    },
+    filters: {
+        type: Object,
+        default: () => ({})
+    },
 });
 
 const formatCurrency = (amount) => {
@@ -85,7 +97,7 @@ const getStatusColor = (status) => {
                     </h3>
                     <div class="grid grid-cols-5 gap-4">
                         <div v-for="(val, key) in aging" :key="key" class="p-4 rounded-lg bg-gray-50 border border-gray-100 text-center">
-                            <p class="text-[10px] text-gray-400 uppercase font-bold">{{ key.replace('_', '-') }} Days</p>
+                            <p class="text-[10px] text-gray-400 uppercase font-bold">{{ key?.replace('_', '-') }} Days</p>
                             <p class="text-sm font-bold text-gray-700 mt-1">{{ formatCurrency(val) }}</p>
                         </div>
                     </div>
@@ -128,7 +140,7 @@ const getStatusColor = (status) => {
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-for="note in notes.data" :key="note.id" :class="{'bg-red-50': note.is_overdue && note.status !== 'collected'}">
+                                <tr v-for="note in notes?.data" :key="note.id" :class="{'bg-red-50': note.is_overdue && note.status !== 'collected'}">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="p-2 bg-indigo-50 rounded-lg mr-3">
@@ -167,8 +179,25 @@ const getStatusColor = (status) => {
                                         </Link>
                                     </td>
                                 </tr>
+                                <tr v-if="!notes?.data || notes?.data.length === 0">
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                        <div class="flex flex-col items-center">
+                                            <AlertTriangleIcon class="w-12 h-12 text-gray-200 mb-2" />
+                                            <p>No promissory notes found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div v-if="notes?.links?.length > 3" class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div class="flex flex-wrap -mb-1">
+                            <template v-for="(link, key) in notes.links" :key="key">
+                                <div v-if="link.url === null" class="mr-1 mb-1 px-4 py-3 text-sm leading-4 text-gray-400 border rounded" v-html="link.label" />
+                                <Link v-else class="mr-1 mb-1 px-4 py-3 text-sm leading-4 border rounded hover:bg-white focus:border-indigo-500 focus:text-indigo-500" :class="{ 'bg-white border-indigo-500 text-indigo-600 font-bold': link.active }" :href="link.url" v-html="link.label" />
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>

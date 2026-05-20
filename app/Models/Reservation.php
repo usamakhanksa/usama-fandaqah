@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Scopes\TeamScope;
 use App\Traits\Filterable;
+use App\User; // Adding explicit import for User model
 
 class Reservation extends Model
 {

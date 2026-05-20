@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +14,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        // Disable foreign key checks for clean seeding
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         // 1. Foundation Lookups
         $this->call([
             CountryCitySeeder::class,
@@ -48,8 +52,8 @@ class DatabaseSeeder extends Seeder
         // 5. Operations
         $this->call([
             ReservationSeeder::class,
-            // ReservationGuestSeeder::class,
-            // CheckinCheckoutSeeder::class,
+            ReservationGuestSeeder::class,
+            CheckinCheckoutSeeder::class,
         ]);
 
         // 6. Finance & Audit
@@ -58,8 +62,9 @@ class DatabaseSeeder extends Seeder
             TransactionSeeder::class,
             InvoiceCreditNoteSeeder::class,
             HousekeepingSeeder::class,
-            // MaintenanceSeeder::class,
-            // NightAuditSeeder::class,
+            MaintenanceSeeder::class,
+            NightAuditSeeder::class,
+            LongStaySeeder::class,
         ]);
 
         // 7. Reports Specialized Data
@@ -71,8 +76,16 @@ class DatabaseSeeder extends Seeder
         $this->call([
             WebsiteSeeder::class,
             IntegrationSeeder::class,
-            // NotificationSeeder::class,
-            // ReportSeeder::class,
+            ReportSeeder::class,
         ]);
+
+        // 9. Final Demo Polish
+        $this->call([
+            DashboardDummyDataSeeder::class,
+            FandaqahDemoSeeder::class,
+        ]);
+
+        // Re-enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

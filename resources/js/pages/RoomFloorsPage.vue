@@ -35,14 +35,14 @@
                 <button class="btn-danger" @click="deleteFloor(floor)">Delete</button>
               </td>
             </tr>
-            <tr v-if="!floors.data.length">
+            <tr v-if="!floors.data || !floors.data.length">
               <td class="p-3 text-center" colspan="5">No floors found.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="py-3">
+      <div class="py-3" v-if="floors.meta && floors.meta.links && floors.meta.links.length > 2">
         <button v-if="floors.meta.prev_page_url" class="btn-outline mr-2" @click="changePage(floors.meta.current_page - 1)">Previous</button>
         <button v-if="floors.meta.next_page_url" class="btn-outline" @click="changePage(floors.meta.current_page + 1)">Next</button>
       </div>
@@ -78,6 +78,10 @@ const fetchFloors = async () => {
   try {
     const { data } = await api.get('/room-floors', { params: query });
     floors.value = data;
+  } catch (error) {
+    console.error("Error fetching floors:", error);
+    // Initialize with default values in case of error
+    floors.value = { data: [], meta: {} };
   } finally {
     loading.value = false;
   }

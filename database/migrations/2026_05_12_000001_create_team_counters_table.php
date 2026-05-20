@@ -12,12 +12,12 @@ return new class extends Migration
         Schema::create('team_counters', function (Blueprint $table) {
             $table->id();
             $table->foreignId('team_id')->constrained()->cascadeOnDelete();
-            $table->string('key');
+            $table->string('key');  // Changed from 'type' to 'key'
             $table->string('prefix');
             $table->integer('value')->default(0);
             $table->timestamps();
 
-            $table->unique(['team_id', 'key', 'prefix']);
+            $table->unique(['team_id', 'key', 'prefix']);  // Updated unique constraint
         });
     }
 

@@ -368,7 +368,7 @@ class DashboardRepository
     public function getFloorWiseStatus(Team $team)
     {
         return Unit::where('team_id', $team->id)
-            ->with('category')
+            ->with('unitCategory')
             ->orderBy('floor')
             ->orderBy('unit_number')
             ->get()

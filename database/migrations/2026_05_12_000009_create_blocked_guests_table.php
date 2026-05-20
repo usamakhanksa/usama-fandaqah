@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('blocked_guests');
         Schema::create('blocked_guests', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('team_id');

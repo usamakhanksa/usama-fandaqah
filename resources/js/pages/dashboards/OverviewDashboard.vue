@@ -136,7 +136,7 @@
             <div class="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
           </div>
           <EmptyState v-else-if="!chartData.series.length" />
-          <apexchart v-else type="line" height="300" :options="chartData.options" :series="chartData.series"></apexchart>
+          <apexchart v-else :key="JSON.stringify(chartData.series)" type="line" height="300" :options="chartData.options" :series="chartData.series"></apexchart>
         </div>
 
       </div>
@@ -245,7 +245,7 @@ const chartData = ref({
     stroke: { curve: 'smooth', width: [3, 3] },
     xaxis: { categories: [] },
     yaxis: [
-      { title: { text: t('dashboard.revenue') }, labels: { formatter: (val) => val.toLocaleString() } },
+      { title: { text: t('dashboard.revenue') }, labels: { formatter: (val) => (val ?? 0).toLocaleString() } },
       { opposite: true, title: { text: t('dashboard.occupancy') + ' %' }, max: 100 }
     ],
     tooltip: { shared: true, intersect: false }
@@ -263,11 +263,21 @@ const fetchData = async (filters) => {
     recentActivity.value = data.recentActivity;
     rooms.value = data.rooms;
     
-    chartData.value.series = [
-      { name: t('dashboard.revenue'), type: 'area', data: data.chart.revenue },
-      { name: t('dashboard.occupancy'), type: 'line', data: data.chart.occupancy }
-    ];
-    chartData.value.options.xaxis.categories = data.chart.dates;
+    // Update chart data in one go to avoid partial re-renders
+    chartData.value = {
+      ...chartData.value,
+      series: [
+        { name: t('dashboard.revenue'), type: 'area', data: data.chart.revenue },
+        { name: t('dashboard.occupancy'), type: 'line', data: data.chart.occupancy }
+      ],
+      options: {
+        ...chartData.value.options,
+        xaxis: {
+          ...chartData.value.options.xaxis,
+          categories: data.chart.dates
+        }
+      }
+    };
 
   } catch (error) {
     console.error('Dashboard fetch error', error);

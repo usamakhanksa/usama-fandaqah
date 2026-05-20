@@ -13,8 +13,14 @@ import {
 } from 'lucide-vue-next';
 
 const props = defineProps({
-    transfers: Object,
-    filters: Object,
+    transfers: {
+        type: Object,
+        default: () => ({ data: [] })
+    },
+    filters: {
+        type: Object,
+        default: () => ({})
+    },
 });
 
 const getStatusColor = (status) => {
@@ -102,7 +108,7 @@ const formatCurrency = (amount) => {
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <tr v-for="transfer in transfers.data" :key="transfer.id" class="hover:bg-gray-50 transition-colors">
+                                <tr v-for="transfer in transfers?.data" :key="transfer.id" class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="p-2 bg-indigo-50 rounded-lg mr-3">
@@ -112,7 +118,7 @@ const formatCurrency = (amount) => {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">{{ transfer.from_invoice.invoice_number }}</div>
+                                        <div class="text-sm text-gray-900">{{ transfer.from_invoice?.invoice_number }}</div>
                                         <div class="text-xs text-gray-500">{{ transfer.from_guest?.full_name || transfer.from_company?.name }}</div>
                                     </td>
                                     <td class="px-6 py-4">
@@ -138,7 +144,7 @@ const formatCurrency = (amount) => {
                                         </Link>
                                     </td>
                                 </tr>
-                                <tr v-if="transfers.data.length === 0">
+                                <tr v-if="!transfers?.data || transfers?.data.length === 0">
                                     <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                                         <div class="flex flex-col items-center">
                                             <FileTextIcon class="w-12 h-12 text-gray-200 mb-2" />
@@ -151,7 +157,7 @@ const formatCurrency = (amount) => {
                     </div>
 
                     <!-- Pagination -->
-                    <div v-if="transfers.data.length > 0" class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                    <div v-if="transfers?.data && transfers?.data.length > 0" class="px-6 py-4 bg-gray-50 border-t border-gray-200">
                         <!-- Pagination logic here -->
                     </div>
                 </div>

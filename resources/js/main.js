@@ -5,8 +5,12 @@ import App from './App.vue';
 import VueApexCharts from 'vue3-apexcharts';
 import i18n from './i18n';
 import 'primeicons/primeicons.css';
+import { route } from './shims/inertia';
 
 const app = createApp(App);
+
+app.config.globalProperties.route = route;
+window.route = route;
 
 app.config.errorHandler = (err, instance, info) => {
   console.error('[Vue Error]', err, info);

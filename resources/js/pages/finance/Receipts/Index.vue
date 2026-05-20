@@ -120,7 +120,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr v-for="receipt in receipts.data" :key="receipt.id" class="hover:bg-slate-50/50 transition-colors">
+          <tr v-for="receipt in receipts?.data" :key="receipt.id" class="hover:bg-slate-50/50 transition-colors">
             <td class="px-6 py-4">
               <div class="font-medium text-slate-700">{{ receipt.receipt_number }}</div>
               <div v-if="receipt.reservation" class="text-xs text-slate-400">
@@ -185,7 +185,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="receipts.data.length === 0">
+          <tr v-if="!receipts?.data || receipts?.data.length === 0">
             <td colspan="7" class="px-6 py-12 text-center text-slate-400">
               <div class="flex flex-col items-center gap-2">
                 <Receipt class="w-12 h-12 text-slate-200" />
@@ -197,7 +197,7 @@
       </table>
 
       <!-- Pagination -->
-      <div v-if="receipts.meta" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+      <div v-if="receipts?.meta && receipts?.data?.length > 0" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
         <p class="text-sm text-slate-500">
           {{ $t('Showing') }} {{ receipts.meta.from }} {{ $t('to') }} {{ receipts.meta.to }} {{ $t('of') }} {{ receipts.meta.total }}
         </p>
@@ -261,10 +261,22 @@ import Modal from '@/Components/Modal.vue';
 import dayjs from 'dayjs';
 
 const props = defineProps({
-  receipts: Object,
-  stats: Object,
-  filters: Object,
-  paymentMethods: Object,
+  receipts: {
+    type: Object,
+    default: () => ({ data: [] })
+  },
+  stats: {
+    type: Object,
+    default: () => ({})
+  },
+  filters: {
+    type: Object,
+    default: () => ({})
+  },
+  paymentMethods: {
+    type: Object,
+    default: () => ({})
+  },
   canCreate: Boolean,
   canEdit: Boolean,
   canDelete: Boolean,

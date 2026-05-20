@@ -86,6 +86,17 @@ class SidebarSeeder extends Seeder
                     ['label' => 'Category Services',    'url' => '/unit-category-services',       'permission' => 'settings.view'],
                 ],
             ],
+            'serviced_apartments' => [
+                'label' => 'Serviced Apartments',
+                'icon'  => 'BuildingIcon',
+                'children' => [
+                    ['label' => 'Buildings',            'url' => '/long-stay/buildings',          'permission' => 'units.view'],
+                    ['label' => 'Lease Agreements',     'url' => '/long-stay/contracts',          'permission' => 'contracts.view'],
+                    ['label' => 'Utility Meters',       'url' => '/long-stay/meters',             'permission' => 'finance.view'],
+                    ['label' => 'Tenant Profiles',      'url' => '/long-stay/tenants',            'permission' => 'customers.view'],
+                    ['label' => 'Unit Inventory',       'url' => '/long-stay/inventory',          'permission' => 'units.view'],
+                ],
+            ],
             'guests' => [
                 'label' => 'Guests & Companies',
                 'icon'  => 'UsersIcon',

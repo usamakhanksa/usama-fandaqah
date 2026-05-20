@@ -102,6 +102,7 @@ import {
   PieChart as PieChartIcon,
   BarChart3 as BarChartIcon
 } from 'lucide-vue-next';
+import KPICard from '@/components/Reports/KPICard.vue';
 
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement, ArcElement, BarElement);
 
@@ -187,18 +188,6 @@ const barOptions = {
     y: { beginAtZero: true },
     x: { grid: { display: false } }
   }
-};
-
-// Internal Components
-const KPICard = ({ title, value, unit, color }) => {
-  return (
-    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-      <p class="text-slate-500 text-sm font-medium">{title}</p>
-      <h3 class={`text-3xl font-bold mt-1 ${color}`}>
-        {value?.toLocaleString()} <span class="text-sm font-normal text-slate-400">{unit}</span>
-      </h3>
-    </div>
-  );
 };
 </script>
 

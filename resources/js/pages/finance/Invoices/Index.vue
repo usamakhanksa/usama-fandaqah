@@ -89,7 +89,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            <tr v-for="invoice in invoices.data" :key="invoice.id" class="hover:bg-slate-50/50 transition-colors">
+            <tr v-for="invoice in invoices?.data" :key="invoice.id" class="hover:bg-slate-50/50 transition-colors">
               <td class="px-6 py-4">
                 <Link :href="route('finance.invoices.show', invoice.id)" class="font-bold text-primary hover:underline">
                   {{ invoice.invoice_number }}
@@ -143,11 +143,16 @@
                 </div>
               </td>
             </tr>
+            <tr v-if="!invoices?.data || invoices?.data.length === 0">
+               <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+                  {{ $t('No invoices found') }}
+               </td>
+            </tr>
           </tbody>
         </table>
 
         <!-- Pagination -->
-        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+        <div v-if="invoices?.data?.length > 0" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
           <p class="text-sm text-slate-500">
             Showing {{ invoices.from }} to {{ invoices.to }} of {{ invoices.total }} invoices
           </p>
@@ -167,9 +172,18 @@ import { Plus, Download, Printer, Edit2, Send, FileJson, CheckCircle2, XCircle, 
 import dayjs from 'dayjs';
 
 const props = defineProps({
-  invoices: Object,
-  filters: Object,
-  stats: Object,
+  invoices: {
+    type: Object,
+    default: () => ({ data: [] })
+  },
+  filters: {
+    type: Object,
+    default: () => ({})
+  },
+  stats: {
+    type: Object,
+    default: () => ({})
+  },
 });
 
 const filters = reactive({ ...props.filters });

@@ -124,7 +124,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr v-for="payment in payments.data" :key="payment.id" class="hover:bg-slate-50/50 transition-colors">
+          <tr v-for="payment in payments?.data" :key="payment.id" class="hover:bg-slate-50/50 transition-colors">
             <td class="px-6 py-4 font-medium text-slate-700">
               {{ payment.payment_number }}
             </td>
@@ -191,7 +191,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="payments.data.length === 0">
+          <tr v-if="!payments?.data || payments?.data.length === 0">
             <td colspan="7" class="px-6 py-12 text-center text-slate-400">
               {{ $t('No payments found') }}
             </td>
@@ -200,7 +200,7 @@
       </table>
 
       <!-- Pagination -->
-      <div v-if="payments.links" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+      <div v-if="payments?.data?.length > 0" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
         <div class="text-sm text-slate-500">
           Showing {{ payments.from }} to {{ payments.to }} of {{ payments.total }} entries
         </div>
@@ -228,9 +228,18 @@ import {
 import dayjs from 'dayjs';
 
 const props = defineProps({
-  payments: Object,
-  stats: Object,
-  filters: Object,
+  payments: {
+    type: Object,
+    default: () => ({ data: [] })
+  },
+  stats: {
+    type: Object,
+    default: () => ({})
+  },
+  filters: {
+    type: Object,
+    default: () => ({})
+  },
 });
 
 const filters = reactive({

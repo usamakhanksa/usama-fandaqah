@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('team_counters', function (Blueprint $table) {
-            $table->integer('start_from')->default(1)->after('prefix');
-            $table->integer('current_value')->default(0)->after('start_from');
-            $table->integer('padding')->default(5)->after('current_value');
+            //
         });
     }
 
@@ -24,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('team_counters', function (Blueprint $table) {
-            $table->dropColumn(['start_from', 'current_value', 'padding']);
+            //
         });
     }
 };

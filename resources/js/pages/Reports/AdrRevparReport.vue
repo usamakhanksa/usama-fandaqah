@@ -115,6 +115,7 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { Line } from 'vue-chartjs';
+import KPICard from '@/components/Reports/KPICard.vue';
 import {
   Chart as ChartJS,
   Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement
@@ -252,17 +253,6 @@ const chartOptions = {
 const exportReport = () => {
   const params = new URLSearchParams(filters.value).toString();
   window.location.href = `/reports/adr-revpar/export?${params}`;
-};
-
-const KPICard = ({ title, value, unit, color }) => {
-  return (
-    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-      <p class="text-slate-500 text-sm font-medium">{title}</p>
-      <h3 class={`text-3xl font-bold mt-1 ${color}`}>
-        {value?.toLocaleString() || 0} <span class="text-sm font-normal text-slate-400">{unit || ''}</span>
-      </h3>
-    </div>
-  );
 };
 </script>
 

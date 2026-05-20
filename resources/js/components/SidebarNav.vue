@@ -101,7 +101,11 @@ const menuItems = ref([]);
 const openGroups = ref({});
 
 const getIcon = (iconName) => {
-  return Icons[iconName] || Icons.CircleIcon;
+  // Ensure the icon name is properly capitalized and exists in the Icons object
+  const normalizedIconName = iconName && iconName[0]?.toUpperCase() + iconName.slice(1);
+  
+  // Return the specified icon or a default one if it doesn't exist
+  return normalizedIconName && Icons[normalizedIconName] ? Icons[normalizedIconName] : Icons.Circle;
 };
 
 const toggleGroup = (key) => {

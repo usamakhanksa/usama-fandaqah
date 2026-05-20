@@ -12,7 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('company_groups', function (Blueprint $table) {
-            $table->json('description')->nullable()->change();
+            if (!Schema::hasColumn('company_groups', 'description')) {
+                $table->text('description')->nullable();
+            }
+            if (!Schema::hasColumn('company_groups', 'discount_rate')) {
+                $table->decimal('discount_rate', 5, 2)->default(0.00);
+            }
+            if (!Schema::hasColumn('company_groups', 'credit_limit')) {
+                $table->decimal('credit_limit', 15, 2)->default(0.00);
+            }
         });
     }
 
@@ -22,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('company_groups', function (Blueprint $table) {
-            $table->text('description')->change();
+            $table->dropColumn(['description', 'discount_rate', 'credit_limit']);
         });
     }
 };

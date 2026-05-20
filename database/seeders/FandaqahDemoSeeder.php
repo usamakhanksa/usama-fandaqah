@@ -99,15 +99,18 @@ class FandaqahDemoSeeder extends Seeder
             }
 
             DB::table('invoice_transfers')->updateOrInsert([
-                'reservation_id' => $reservation->id,
-                'promissory_id' => $promissoryId
+                'transfer_number' => 'DEMO-TRF-001',
             ], [
                 'team_id' => 1,
-                'company_id' => 1,
+                'from_invoice_id' => 1,
+                'from_reservation_id' => $reservation->id,
+                'from_company_id' => 1,
+                'transfer_date' => now()->toDateString(),
                 'amount' => 5000,
-                'transferred_by' => 1,
-                'transferred_at' => now(),
-                'notes' => 'Bulk transfer for corporate stay',
+                'vat_amount' => 750,
+                'total_amount' => 5750,
+                'reason' => 'Bulk transfer for corporate stay',
+                'created_by' => 1,
             ]);
         }
 
@@ -172,7 +175,7 @@ class FandaqahDemoSeeder extends Seeder
         ]);
 
         $unit = DB::table('units')->first();
-        if ($unit) {
+        if ($unit && !DB::table('room_status_log')->where('unit_id', $unit->id)->where('team_id', 1)->exists()) {
             DB::table('room_status_log')->insert([
                 'team_id' => 1,
                 'unit_id' => $unit->id,
@@ -195,20 +198,37 @@ class FandaqahDemoSeeder extends Seeder
         ]);
 
         if ($reservation) {
-            DB::table('commission_payments')->updateOrInsert([
-                'reservation_id' => $reservation->id,
-                'source_id' => 1
-            ], [
-                'team_id' => 1,
-                'period_from' => now()->startOfMonth()->toDateString(),
-                'period_to' => now()->endOfMonth()->toDateString(),
-                'room_revenue_base' => 1000,
-                'commission_rate' => 15.00,
-                'commission_type' => 'percentage',
-                'commission_amount' => 150,
-                'status' => 'pending',
-                'created_at' => now(),
-            ]);
+            $paymentNumber = 'COM-' . now()->format('Ym') . '-0001';
+            $existingPayment = DB::table('commission_payments')
+                ->where('team_id', 1)
+                ->where('payment_number', $paymentNumber)
+                ->first();
+
+            if (!$existingPayment) {
+                $paymentId = DB::table('commission_payments')->insertGetId([
+                    'team_id' => 1,
+                    'travel_agent_id' => 1,
+                    'commission_period_from' => now()->startOfMonth()->toDateString(),
+                    'commission_period_to' => now()->endOfMonth()->toDateString(),
+                    'payment_number' => $paymentNumber,
+                    'total_commission' => 150,
+                    'total_paid' => 0,
+                    'payment_method' => 'bank_transfer',
+                    'payment_date' => now()->toDateString(),
+                    'status' => 'pending',
+                    'created_by' => 1,
+                    'created_at' => now(),
+                ]);
+
+                DB::table('commission_payment_details')->insert([
+                    'commission_payment_id' => $paymentId,
+                    'reservation_id' => $reservation->id,
+                    'commission_rate' => 15.00,
+                    'commission_amount' => 150,
+                    'room_revenue' => 1000,
+                    'created_at' => now(),
+                ]);
+            }
         }
 
         $this->command->info('Fandaqah Demo Seeding Completed Successfully with exact Sidebar Permissions.');

@@ -234,8 +234,8 @@ const fetchReservations = async () => {
 const fetchSources = async () => {
   try {
     const response = await api.get('/sources');
-    // Filter only OTA/Travel agent sources
-    sources.value = response.data.filter(s => s.is_travel_agent);
+    // Filter only OTA/Travel agent sources from the paginated response
+    sources.value = (response.data.data || []).filter(s => s.is_travel_agent);
   } catch (error) {
     console.error('Error fetching sources:', error);
   }

@@ -7,12 +7,19 @@ use App\Models\Reservation;
 use App\Models\Source;
 use App\Models\Unit;
 use App\Models\UnitStatus;
-use App\Models\UnitMaintenance;
+use App\UnitMaintenance;
 use App\Models\CommissionPayment;
 use App\Models\CommissionPaymentDetail;
 use App\Models\CheckOutRecord;
 use App\Models\Guest;
 use App\Models\ReservationStatus;
+use App\Models\PaidOut;
+use App\Models\TurnawayLog;
+use App\Models\InvoiceTransfer;
+use App\Models\Transaction;
+use App\Models\Invoice;
+use App\Models\Company;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -233,7 +240,7 @@ class ReportSpecializedSeeder extends Seeder
                     'total_paid' => rand(0, 5000),
                     'payment_method' => collect(['bank_transfer', 'cash', 'cheque'])->random(),
                     'status' => collect(['pending', 'partial', 'paid'])->random(),
-                    'created_by' => \App\Models\User::first()->id ?? 1,
+                    'created_by' => \App\User::first()->id ?? 1,
                 ]);
 
                 $reservations = Reservation::where('team_id', $team->id)
@@ -265,7 +272,10 @@ class ReportSpecializedSeeder extends Seeder
 
         $statuses = ['clean', 'dirty', 'cleaning', 'occupied', 'vacant'];
         foreach ($statuses as $status) {
-            UnitStatus::firstOrCreate(['name' => $status]);
+            UnitStatus::firstOrCreate(
+                ['slug' => $status],
+                ['name' => ucfirst($status)]
+            );
         }
 
         $maintenanceCount = min(10, $units->count());
@@ -284,12 +294,18 @@ class ReportSpecializedSeeder extends Seeder
 
         $checkOutCount = min(15, $units->count());
         $checkoutUnits = $units->random($checkOutCount);
+        $reservationsForCheckout = Reservation::where('team_id', $team->id)->take(15)->get();
 
-        foreach ($checkoutUnits as $unit) {
+        foreach ($checkoutUnits as $index => $unit) {
+            $reservation = $reservationsForCheckout->get($index) ?? $reservationsForCheckout->first();
+            if (!$reservation) continue;
+
             CheckOutRecord::create([
-                'team_id' => $team->id,
                 'unit_id' => $unit->id,
-                'reservation_id' => null,
+                'reservation_id' => $reservation->id,
+                'date' => Carbon::today()->subDays(rand(1, 5))->toDateString(),
+                'time' => Carbon::now()->subHours(rand(1, 10))->format('H:i:s'),
+                'final_charges' => rand(200, 1000),
                 'created_at' => Carbon::today()->subHours(rand(5, 48)),
                 'updated_at' => Carbon::today()->subHours(rand(5, 48)),
             ]);
@@ -367,5 +383,193 @@ class ReportSpecializedSeeder extends Seeder
             ]);
         }
         return $guest;
+    }
+
+    private function seedPaidOuts($team)
+    {
+        $guest = $this->getOrCreateGuest($team);
+        $user = User::first() ?? User::factory()->create();
+        $reservation = Reservation::where('team_id', $team->id)->first();
+
+        $paidOuts = [
+            [
+                'team_id' => $team->id,
+                'reservation_id' => $reservation ? $reservation->id : null,
+                'guest_id' => $guest->id,
+                'paid_out_number' => 'PO-' . rand(10000, 99999),
+                'paid_out_date' => Carbon::today()->subDays(rand(1, 10)),
+                'amount' => 150.00,
+                'description' => 'Taxi service to Riyadh airport',
+                'category' => 'taxi',
+                'vendor_name' => 'Riyadh Cab Co',
+                'receipt_number' => 'REC-7763',
+                'payment_method' => 'cash',
+                'status' => 'approved',
+                'approved_by' => $user->id,
+                'approved_at' => Carbon::now(),
+                'created_by' => $user->id,
+            ],
+            [
+                'team_id' => $team->id,
+                'reservation_id' => $reservation ? $reservation->id : null,
+                'guest_id' => $guest->id,
+                'paid_out_number' => 'PO-' . rand(10000, 99999),
+                'paid_out_date' => Carbon::today()->subDays(rand(1, 10)),
+                'amount' => 85.00,
+                'description' => 'Express laundry cleaning voucher',
+                'category' => 'laundry',
+                'vendor_name' => 'White Glove Cleaners',
+                'receipt_number' => 'REC-9921',
+                'payment_method' => 'cash',
+                'status' => 'approved',
+                'approved_by' => $user->id,
+                'approved_at' => Carbon::now(),
+                'created_by' => $user->id,
+            ],
+        ];
+
+        foreach ($paidOuts as $po) {
+            PaidOut::create($po);
+        }
+    }
+
+    private function seedTurnaways($team)
+    {
+        $guest = $this->getOrCreateGuest($team);
+        $user = User::first() ?? User::factory()->create();
+
+        $turnaways = [
+            [
+                'team_id' => $team->id,
+                'guest_id' => $guest->id,
+                'guest_name' => 'Suleiman Al-Otaibi',
+                'guest_phone' => '+966551234567',
+                'requested_room_type' => 'Deluxe Suite',
+                'requested_date' => Carbon::today()->subDays(rand(1, 15)),
+                'requested_nights' => 3,
+                'reason' => 'no_availability',
+                'reason_detail' => 'All Deluxe Suites fully booked due to seasonal tourism festival.',
+                'estimated_revenue_loss' => 2400.00,
+                'alternative_offered' => true,
+                'alternative_details' => 'Offered standard Executive room with complimentary breakfast, guest declined.',
+                'turned_away_by' => $user->id,
+            ],
+            [
+                'team_id' => $team->id,
+                'guest_id' => $guest->id,
+                'guest_name' => 'Johnathon Smith',
+                'guest_phone' => '+14155552671',
+                'requested_room_type' => 'Standard Single',
+                'requested_date' => Carbon::today()->subDays(rand(1, 15)),
+                'requested_nights' => 2,
+                'reason' => 'rate_disagreement',
+                'reason_detail' => 'Guest felt the weekend corporate peak rate was too high.',
+                'estimated_revenue_loss' => 900.00,
+                'alternative_offered' => false,
+                'alternative_details' => null,
+                'turned_away_by' => $user->id,
+            ]
+        ];
+
+        foreach ($turnaways as $tw) {
+            TurnawayLog::create($tw);
+        }
+    }
+
+    private function seedCompanyAr($team)
+    {
+        $guest = $this->getOrCreateGuest($team);
+        $company = Company::where('team_id', $team->id)->first() ?? Company::create([
+            'team_id' => $team->id,
+            'name' => 'Saudi Aramco Corporate',
+            'email' => 'travel@aramco.com',
+            'phone' => '+966138720161',
+            'credit_limit' => 100000.00,
+            'currency' => 'SAR',
+        ]);
+
+        $user = User::first() ?? User::factory()->create();
+        $reservation = Reservation::where('team_id', $team->id)->first();
+        $invoice = Invoice::where('team_id', $team->id)->first() ?? Invoice::create([
+            'team_id' => $team->id,
+            'reservation_id' => $reservation ? $reservation->id : null,
+            'guest_id' => $guest->id,
+            'invoice_number' => 'INV-' . rand(10000, 99999),
+            'invoice_date' => Carbon::now(),
+            'sub_total' => 1500.00,
+            'vat_amount' => 225.00,
+            'total_amount' => 1725.00,
+            'grand_total' => 1725.00,
+            'status' => 'confirmed',
+            'created_by' => $user->id,
+        ]);
+
+        InvoiceTransfer::create([
+            'team_id' => $team->id,
+            'from_invoice_id' => $invoice->id,
+            'to_invoice_id' => null,
+            'from_guest_id' => $guest->id,
+            'to_company_id' => $company->id,
+            'transfer_number' => 'TXF-' . rand(10000, 99999),
+            'transfer_date' => Carbon::today(),
+            'amount' => 1500.00,
+            'vat_amount' => 225.00,
+            'total_amount' => 1725.00,
+            'reason' => 'Corporate account takeover settlement',
+            'transfer_type' => 'full',
+            'status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => Carbon::now(),
+            'created_by' => $user->id,
+        ]);
+    }
+
+    private function seedTrialBalanceData($team)
+    {
+        $user = User::first() ?? User::factory()->create();
+        $reservation = Reservation::where('team_id', $team->id)->first();
+
+        // Seed balanced debit/credit transactions for the general ledger audit
+        $transactions = [
+            [
+                'team_id' => $team->id,
+                'payable_type' => 'App\Models\Reservation',
+                'payable_id' => $reservation ? $reservation->id : 1,
+                'type' => 'deposit',
+                'amount' => 2500.00,
+                'amount_without_tax' => 2173.91,
+                'tax_amount' => 326.09,
+                'tax_percentage' => 15.00,
+                'number' => 'TXN-' . rand(100000, 999999),
+                'confirmed' => true,
+                'created_by' => $user->id,
+                'kind' => 'payment',
+                'description' => 'Guest credit card room payment standard check-in',
+                'meta' => ['payment_type' => 'visa', 'category' => 'reservation', 'date' => Carbon::today()->toDateString()],
+                'business_date' => Carbon::today(),
+            ],
+            [
+                'team_id' => $team->id,
+                'payable_type' => 'App\Models\Reservation',
+                'payable_id' => $reservation ? $reservation->id : 1,
+                'type' => 'withdraw',
+                'amount' => 250.00,
+                'amount_without_tax' => 217.39,
+                'tax_amount' => 32.61,
+                'tax_percentage' => 15.00,
+                'number' => 'TXN-' . rand(100000, 999999),
+                'confirmed' => true,
+                'created_by' => $user->id,
+                'kind' => 'charge',
+                'description' => 'Restaurant quick service room charge posting',
+                'meta' => ['payment_type' => 'room_charge', 'category' => 'service', 'date' => Carbon::today()->toDateString()],
+                'business_date' => Carbon::today(),
+            ]
+        ];
+
+        foreach ($transactions as $tx) {
+            $tx['uuid'] = (string) \Illuminate\Support\Str::uuid();
+            Transaction::create($tx);
+        }
     }
 }

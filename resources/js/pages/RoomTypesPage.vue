@@ -37,14 +37,14 @@
                 <button class="btn-danger" @click="deleteRoomType(type)">Delete</button>
               </td>
             </tr>
-            <tr v-if="!roomTypes.data.length">
+            <tr v-if="!roomTypes.data || !roomTypes.data.length">
               <td class="p-3 text-center" colspan="5">No room types found.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="py-3">
+      <div class="py-3" v-if="roomTypes.meta && roomTypes.meta.links && roomTypes.meta.links.length > 2">
         <button v-if="roomTypes.meta.prev_page_url" class="btn-outline mr-2" @click="changePage(roomTypes.meta.current_page - 1)">Previous</button>
         <button v-if="roomTypes.meta.next_page_url" class="btn-outline" @click="changePage(roomTypes.meta.current_page + 1)">Next</button>
       </div>
@@ -81,6 +81,10 @@ const fetchRoomTypes = async () => {
   try {
     const { data } = await api.get('/room-types', { params: query });
     roomTypes.value = data;
+  } catch (error) {
+    console.error("Error fetching room types:", error);
+    // Initialize with default values in case of error
+    roomTypes.value = { data: [], meta: {} };
   } finally {
     loading.value = false;
   }

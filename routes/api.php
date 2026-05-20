@@ -100,6 +100,53 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/timeline/{unit}', [RoomStatusLogController::class, 'timeline']);
     });
 
+    // Long Stay / Serviced Apartments
+    Route::group(['prefix' => 'long-stay'], function () {
+        Route::get('/buildings', [\App\Http\Controllers\Api\LongStayController::class, 'buildings']);
+        Route::post('/buildings', [\App\Http\Controllers\Api\LongStayController::class, 'storeBuilding']);
+        Route::get('/contracts', [\App\Http\Controllers\Api\LongStayController::class, 'contracts']);
+        Route::post('/contracts', [\App\Http\Controllers\Api\LongStayController::class, 'storeContract']);
+        Route::post('/contracts/{contract}/terminate', [\App\Http\Controllers\Api\LongStayController::class, 'terminateContract']);
+        Route::get('/units/{unit}/utility-meters', [\App\Http\Controllers\Api\LongStayController::class, 'utilityMeters']);
+        Route::post('/utility-readings', [\App\Http\Controllers\Api\LongStayController::class, 'storeUtilityReading']);
+        Route::get('/units/{unit}/inventory', [\App\Http\Controllers\Api\LongStayController::class, 'inventory']);
+    });
+
+    // Housekeeping
+    Route::group(['prefix' => 'housekeeping'], function () {
+        Route::get('/board', [\App\Http\Controllers\Api\HousekeepingController::class, 'board']);
+        Route::get('/tasks', [\App\Http\Controllers\Api\HousekeepingController::class, 'tasks']);
+        Route::post('/units/{unit}/status', [\App\Http\Controllers\Api\HousekeepingController::class, 'updateRoomStatus']);
+        Route::post('/tasks/{task}/start', [\App\Http\Controllers\Api\HousekeepingController::class, 'startTask']);
+        Route::post('/tasks/{task}/complete', [\App\Http\Controllers\Api\HousekeepingController::class, 'completeTask']);
+    });
+
+    // Maintenance
+    Route::group(['prefix' => 'maintenance'], function () {
+        Route::get('/tickets', [\App\Http\Controllers\Api\MaintenanceController::class, 'index']);
+        Route::post('/tickets', [\App\Http\Controllers\Api\MaintenanceController::class, 'store']);
+        Route::post('/tickets/{ticket}/assign', [\App\Http\Controllers\Api\MaintenanceController::class, 'assign']);
+        Route::post('/tickets/{ticket}/complete', [\App\Http\Controllers\Api\MaintenanceController::class, 'complete']);
+    });
+
+    // Website CMS
+    Route::group(['prefix' => 'website'], function () {
+        Route::get('/settings', [\App\Http\Controllers\Api\WebsiteController::class, 'settings']);
+        Route::post('/settings', [\App\Http\Controllers\Api\WebsiteController::class, 'updateSettings']);
+        Route::get('/pages', [\App\Http\Controllers\Api\WebsiteController::class, 'pages']);
+        Route::post('/pages', [\App\Http\Controllers\Api\WebsiteController::class, 'savePage']);
+        Route::put('/pages/{id}', [\App\Http\Controllers\Api\WebsiteController::class, 'savePage']);
+        Route::get('/gallery', [\App\Http\Controllers\Api\WebsiteController::class, 'gallery']);
+    });
+
+    // Integrations
+    Route::group(['prefix' => 'integrations'], function () {
+        Route::get('/', [\App\Http\Controllers\Api\IntegrationController::class, 'index']);
+        Route::post('/{integration}/settings', [\App\Http\Controllers\Api\IntegrationController::class, 'updateSettings']);
+        Route::get('/logs', [\App\Http\Controllers\Api\IntegrationController::class, 'logs']);
+        Route::post('/{integration}/test', [\App\Http\Controllers\Api\IntegrationController::class, 'testConnection']);
+    });
+
     // Room Types
     Route::group(['prefix' => 'room-types'], function () {
         Route::get('/', [RoomTypeController::class, 'index']);

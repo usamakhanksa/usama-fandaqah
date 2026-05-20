@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('turnaway_logs');
         Schema::create('turnaway_logs', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('team_id');

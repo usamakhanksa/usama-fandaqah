@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Scopes\TeamScope;
+use App\User; // Adding explicit import for User model
 
 class CompanyNote extends Model
 {

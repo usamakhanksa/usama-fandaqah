@@ -106,12 +106,22 @@ const statusClass = (s) => ({ 1: 'bg-emerald-100 text-emerald-600', 2: 'bg-amber
 const resetForm = () => Object.assign(form, { unit_number: '', name: '', floor: '', status: 1, beds: 1, baths: 1, capacity: 2, is_active: true });
 
 const load = async () => {
-  const { data } = await api.get('/rooms-module/units', { params: filters });
-  units.value = data.data || [];
-  pagination.next = !!data.next_page_url;
-  pagination.prev = !!data.prev_page_url;
-  pagination.current = data.current_page || 1;
-  pagination.total = data.total || 0;
+  try {
+    const { data } = await api.get('/rooms-module/units', { params: filters });
+    units.value = data.data || [];
+    pagination.next = !!(data.next_page_url && data.current_page < data.last_page);
+    pagination.prev = !!(data.prev_page_url && data.current_page > 1);
+    pagination.current = data.current_page || 1;
+    pagination.total = data.total || 0;
+  } catch (error) {
+    console.error("Error loading units:", error);
+    // Initialize with default values in case of error
+    units.value = [];
+    pagination.next = false;
+    pagination.prev = false;
+    pagination.current = 1;
+    pagination.total = 0;
+  }
 };
 
 const edit = (unit) => { editing.value = unit; Object.assign(form, unit); showForm.value = true; };

@@ -12,7 +12,6 @@ use App\Models\FinancialRecord;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\GroupReservation;
-use App\Reservation as LegacyReservation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -25,14 +24,14 @@ class ReservationService
     public function getReservations(array $filters = [], int $perPage = 15)
     {
         $teamId = auth()->user()->current_team_id;
-        $query = LegacyReservation::with(['customer', 'unit', 'source'])
+        $query = Reservation::with(['guest', 'unit', 'source'])
             ->where('team_id', $teamId);
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('number', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn($gq) => $gq->where('name', 'like', "%{$search}%")
+                $q->where('code', 'like', "%{$search}%")
+                    ->orWhereHas('guest', fn($gq) => $gq->where('name', 'like', "%{$search}%")
                         ->orWhere('phone', 'like', "%{$search}%"));
             });
         }
@@ -40,10 +39,10 @@ class ReservationService
             $query->where('status', $filters['status']);
         }
         if (!empty($filters['date_in'])) {
-            $query->whereDate('date_in', '>=', $filters['date_in']);
+            $query->whereDate('check_in', '>=', $filters['date_in']);
         }
         if (!empty($filters['date_out'])) {
-            $query->whereDate('date_out', '<=', $filters['date_out']);
+            $query->whereDate('check_out', '<=', $filters['date_out']);
         }
         if (!empty($filters['source_id'])) {
             $query->where('source_id', $filters['source_id']);
@@ -52,7 +51,7 @@ class ReservationService
             $query->where('company_id', $filters['company_id']);
         }
 
-        $sortMap = ['check_in' => 'date_in', 'check_out' => 'date_out', 'guest_name' => 'created_at'];
+        $sortMap = ['check_in' => 'check_in', 'check_out' => 'check_out', 'guest_name' => 'created_at'];
         $sortField = $sortMap[$filters['sort_by'] ?? ''] ?? ($filters['sort_by'] ?? 'created_at');
         $query->orderBy($sortField, $filters['sort_order'] ?? 'desc');
 
@@ -126,9 +125,9 @@ class ReservationService
      */
     public function checkIn($id)
     {
-        $reservation = LegacyReservation::findOrFail($id);
+        $reservation = Reservation::findOrFail($id);
         return DB::transaction(function () use ($reservation) {
-            $reservation->update(['checked_in' => now()]);
+            $reservation->update(['check_in' => now()]);
             if ($reservation->unit) {
                 $reservation->unit->update(['status' => 5]); // occupied
             }
@@ -138,9 +137,9 @@ class ReservationService
 
     public function checkOut($id)
     {
-        $reservation = LegacyReservation::findOrFail($id);
+        $reservation = Reservation::findOrFail($id);
         return DB::transaction(function () use ($reservation) {
-            $reservation->update(['checked_out' => now()]);
+            $reservation->update(['check_out' => now()]);
             if ($reservation->unit) {
                 $reservation->unit->update(['status' => 2]); // dirty
             }
@@ -150,7 +149,7 @@ class ReservationService
 
     public function cancel($id, string $reason = null)
     {
-        $reservation = LegacyReservation::findOrFail($id);
+        $reservation = Reservation::findOrFail($id);
         return DB::transaction(function () use ($reservation, $reason) {
             $reservation->update(['status' => 'canceled', 'cancellation_reason' => $reason]);
             if ($reservation->unit) {
@@ -211,12 +210,12 @@ class ReservationService
         $endDate = $filters['end_date'] ?? now()->endOfMonth()->toDateString();
         $teamId = auth()->user()->current_team_id;
 
-        $units = \App\Unit::where('team_id', $teamId)->with('unitCategory')->get();
+        $units = \App\Unit::where('team_id', $teamId)->with('unit_category')->get();
 
-        $reservations = LegacyReservation::where('team_id', $teamId)
-            ->where(fn($q) => $q->whereBetween('date_in', [$startDate, $endDate])
-                ->orWhereBetween('date_out', [$startDate, $endDate])
-                ->orWhere(fn($q2) => $q2->where('date_in', '<=', $startDate)->where('date_out', '>=', $endDate)))
+        $reservations = Reservation::where('team_id', $teamId)
+            ->where(fn($q) => $q->whereBetween('check_in', [$startDate, $endDate])
+                ->orWhereBetween('check_out', [$startDate, $endDate])
+                ->orWhere(fn($q2) => $q2->where('check_in', '<=', $startDate)->where('check_out', '>=', $endDate)))
             ->whereIn('status', ['confirmed', 'canceled'])
             ->whereNull('deleted_at')
             ->get();
@@ -236,54 +235,54 @@ class ReservationService
     {
         $date = $filters['date'] ?? now()->toDateString();
         $teamId = auth()->user()->current_team_id;
-        $query = LegacyReservation::with(['customer', 'unit', 'source'])
+        $query = Reservation::with(['guest', 'unit', 'source'])
             ->where('team_id', $teamId)
-            ->whereDate('date_in', $date)
+            ->whereDate('check_in', $date)
             ->where('status', 'confirmed');
         if (!empty($filters['source_id'])) $query->where('source_id', $filters['source_id']);
-        return $query->orderBy('date_in')->paginate($filters['per_page'] ?? 25);
+        return $query->orderBy('check_in')->paginate($filters['per_page'] ?? 25);
     }
 
     public function getDepartures(array $filters)
     {
         $date = $filters['date'] ?? now()->toDateString();
         $teamId = auth()->user()->current_team_id;
-        $query = LegacyReservation::with(['customer', 'unit', 'source'])
+        $query = Reservation::with(['guest', 'unit', 'source'])
             ->where('team_id', $teamId)
-            ->whereDate('date_out', $date)
-            ->whereNotNull('checked_in')
-            ->whereNull('checked_out');
+            ->whereDate('check_out', $date)
+            ->whereNotNull('check_in')
+            ->whereNull('check_out');
         if (!empty($filters['source_id'])) $query->where('source_id', $filters['source_id']);
-        return $query->orderBy('date_out')->paginate($filters['per_page'] ?? 25);
+        return $query->orderBy('check_out')->paginate($filters['per_page'] ?? 25);
     }
 
     public function getInHouseGuests(array $filters)
     {
         $teamId = auth()->user()->current_team_id;
-        $query = LegacyReservation::with(['customer', 'unit', 'source'])
+        $query = Reservation::with(['guest', 'unit', 'source'])
             ->where('team_id', $teamId)
-            ->whereNotNull('checked_in')
-            ->whereNull('checked_out');
+            ->whereNotNull('check_in')
+            ->whereNull('check_out');
         if (!empty($filters['search'])) {
             $s = $filters['search'];
-            $query->where(fn($q) => $q->where('number', 'like', "%$s%")
-                ->orWhereHas('customer', fn($gq) => $gq->where('name', 'like', "%$s%")));
+            $query->where(fn($q) => $q->where('code', 'like', "%$s%")
+                ->orWhereHas('guest', fn($gq) => $gq->where('name', 'like', "%$s%")));
         }
-        return $query->orderBy('checked_in', 'desc')->paginate($filters['per_page'] ?? 25);
+        return $query->orderBy('check_in', 'desc')->paginate($filters['per_page'] ?? 25);
     }
 
     public function getOnlineReservations(array $filters)
     {
         $teamId = auth()->user()->current_team_id;
-        $query = LegacyReservation::with(['customer', 'unit', 'source'])
+        $query = Reservation::with(['guest', 'unit', 'source'])
             ->where('team_id', $teamId)
             ->where('is_online', 1);
         if (!empty($filters['status'])) $query->where('status', $filters['status']);
-        if (!empty($filters['date'])) $query->whereDate('date_in', $filters['date']);
+        if (!empty($filters['date'])) $query->whereDate('check_in', $filters['date']);
         if (!empty($filters['search'])) {
             $s = $filters['search'];
-            $query->where(fn($q) => $q->where('number', 'like', "%$s%")
-                ->orWhereHas('customer', fn($gq) => $gq->where('name', 'like', "%$s%")));
+            $query->where(fn($q) => $q->where('code', 'like', "%$s%")
+                ->orWhereHas('guest', fn($gq) => $gq->where('name', 'like', "%$s%")));
         }
         return $query->orderBy('created_at', 'desc')->paginate($filters['per_page'] ?? 25);
     }
@@ -293,7 +292,7 @@ class ReservationService
      */
     public function confirm($id)
     {
-        $reservation = LegacyReservation::findOrFail($id);
+        $reservation = Reservation::findOrFail($id);
         $reservation->update(['status' => 'confirmed']);
         return $reservation;
     }
@@ -343,16 +342,16 @@ class ReservationService
     public function getOTAReservations(array $filters = [])
     {
         $teamId = auth()->user()->current_team_id;
-        $query = LegacyReservation::with(['customer', 'unit', 'source'])
+        $query = Reservation::with(['guest', 'unit', 'source'])
             ->where('team_id', $teamId)
             ->whereHas('source', fn($q) => $q->where('is_travel_agent', true));
         if (!empty($filters['status'])) $query->where('status', $filters['status']);
-        if (!empty($filters['date'])) $query->whereDate('date_in', $filters['date']);
+        if (!empty($filters['date'])) $query->whereDate('check_in', $filters['date']);
         if (!empty($filters['source_id'])) $query->where('source_id', $filters['source_id']);
         if (!empty($filters['search'])) {
             $s = $filters['search'];
-            $query->where(fn($q) => $q->where('number', 'like', "%$s%")
-                ->orWhereHas('customer', fn($gq) => $gq->where('name', 'like', "%$s%")));
+            $query->where(fn($q) => $q->where('code', 'like', "%$s%")
+                ->orWhereHas('guest', fn($gq) => $gq->where('name', 'like', "%$s%")));
         }
         return $query->orderBy('created_at', 'desc')->paginate($filters['per_page'] ?? 25);
     }

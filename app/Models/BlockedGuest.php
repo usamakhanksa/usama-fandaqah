@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Scopes\TeamScope;
+use App\User; // Adding explicit import for User model
 
 class BlockedGuest extends Model
 {
